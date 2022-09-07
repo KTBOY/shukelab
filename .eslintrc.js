@@ -1,3 +1,11 @@
+/*
+ * @Author: zlc
+ * @Date: 2022-09-02 17:26:00
+ * @LastEditTime: 2022-09-07 09:54:07
+ * @LastEditors: zlc
+ * @Description:
+ * @FilePath: \project-template-ui-plus\.eslintrc.js
+ */
 module.exports = {
   root: true,
   env: {
@@ -22,6 +30,7 @@ module.exports = {
   rules: {
     'no-unused-vars': 'off',
     '@typescript-eslint/no-unused-vars': 'off',
+    'vue/multi-word-component-names': 'off',
     semi: 0,
   },
   globals: {
