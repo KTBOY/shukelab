@@ -1,7 +1,7 @@
 <!--
  * @Author: zlc
  * @Date: 2022-09-07 15:22:27
- * @LastEditTime: 2022-10-17 16:33:44
+ * @LastEditTime: 2022-10-19 17:59:25
  * @LastEditors: zlc
  * @Description: 菜单虚拟列表
  * @FilePath: \shuke-lab\src\components\VirtualMenuGanged\VirtualMenuGanged.vue
@@ -14,7 +14,7 @@
           <scroll-view
             class="left-scroll"
             :scroll-y="true"
-            :scroll-into-view="leftVesselState.currenIndex"
+            :scroll-into-view="leftVesselState.leftIntoView"
             :scroll-with-animation="true"
           >
             <view v-if="list.length" class="info">
@@ -44,20 +44,25 @@
           >
             <view class="info">
               <view v-for="item in list" :key="item.id" class="item-parent">
-                <view>
-                  <view v-for="(item1, index2) in item.data" :key="index2" class="class-item">
-                    <view class="thumb-box item-food">
-                      <view class="left-info">
-                        <image :src="item1.image" class="item-image"></image>
-                      </view>
-                      <view class="right-info">
-                        <view class="goods-title"> {{ item.name }}</view>
+                <block v-for="(item1, index2) in item.data" :key="index2">
+                  <view>
+                    <view class="class-item">
+                      <view class="thumb-box item-food">
+                        <view class="left-info">
+                          <image :src="item1.image" class="item-image"></image>
+                        </view>
+                        <view class="right-info">
+                          <view class="goods-title"> {{ item.name }}</view>
+                        </view>
                       </view>
                     </view>
                   </view>
-                </view>
+                </block>
               </view>
             </view>
+
+            <!-- 占位符 -->
+            <view class="fill-last" :style="{ height: state.fillHeight + 'px' }"></view>
           </scroll-view>
         </view>
       </view>
@@ -69,6 +74,8 @@ import { reactive, defineProps, onMounted, computed, PropType, nextTick, type Wr
 type stateType = {
   scrollTopSize: number
   fillHeight: number
+  currenHeight: any
+  windowItemCount: WritableComputedRef<number>
 }
 
 type leftVesselStateType = {
@@ -92,7 +99,7 @@ interface MenuDataItem {
 const props = defineProps({
   virtualMenuHeight: {
     type: Number,
-    default: uni.getSystemInfoSync().windowHeight,
+    default: uni.getSystemInfoSync().windowHeight - 44,
   },
   list: {
     type: Array as PropType<MenuDataItem[]>,
@@ -100,13 +107,24 @@ const props = defineProps({
       return []
     },
   },
+  itemHeight: {
+    type: Number,
+    default: 130,
+  },
 })
 const query = uni.createSelectorQuery().in(this)
 const observer = uni.createIntersectionObserver(this)
 const state = reactive<stateType>({
   scrollTopSize: 0,
   fillHeight: 0,
+  currenHeight: {
+    isLookList: [],
+  },
+  windowItemCount: computed(() => {
+    return Math.ceil(props.virtualMenuHeight / synthesizeItemHeight.value[leftVesselState.currenIndex].count)
+  }),
 })
+
 const leftVesselState = reactive<leftVesselStateType>({
   currenIndex: 0,
   currenHeight: 0,
@@ -119,6 +137,24 @@ const rightVesselState = reactive<rightVesselStateType>({
   scrollTop: 0,
   oldScrollTop: 0,
   topArrList: [],
+})
+const synthesizeItemHeight: WritableComputedRef<any> = computed(() => {
+  if (!props.list.length) return
+  const countList: Array<object> = []
+  for (let index = 0; index < props.list.length; index++) {
+    const data: any = {
+      list: [],
+      count: 0,
+    }
+    const element = props.list[index]
+    const len = element.data.length
+    data.list.push(len * props.itemHeight)
+    data.count = data.list.length * props.itemHeight
+    countList.push(data)
+  }
+
+  console.log('虚拟高度', countList)
+  return countList
 })
 const leftFun = {
   async leftClickButton(value: number) {
@@ -147,6 +183,7 @@ const leftFun = {
 }
 
 const rightFun = {
+  //切换分类
   rightClickButton(e) {
     console.log(rightVesselState)
 
@@ -163,6 +200,8 @@ const rightFun = {
     leftVesselState.moveY = leftVesselState.currenIndex * leftVesselState.currenHeight
     console.log(leftVesselState)
   },
+
+  //获取数据头部距离
   getElementTop() {
     return new Promise((resolve, reject) => {
       query
@@ -176,12 +215,28 @@ const rightFun = {
         return item.top - state.scrollTopSize
       })
       //剩余多少高度撑满屏幕
-      const last = res[res.length - 1].length
-      if (last < props.virtualMenuHeight) {
+      const last = res[res.length - 1].height
+
+      if (last - 20 < props.virtualMenuHeight) {
         state.fillHeight = props.virtualMenuHeight - last
       } else {
         state.fillHeight = 100
       }
+    })
+  },
+  onScrollIntersectionObserverBlock() {
+    const currenIndex = leftVesselState.currenIndex
+    observer.relativeToViewport({ top: 100, bottom: 100 }).observe(`#right-${currenIndex}`, async (res: any) => {
+      if (res.intersectionRatio) {
+        const end = currenIndex + state.windowItemCount
+        for (let index = currenIndex; index < end; index++) {
+          state.currenHeight.isLookList[index] = true
+        }
+      } else {
+        state.currenHeight.isLookList[res.dataset.index] = false
+      }
+
+      console.log(state.currenHeight)
     })
   },
 }
@@ -189,7 +244,7 @@ const rightFun = {
 onMounted(async () => {
   console.log(props)
   await nextTick()
-
+  state.currenHeight.isLookList = Array(state.windowItemCount).fill(true) //当前视窗可以显示几条数据
   await leftFun.getClassifyElement()
   await rightFun.getElementTop()
 })
