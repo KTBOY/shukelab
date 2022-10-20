@@ -1,7 +1,7 @@
 <!--
  * @Author: zlc
  * @Date: 2022-09-07 15:22:27
- * @LastEditTime: 2022-10-19 17:59:25
+ * @LastEditTime: 2022-10-20 10:20:55
  * @LastEditors: zlc
  * @Description: 菜单虚拟列表
  * @FilePath: \shuke-lab\src\components\VirtualMenuGanged\VirtualMenuGanged.vue
@@ -40,12 +40,12 @@
             :style="{ height: `${virtualMenuHeight}px` }"
             :scroll-top="rightVesselState.scrollTop"
             :scroll-with-animation="true"
-            @scroll="rightFun.rightClickButton"
+            @scroll="rightFun.scroll"
           >
             <view class="info">
-              <view v-for="item in list" :key="item.id" class="item-parent">
+              <view v-for="(item, index) in list" :id="'right-' + index" :key="item.id" class="item-parent">
                 <block v-for="(item1, index2) in item.data" :key="index2">
-                  <view>
+                  <view v-if="state.currenHeight.isLookList[index]">
                     <view class="class-item">
                       <view class="thumb-box item-food">
                         <view class="left-info">
@@ -57,6 +57,11 @@
                       </view>
                     </view>
                   </view>
+
+                  <!-- 虚拟块 -->
+                  <block v-else>
+                    <view :style="{ height: `${synthesizeItemHeight[index].list[index2]}px` }"> </view>
+                  </block>
                 </block>
               </view>
             </view>
@@ -184,7 +189,7 @@ const leftFun = {
 
 const rightFun = {
   //切换分类
-  rightClickButton(e) {
+  scroll(e) {
     console.log(rightVesselState)
 
     const { scrollTop, scrollHeight, deltaY } = e.detail
@@ -198,6 +203,7 @@ const rightFun = {
     rightVesselState.oldScrollTop = rightVesselState.topArrList[index]
     leftVesselState.currenIndex = index < 0 ? 0 : index
     leftVesselState.moveY = leftVesselState.currenIndex * leftVesselState.currenHeight
+    rightFun.onScrollIntersectionObserverBlock()
     console.log(leftVesselState)
   },
 
