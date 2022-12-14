@@ -1,7 +1,7 @@
 <!--
  * @Author: zlc
  * @Date: 2022-09-07 15:22:27
- * @LastEditTime: 2022-10-20 10:20:55
+ * @LastEditTime: 2022-10-20 14:06:05
  * @LastEditors: zlc
  * @Description: 菜单虚拟列表
  * @FilePath: \shuke-lab\src\components\VirtualMenuGanged\VirtualMenuGanged.vue
@@ -75,21 +75,21 @@
   </view>
 </template>
 <script lang="ts" setup>
-import { reactive, defineProps, onMounted, computed, PropType, nextTick, type WritableComputedRef } from 'vue'
-type stateType = {
+import { ref, reactive, defineProps, onMounted, computed, PropType, nextTick, WritableComputedRef } from 'vue'
+interface stateType {
   scrollTopSize: number
   fillHeight: number
   currenHeight: any
   windowItemCount: WritableComputedRef<number>
 }
 
-type leftVesselStateType = {
+interface leftVesselStateType {
   currenIndex: number
   currenHeight: number
   moveY: number
   leftIntoView: WritableComputedRef<string>
 }
-type rightVesselStateType = {
+interface rightVesselStateType {
   scrollTop: number
   oldScrollTop: number
   topArrList: Array<any>
@@ -119,6 +119,7 @@ const props = defineProps({
 })
 const query = uni.createSelectorQuery().in(this)
 const observer = uni.createIntersectionObserver(this)
+const a = ref()
 const state = reactive<stateType>({
   scrollTopSize: 0,
   fillHeight: 0,
