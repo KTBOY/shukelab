@@ -1,0 +1,82 @@
+
+
+.vessel-info {
+	overflow: hidden;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: flex-start;
+	align-items: flex-start;
+	align-content: flex-start;
+}
+
+
+.left-vessel {
+	width: 180rpx;
+	box-sizing: border-box;
+	font-size: 32rpx;
+
+}
+
+.left-vessel-scroll {
+	background-color: #f2f4f6;
+}
+
+.info .item {
+	width: 180rpx;
+	height: 100rpx;
+	box-sizing: border-box;
+	display: flex;
+	align-items: center;
+	font-size: 26rpx;
+	color: #444;
+	font-weight: 400;
+	justify-content: center;
+}
+
+.item-active {
+	width: 180rpx;
+	height: 100rpx;
+	position: absolute;
+	font-size: 28rpx;
+	font-weight: 600;
+	background: #000;
+	color: #fff;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: all 0.5s;
+
+
+}
+
+.active-name {
+	z-index: 10;
+}
+
+/* 右侧区域 */
+.right-vessel {
+	flex: 1;
+
+}
+
+
+.info {
+	background-color: #f2f4f6;
+	width: 100%;
+}
+
+.item-parent {
+	width: 530rpx;
+}
+
+.item-parent+.item-parent {
+	border-top: 2rpx solid #e3e4e6;
+}
+
+.item-title {
+	font-size: 28rpx;
+	font-family: Source Han Sans CN;
+	color: #222222;
+	font-weight: bold;
+}
