@@ -8,17 +8,13 @@
 -->
 <template>
 	<view class="content">
-		<view class="head">
-			<view class="cover">
-				<image class="logo" src="https://p2.music.126.net/rNQH185Dp2lcG2yII_Aiwg==/18159534045164927.jpg">
-				</image>
-			</view>
-			<view class="name"> Welcome to shuke lab</view>
-		</view>
 		<view class="body">
 			<view class="module-list">
-				<button class="button" @click="handlerPageRouter()">
-					<view class="module-name">sk-linkage-menu</view>
+				<button class="button" @click="handlerPageRouter('/pages/virtualMenuGanged/index')">
+					<view class="module-name">联动菜单</view>
+				</button>
+				<button class="button" @click="handlerPageRouter('/pages/takePhotoDemo/index')">
+					<view class="module-name">人脸拍照</view>
 				</button>
 			</view>
 		</view>
@@ -26,13 +22,10 @@
 </template>
 
 <script setup lang="ts">
-	import { onMounted } from 'vue'
-	import { ref } from 'vue'
-	const query = uni.createSelectorQuery().in(this)
 	//组件入口
-	const handlerPageRouter = () => {
+	const handlerPageRouter = (url) => {
 		uni.navigateTo({
-			url: '/pages/virtualMenuGanged/index',
+			url
 		})
 	}
 </script>

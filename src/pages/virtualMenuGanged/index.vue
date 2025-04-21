@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<sk-linkage-menu :list="state.test" :height="500">
+		<sk-linkage-menu :list="state.test" :height="500" @chang="leftName">
 			<template v-slot="{data}">
 				<view>
 					<view class="class-item">
@@ -53,8 +53,14 @@
 					})
 				}
 			})
+			
+				
+			const leftName=(v)=>{
+				console.log(v)
+			}
 			return {
 				state,
+				leftName
 			}
 		},
 	}

@@ -18,7 +18,7 @@
 								<text class="active-name">{{ list[leftVesselState.currenIndex].name }}</text>
 							</view>
 							<view v-for="(item, index) in list" :id="`left-${index}`" :key="index" class="item"
-								@click="leftFun.leftClickButton(index)">
+								@click="leftFun.leftClickButton(index,item)">
 								<text class="name">{{ item.name }}</text>
 							</view>
 						</view>
@@ -71,7 +71,7 @@
 		data : Array<any>
 		id : number
 	}
-
+	const emits=defineEmits(['chang'])
 	const props = defineProps({
 		virtualMenuHeight: {
 			type: Number,
@@ -89,9 +89,11 @@
 		},
 
 	})
+	
 	const query = uni.createSelectorQuery().in(this)
 	const observer = uni.createIntersectionObserver(this)
-	const a = ref()
+	
+	
 	const state = reactive<stateType>({
 		scrollTopSize: 0,
 		fillHeight: 0,
@@ -134,7 +136,7 @@
 		return countList
 	})
 	const leftFun = {
-		async leftClickButton(value : number) {
+		async leftClickButton(value : number,item: MenuDataItem) {
 			rightVesselState.scrollTop = rightVesselState.oldScrollTop
 			await nextTick()
 			rightVesselState.scrollTop = rightVesselState.topArrList[value]
@@ -142,6 +144,7 @@
 			setTimeout(() => {
 				leftVesselState.currenIndex = value
 			}, 1000)
+			emits('chang',{currenIndex:value,...item})
 		},
 
 		getClassifyElement() {
@@ -162,8 +165,6 @@
 	const rightFun = {
 		//切换分类
 		scroll(e) {
-			console.log(rightVesselState)
-
 			const { scrollTop, scrollHeight, deltaY } = e.detail
 			let index = 0
 			for (let i = rightVesselState.topArrList.length - 1; i >= 0; i--) {
@@ -175,7 +176,6 @@
 			rightVesselState.oldScrollTop = rightVesselState.topArrList[index]
 			leftVesselState.currenIndex = index < 0 ? 0 : index
 			leftVesselState.moveY = leftVesselState.currenIndex * leftVesselState.currenHeight
-			console.log(leftVesselState)
 		},
 
 		//获取数据头部距离

@@ -1,16 +1,12 @@
 {
-  "id": "sk-linkage-menu",
-  "displayName": "vue3左右菜单联动，购物点单",
-  "version": "1.0.2",
-  "description": "左右菜单联动，一般用于商场分类",
+  "id": "take-photos",
+  "displayName": "take-photos",
+  "version": "1.0.0",
+  "description": "take-photos",
   "keywords": [
-    "sk-linkage-menu",
-    "scroll-view",
-    "左右联动",
-    "菜单",
-    "联动菜单"
+    "take-photos"
 ],
-  "repository": "https://github.com/KTBOY/shukelab",
+  "repository": "",
   "engines": {
     "HBuilderX": "^3.1.0"
   },
@@ -28,9 +24,9 @@
       "qq": ""
     },
     "declaration": {
-      "ads": "无",
-      "data": "插件不采集任何数据",
-      "permissions": "无"
+      "ads": "",
+      "data": "",
+      "permissions": ""
     },
     "npmurl": ""
   },
@@ -39,36 +35,36 @@
     "encrypt": [],
     "platforms": {
       "cloud": {
-        "tcb": "y",
-        "aliyun": "y",
-        "alipay": "y"
+        "tcb": "u",
+        "aliyun": "u",
+        "alipay": "u"
       },
       "client": {
         "Vue": {
-          "vue2": "n",
-          "vue3": "y"
+          "vue2": "u",
+          "vue3": "u"
         },
         "App": {
-          "app-vue": "y",
+          "app-vue": "u",
           "app-nvue": "u",
           "app-uvue": "u"
         },
         "H5-mobile": {
-          "Safari": "y",
-          "Android Browser": "y",
-          "微信浏览器(Android)": "y",
-          "QQ浏览器(Android)": "y"
+          "Safari": "u",
+          "Android Browser": "u",
+          "微信浏览器(Android)": "u",
+          "QQ浏览器(Android)": "u"
         },
         "H5-pc": {
-          "Chrome": "y",
-          "IE": "n",
-          "Edge": "y",
-          "Firefox": "y",
-          "Safari": "y"
+          "Chrome": "u",
+          "IE": "u",
+          "Edge": "u",
+          "Firefox": "u",
+          "Safari": "u"
         },
         "小程序": {
-          "微信": "y",
-          "阿里": "y",
+          "微信": "u",
+          "阿里": "u",
           "百度": "u",
           "字节跳动": "u",
           "QQ": "u",
