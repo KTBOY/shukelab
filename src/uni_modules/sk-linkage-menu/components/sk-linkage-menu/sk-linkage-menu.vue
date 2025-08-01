@@ -7,17 +7,17 @@
  * @FilePath: \shuke-lab\src\components\VirtualMenuGanged\VirtualMenuGanged.vue
 -->
 <template>
-	<view class="virtual-menu-ganged" >
+	<view class="virtual-menu-ganged">
 		<view class="menu-vessel">
 			<view class="vessel-info">
 				<view class="left-vessel">
 					<scroll-view class="left-scroll" :scroll-y="true" :scroll-into-view="leftVesselState.leftIntoView"
 						:scroll-with-animation="true" :style="{ height: `${virtualMenuHeight}px` }">
 						<view v-if="list.length" class="info">
-							<view class="item-active" :style="{ transform: `translateY(${leftVesselState.moveY}px)` }">
+							<view :class="['item-active']" :style="{ transform: `translateY(${leftVesselState.moveY}px)`, ...leftBarStyle}">
 								<text class="active-name">{{ list[leftVesselState.currenIndex].name }}</text>
 							</view>
-							<view v-for="(item, index) in list" :id="`left-${index}`" :key="index" class="item"
+							<view v-for="(item, index) in list" :id="`left-${index}`" :key="index"  :class="['item']" :style="leftBarUnStyle"
 								@click="leftFun.leftClickButton(index,item)">
 								<text class="name">{{ item.name }}</text>
 							</view>
@@ -71,7 +71,18 @@
 		data : Array<any>
 		id : number
 	}
-	const emits=defineEmits(['chang'])
+	
+	interface indexType {
+		currenIndex : number
+	}
+
+	
+
+	const emits = defineEmits<{
+		change:[data : MenuDataItem & indexType]
+	}>()
+	
+
 	const props = defineProps({
 		virtualMenuHeight: {
 			type: Number,
@@ -87,13 +98,21 @@
 			type: Number,
 			default: 130,
 		},
+		
+		leftBarStyle:{
+			type:Object
+		},
+
+		leftBarUnStyle:{
+			type:Object
+		}
 
 	})
-	
+
 	const query = uni.createSelectorQuery().in(this)
 	const observer = uni.createIntersectionObserver(this)
-	
-	
+
+
 	const state = reactive<stateType>({
 		scrollTopSize: 0,
 		fillHeight: 0,
@@ -136,7 +155,7 @@
 		return countList
 	})
 	const leftFun = {
-		async leftClickButton(value : number,item: MenuDataItem) {
+		async leftClickButton(value : number, item : MenuDataItem) {
 			rightVesselState.scrollTop = rightVesselState.oldScrollTop
 			await nextTick()
 			rightVesselState.scrollTop = rightVesselState.topArrList[value]
@@ -144,7 +163,8 @@
 			setTimeout(() => {
 				leftVesselState.currenIndex = value
 			}, 1000)
-			emits('chang',{currenIndex:value,...item})
+			let data = { currenIndex: value, ...item }
+			emits('change', data)
 		},
 
 		getClassifyElement() {

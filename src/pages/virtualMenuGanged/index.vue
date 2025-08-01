@@ -1,6 +1,6 @@
 <template>
 	<view>
-		<sk-linkage-menu :list="state.test" :height="500" @chang="leftName">
+		<sk-linkage-menu :list="state.test" :height="500" @change="leftName" :leftBarStyle="{'background':'red'}">
 			<template v-slot="{data}">
 				<view>
 					<view class="class-item">
@@ -24,7 +24,7 @@
 	type stateType = {
 		test : any
 	}
-	export default{
+	export default {
 		setup(props) {
 			const state = reactive<stateType>({
 				test: [],
@@ -53,9 +53,9 @@
 					})
 				}
 			})
-			
-				
-			const leftName=(v)=>{
+
+
+			const leftName = (v) => {
 				console.log(v)
 			}
 			return {

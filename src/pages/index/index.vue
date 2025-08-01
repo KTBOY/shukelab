@@ -10,12 +10,15 @@
 	<view class="content">
 		<view class="body">
 			<view class="module-list">
-				<button class="button" @click="handlerPageRouter('/pages/virtualMenuGanged/index')">
+				<view class="button" @click="handlerPageRouter('/pages/virtualMenuGanged/index')">
 					<view class="module-name">联动菜单</view>
-				</button>
-				<button class="button" @click="handlerPageRouter('/pages/takePhotoDemo/index')">
+				</view>
+				<view class="button" @click="handlerPageRouter('/pages/takePhotoDemo/index')">
 					<view class="module-name">人脸拍照</view>
-				</button>
+				</view>
+				<view class="button" @click="handlerPageRouter('/pages/tabBarDemo/index')">
+					<view class="module-name">tabBar</view>
+				</view>
 			</view>
 		</view>
 	</view>
@@ -72,6 +75,8 @@
 	.body {
 		.module-list {
 			display: flex;
+			flex-flow: wrap;
+			align-items: flex-start;
 
 			.button {
 				color: var(--font-color);
@@ -89,6 +94,8 @@
 				padding: 5rpx;
 				text-align: center;
 				height: 160rpx;
+				margin: 12rpx;
+
 				.icon-menu {
 					height: 60rpx;
 					line-height: 60rpx;

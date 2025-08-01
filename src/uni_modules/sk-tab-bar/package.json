@@ -1,16 +1,12 @@
 {
-  "id": "sk-linkage-menu",
-  "displayName": "vue3左右菜单联动，购物点单",
-  "version": "1.0.3",
-  "description": "左右菜单联动，一般用于商场分类",
+  "id": "sk-tab-bar",
+  "displayName": "sk-tab-bar",
+  "version": "1.0.0",
+  "description": "sk-tab-bar",
   "keywords": [
-    "sk-linkage-menu",
-    "scroll-view",
-    "左右联动",
-    "菜单",
-    "联动菜单"
+    "sk-tab-bar"
 ],
-  "repository": "https://github.com/KTBOY/shukelab",
+  "repository": "",
   "engines": {
     "HBuilderX": "^3.1.0"
   },
@@ -29,7 +25,7 @@
     },
     "declaration": {
       "ads": "无",
-      "data": "插件不采集任何数据",
+      "data": "无",
       "permissions": "无"
     },
     "npmurl": ""
@@ -49,26 +45,27 @@
           "vue3": "y"
         },
         "App": {
-          "app-vue": "y",
-          "app-nvue": "u",
-          "app-uvue": "u"
+            "app-vue": "u",
+            "app-nvue": "u",
+            "app-uvue": "u",
+            "app-harmony": "u"
         },
         "H5-mobile": {
-          "Safari": "y",
+          "Safari": "u",
           "Android Browser": "y",
           "微信浏览器(Android)": "y",
           "QQ浏览器(Android)": "y"
         },
         "H5-pc": {
           "Chrome": "y",
-          "IE": "n",
+          "IE": "u",
           "Edge": "y",
           "Firefox": "y",
-          "Safari": "y"
+          "Safari": "u"
         },
         "小程序": {
           "微信": "y",
-          "阿里": "y",
+          "阿里": "u",
           "百度": "u",
           "字节跳动": "u",
           "QQ": "u",

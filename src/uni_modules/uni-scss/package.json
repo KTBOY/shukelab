@@ -1,21 +1,22 @@
 {
-  "id": "sk-linkage-menu",
-  "displayName": "vue3左右菜单联动，购物点单",
+  "id": "uni-scss",
+  "displayName": "uni-scss 辅助样式",
   "version": "1.0.3",
-  "description": "左右菜单联动，一般用于商场分类",
+  "description": "uni-sass是uni-ui提供的一套全局样式 ，通过一些简单的类名和sass变量，实现简单的页面布局操作，比如颜色、边距、圆角等。",
   "keywords": [
-    "sk-linkage-menu",
-    "scroll-view",
-    "左右联动",
-    "菜单",
-    "联动菜单"
+    "uni-scss",
+    "uni-ui",
+    "辅助样式"
 ],
-  "repository": "https://github.com/KTBOY/shukelab",
+  "repository": "https://github.com/dcloudio/uni-ui",
   "engines": {
     "HBuilderX": "^3.1.0"
   },
   "dcloudext": {
-    "type": "component-vue",
+    "category": [
+        "JS SDK",
+        "通用 SDK"
+    ],
     "sale": {
       "regular": {
         "price": "0.00"
@@ -29,10 +30,10 @@
     },
     "declaration": {
       "ads": "无",
-      "data": "插件不采集任何数据",
+      "data": "无",
       "permissions": "无"
     },
-    "npmurl": ""
+    "npmurl": "https://www.npmjs.com/package/@dcloudio/uni-ui"
   },
   "uni_modules": {
     "dependencies": [],
@@ -40,18 +41,12 @@
     "platforms": {
       "cloud": {
         "tcb": "y",
-        "aliyun": "y",
-        "alipay": "y"
+        "aliyun": "y"
       },
       "client": {
-        "Vue": {
-          "vue2": "n",
-          "vue3": "y"
-        },
         "App": {
           "app-vue": "y",
-          "app-nvue": "u",
-          "app-uvue": "u"
+          "app-nvue": "u"
         },
         "H5-mobile": {
           "Safari": "y",
@@ -61,7 +56,7 @@
         },
         "H5-pc": {
           "Chrome": "y",
-          "IE": "n",
+          "IE": "y",
           "Edge": "y",
           "Firefox": "y",
           "Safari": "y"
@@ -69,17 +64,17 @@
         "小程序": {
           "微信": "y",
           "阿里": "y",
-          "百度": "u",
-          "字节跳动": "u",
-          "QQ": "u",
-          "钉钉": "u",
-          "快手": "u",
-          "飞书": "u",
-          "京东": "u"
+          "百度": "y",
+          "字节跳动": "y",
+          "QQ": "y"
         },
         "快应用": {
-          "华为": "u",
-          "联盟": "u"
+          "华为": "n",
+          "联盟": "n"
+        },
+        "Vue": {
+            "vue2": "y",
+            "vue3": "y"
         }
       }
     }

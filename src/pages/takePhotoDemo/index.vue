@@ -34,7 +34,7 @@
 	.bg-header {
 		width: 750rpx;
 		height: 320rpx;
-		background:linear-gradient(180deg, #1f8fff, #5d9ad6 51%, rgba(31, 143, 255, 0));
+		background: linear-gradient(180deg, #1f8fff, #5d9ad6 51%, rgba(31, 143, 255, 0));
 		position: absolute;
 		z-index: -1;
 	}

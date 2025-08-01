@@ -7,18 +7,30 @@
  * @FilePath: \project-template-ui-plus\src\App.vue
 -->
 <script setup lang="ts">
-import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
-import { onMounted } from 'vue'
-onMounted(() => {
-  console.log('onMounted')
-})
-onLaunch(() => {
-  console.log('App Launch')
-})
-onShow(() => {
-  console.log('App Show')
-})
-onHide(() => {
-  console.log('App Hide')
-})
+	import { onLaunch, onShow, onHide } from '@dcloudio/uni-app'
+	import { onMounted } from 'vue'
+	onMounted(() => {
+		console.log('onMounted')
+	})
+	onLaunch(() => {
+
+	})
+	onShow(() => {
+		console.log('App Show')
+	})
+	onHide(() => {
+		console.log('App Hide')
+	})
 </script>
+<style>
+	@import url("../pubilc/style/icon.scss");
+	page {
+	  height: 100%;
+	  display: flex;
+	  flex-direction: column;
+	  overflow: hidden;
+	  font-family: PingFang SC, PingFang SC-Medium;
+	  position: relative;
+	  box-sizing: border-box;
+	}
+</style>

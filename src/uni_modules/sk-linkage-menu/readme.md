@@ -78,18 +78,20 @@
 
 ### Props
 
-|      属性名       |      类型      |                  默认值                   |       说明       |
-| :---------------: | :------------: | :---------------------------------------: | :--------------: |
-| virtualMenuHeight |     Number     | uni.getSystemInfoSync().windowHeight - 44 |     组件高度     |
-|       list        | MenuDataItem[] |                                           | 右侧滚动内容列表 |
-|    itemHeight     |     Number     |                    130                    |   每一项的高度   |
+|      属性名       |      类型      |                  默认值                   |        说明        |
+| :---------------: | :------------: | :---------------------------------------: | :----------------: |
+| virtualMenuHeight |     Number     | uni.getSystemInfoSync().windowHeight - 44 |      组件高度      |
+|       list        | MenuDataItem[] |                                           |  右侧滚动内容列表  |
+|    itemHeight     |     Number     |                    130                    |    每一项的高度    |
+|   leftBarStyle    |     Object     |                                           | 左侧未选中菜单样式 |
+|  leftBarUnStyle   |     Object     |                                           | 左侧已选中菜单样式 |
 
 
 ### Methods
 
 |      属性名       |      类型      |                  说明                   |
 | :---------------: | :------------: | :---------------------------------------: |
-|       chang        | Functuon |                 左侧选中的回调，参数是点击当前项的数据                 |
+|       change       | Functuon |                 左侧选中的回调，参数是点击当前项的数据                 |
 
 **MenuDataItem类型**
 

@@ -1,0 +1,46 @@
+{
+	"nav": [{
+			"name": "组件列表",
+			"enName": "base",
+			"packages": [
+				
+				{
+				"enName": "sk-linkage-menu",
+				"cName": "联动菜单",
+				"desc": "联动菜单",
+				"show": true,
+				"path": "/pages/virtualMenuGanged/index",
+				"pathList": "/pages/index/list",
+				"packages": [{
+						"name": "基础用法",
+						"show": true,
+						"path": "/pages/virtualMenuGanged/index"
+					},
+					
+				]
+			},
+			
+			{
+				"enName": "sk-tab-bar",
+				"cName": "自定义tabBar",
+				"desc": "自定义tabBar",
+				"show": true,
+				"path": "/pages/virtualMenuGanged/index",
+				"pathList": "/pages/index/list",
+				"packages": [{
+						"name": "基础用法",
+						"show": true,
+						"path": "/pages/tabBarDemo/index"
+					},
+					
+				]
+			},
+			
+			
+			]
+		}
+
+
+
+	]
+}

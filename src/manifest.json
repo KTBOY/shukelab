@@ -1,6 +1,6 @@
 {
-    "name" : "",
-    "appid" : "",
+    "name" : "test",
+    "appid" : "__UNI__C5BB3DA",
     "description" : "",
     "versionName" : "1.0.0",
     "versionCode" : "100",
@@ -14,7 +14,12 @@
             "alwaysShowBeforeRender" : true,
             "waiting" : true,
             "autoclose" : true,
-            "delay" : 0
+            "delay" : 0,
+            "ad" : {
+                "enable" : true,
+                "provider" : "ad-provider",
+                "positionId" : ""
+            }
         },
         /* 模块配置 */
         "modules" : {},
@@ -41,9 +46,14 @@
                 ]
             },
             /* ios打包配置 */
-            "ios" : {},
+            "ios" : {
+                "dSYMs" : false
+            },
             /* SDK配置 */
-            "sdkConfigs" : {}
+            "sdkConfigs" : {},
+            "splashscreen" : {
+                "androidStyle" : "common"
+            }
         }
     },
     /* 快应用特有相关 */
@@ -65,8 +75,17 @@
     "mp-toutiao" : {
         "usingComponents" : true
     },
-    "uniStatistics": {  
-        "enable": false
+    "uniStatistics" : {
+        "enable" : false
     },
-    "vueVersion" : "3"
+    "vueVersion" : "3",
+    "h5" : {
+        "devServer" : {
+            "https" : false
+        },
+        "router" : {
+            "mode" : "history",
+            "base" : "/"
+        }
+    }
 }
