@@ -1,10 +1,12 @@
 {
   "id": "sk-tab-bar",
-  "displayName": "sk-tab-bar",
-  "version": "1.0.0",
-  "description": "sk-tab-bar",
+  "displayName": "小程序自定义tabBar",
+  "version": "1.0.1",
+  "description": "组件形式tabBar",
   "keywords": [
-    "sk-tab-bar"
+    "sk-tab-bar",
+	"小程序tabBar",
+	"自定义tabBar"
 ],
   "repository": "",
   "engines": {

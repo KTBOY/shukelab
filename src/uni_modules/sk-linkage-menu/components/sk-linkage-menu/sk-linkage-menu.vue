@@ -3,7 +3,7 @@
  * @Date: 2022-09-07 15:22:27
  * @LastEditTime: 2022-10-20 14:06:05
  * @LastEditors: sk
- * @Description: 菜单虚拟列表
+ * @Description: 联动菜单
  * @FilePath: \shuke-lab\src\components\VirtualMenuGanged\VirtualMenuGanged.vue
 -->
 <template>
@@ -11,14 +11,15 @@
 		<view class="menu-vessel">
 			<view class="vessel-info">
 				<view class="left-vessel">
-					<scroll-view class="left-scroll" :scroll-y="true" :scroll-into-view="leftVesselState.leftIntoView"
-						:scroll-with-animation="true" :style="{ height: `${virtualMenuHeight}px` }">
+					<scroll-view :scroll-y="true" class="left-scroll" :scroll-top="leftVesselState.scrollTop"
+						scroll-with-animation :style="{ height: `${virtualMenuHeight}px` }">
 						<view v-if="list.length" class="info">
-							<view :class="['item-active']" :style="{ transform: `translateY(${leftVesselState.moveY}px)`, ...leftBarStyle}">
+							<view :class="['item-active']"
+								:style="{ transform: `translateY(${leftVesselState.moveY}px)`, ...leftBarStyle}">
 								<text class="active-name">{{ list[leftVesselState.currenIndex].name }}</text>
 							</view>
-							<view v-for="(item, index) in list" :id="`left-${index}`" :key="index"  :class="['item']" :style="leftBarUnStyle"
-								@click="leftFun.leftClickButton(index,item)">
+							<view v-for="(item,index) in list" :key="index" :id="`left-${index}`" :class="['item']"
+								@click="leftFun.leftClickButton(index,item)" :style="leftBarUnStyle">
 								<text class="name">{{ item.name }}</text>
 							</view>
 						</view>
@@ -46,7 +47,10 @@
 	</view>
 </template>
 <script lang="ts" setup>
-	import { ref, reactive, defineProps, onMounted, computed, PropType, nextTick, WritableComputedRef } from 'vue'
+	import { ref, reactive, defineProps, onMounted, computed, PropType, nextTick, WritableComputedRef, getCurrentInstance } from 'vue'
+
+
+
 	interface stateType {
 		scrollTopSize : number
 		fillHeight : number
@@ -71,17 +75,17 @@
 		data : Array<any>
 		id : number
 	}
-	
+
 	interface indexType {
 		currenIndex : number
 	}
 
-	
 
+	const instance = getCurrentInstance();
 	const emits = defineEmits<{
-		change:[data : MenuDataItem & indexType]
+		change : [data: MenuDataItem & indexType]
 	}>()
-	
+
 
 	const props = defineProps({
 		virtualMenuHeight: {
@@ -98,20 +102,21 @@
 			type: Number,
 			default: 130,
 		},
-		
-		leftBarStyle:{
-			type:Object
+
+		leftBarStyle: {
+			type: Object
 		},
 
-		leftBarUnStyle:{
-			type:Object
+		leftBarUnStyle: {
+			type: Object
 		}
 
 	})
 
-	const query = uni.createSelectorQuery().in(this)
-	const observer = uni.createIntersectionObserver(this)
 
+	const observer = uni.createIntersectionObserver(instance.proxy)
+
+	const query = uni.createSelectorQuery().in(instance.proxy);
 
 	const state = reactive<stateType>({
 		scrollTopSize: 0,
@@ -128,8 +133,17 @@
 		currenIndex: 0,
 		currenHeight: 0,
 		moveY: 0,
+
+		itemHeightList: [],
 		leftIntoView: computed(() => {
 			return `left-${leftVesselState.currenIndex > 1 ? leftVesselState.currenIndex - 2 : 0}`
+		}),
+		scrollTop: computed(() => {
+			if (!leftVesselState.itemHeightList.length) return
+			return leftVesselState.itemHeightList[leftVesselState.currenIndex].top +
+				leftVesselState.itemHeightList[leftVesselState.currenIndex].width / 2 -
+				props.virtualMenuHeight / 2 -
+				leftVesselState.itemHeightList[0].top;
 		}),
 	})
 	const rightVesselState = reactive<rightVesselStateType>({
@@ -156,14 +170,10 @@
 	})
 	const leftFun = {
 		async leftClickButton(value : number, item : MenuDataItem) {
-			rightVesselState.scrollTop = rightVesselState.oldScrollTop
-			await nextTick()
-			rightVesselState.scrollTop = rightVesselState.topArrList[value]
-			await nextTick()
-			setTimeout(() => {
-				leftVesselState.currenIndex = value
-			}, 1000)
+			 rightVesselState.scrollTop = rightVesselState.topArrList[value]
+			leftVesselState.currenIndex = value
 			let data = { currenIndex: value, ...item }
+
 			emits('change', data)
 		},
 
@@ -180,6 +190,17 @@
 				})
 				.exec()
 		},
+
+
+		getLeftItemRect() {
+			query.selectAll(`.item`)
+				.boundingClientRect((rect) => {
+					leftVesselState.itemHeightList = rect
+					leftVesselState.currenHeight=rect[0].height
+				}).exec();
+
+
+		}
 	}
 
 	const rightFun = {
@@ -200,6 +221,7 @@
 
 		//获取数据头部距离
 		getElementTop() {
+
 			return new Promise((resolve, reject) => {
 				query
 					.selectAll('.item-parent')
@@ -224,9 +246,11 @@
 	}
 
 	onMounted(async () => {
-		await nextTick()
-		leftFun.getClassifyElement()
-		await rightFun.getElementTop()
+		setTimeout(() => {
+			leftFun.getLeftItemRect()
+			rightFun.getElementTop()
+		}, 500)
+
 	})
 </script>
 <style scoped>

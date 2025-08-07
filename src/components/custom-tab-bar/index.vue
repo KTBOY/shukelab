@@ -1,10 +1,26 @@
 <template>
-	<view class="wh-full">
+	<view class="bg" :style="{'--bg':outerApertureBorderColor}">
 
-		<customTabBar></customTabBar>
+		<div class="tab-demo">
+			<view class="uni-title uni-common-mt">切换弧度背景样式</view>
+
+			<radio-group @change="radioChange" class="flex">
+				<label class="flex" v-for="(item, index) in colorList" :key="item.value">
+					<view>
+						<radio :value="item.value" :checked="index === current" />
+					</view>
+					<view :style="{color:index==2?'red': item.value}">{{item.name}}</view>
+				</label>
+			</radio-group>
+
+			<!-- 	<view class="uni-title uni-common-mt">切换图标</view> -->
+		</div>
+
+		<sk-tab-bar :data="list" :iconBackgroundColor="iconBackgroundColor"
+			:outerApertureBorderColor="outerApertureBorderColor"></sk-tab-bar>
+
+
 	</view>
-
-
 </template>
 
 <script lang="ts" setup>
@@ -13,7 +29,6 @@
 	import icon1 from "@/static/66.png"
 	import icon2Active from "@/static/icon2.png"
 	import icon2 from "@/static/77.png"
-	import customTabBar from "@/components/custom-tab-bar/index.vue"
 
 	const colorList = ref([{
 		value: '#e07800',
@@ -81,8 +96,26 @@
 	}
 </script>
 
+<style>
+	page {
+		background-color: var(--bg)
+	}
+</style>
 <style lang="scss" scoped>
-	.wh-full {
+	.bg {
+		background-color: var(--bg);
 		height: 100%;
+		padding: 15rpx;
+	}
+
+	.tab-demo {
+		height: 300rpx;
+		background-color: #f2f3f7;
+		padding: 10rpx;
+	}
+
+	.flex {
+		display: flex;
+		margin: 5rpx;
 	}
 </style>

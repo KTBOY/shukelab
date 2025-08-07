@@ -1,7 +1,7 @@
 {
   "id": "sk-linkage-menu",
   "displayName": "vue3左右菜单联动，购物点单",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "左右菜单联动，一般用于商场分类",
   "keywords": [
     "sk-linkage-menu",
@@ -49,9 +49,10 @@
           "vue3": "y"
         },
         "App": {
-          "app-vue": "y",
-          "app-nvue": "u",
-          "app-uvue": "u"
+            "app-vue": "y",
+            "app-nvue": "u",
+            "app-uvue": "u",
+            "app-harmony": "u"
         },
         "H5-mobile": {
           "Safari": "y",
@@ -68,7 +69,7 @@
         },
         "小程序": {
           "微信": "y",
-          "阿里": "y",
+          "阿里": "u",
           "百度": "u",
           "字节跳动": "u",
           "QQ": "u",
