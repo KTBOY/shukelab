@@ -1,6 +1,6 @@
 {
-  "name": "uni-preset-vue",
-  "version": "0.0.0",
+  "name": "shuke",
+  "version": "1.0.0",
   "scripts": {
     "dev:app": "uni -p app",
     "dev:custom": "uni -p",

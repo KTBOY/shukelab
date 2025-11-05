@@ -88,7 +88,7 @@
 
 |          属性名          |   类型   |    默认值    |               说明               |
 | :----------------------: | :------: | :----------: | :------------------------------: |
-|           data           | tabBar[] |              |         右侧滚动内容列表         |
+|           data           | tabBar[] |              |               数据       |
 | outerApertureBorderColor |  String  |   #f2f3f7    | 按钮底层颜色，需要和page颜色相同 |
 |   iconBackgroundColor    |  String  | rgb(3, 3, 3) |            按钮背景色            |
 

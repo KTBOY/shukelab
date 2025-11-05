@@ -41,6 +41,10 @@
 		iconBackgroundColor: {
 			type: String,
 			default: 'rgb(3, 3, 3)'
+		},
+		cornerMark:{
+			type:Boolean,
+			default:false
 		}
 	})
 
