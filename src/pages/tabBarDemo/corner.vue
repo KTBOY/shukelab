@@ -1,10 +1,14 @@
 <template>
 	<view class="bg" :style="{'--bg':outerApertureBorderColor}">
 		<div class="tab-demo">
-			<view class="uni-title uni-common-mt">切换弧度背景样式</view>
+
+
+			<view class="uni-title uni-common-mt">cornerMark 开启角标</view>
+			<view class="uni-title uni-common-mt">corner 角标内容</view>
+
 
 		</div>
-		<sk-tab-bar :data="list" :iconBackgroundColor="iconBackgroundColor"
+		<sk-tab-bar :data="list" :corner="corner" :iconBackgroundColor="iconBackgroundColor"
 			:outerApertureBorderColor="outerApertureBorderColor"></sk-tab-bar>
 
 
@@ -18,7 +22,7 @@
 	import icon2Active from "@/static/icon2.png"
 	import icon2 from "@/static/77.png"
 	import airec from "@/static/airec.png"
-	import airec2 from "@/static/airec2.png"
+	import car from "@/static/car.png"
 
 	const colorList = ref([{
 		value: '#e07800',
@@ -35,44 +39,9 @@
 	},
 
 	])
-	const colorList2 = ref([{
-		value: '#aa0000',
-		name: '#aa0000',
-		checked: 'true'
-	},
-	{
-		value: '#ffaaff',
-		name: '#ffaaff'
-	},
-	{
-		value: '#030303',
-		name: '复原'
-	},
 
-	])
-	const iconList = ref([{
-		value: '#aa0000',
-		name: '#aa0000',
-		checked: 'true'
-	},
-
-	{
-		value: '#030303',
-		name: '复原'
-	},
-
-	])
-	const iconList3 = ref([{
-		name: '切换',
-		checked: 'true',
-		icon: airec,
-		active: airec2,
-	},
-
-
-	])
 	const current = ref(2)
-	const current2 = ref(2)
+	const corner = ref(2)
 	const current3 = ref(1)
 	const list = ref([{
 		icon: icon1,
@@ -89,30 +58,32 @@
 		width: '36px',
 		height: '36px',
 		url: 'pages/goods/category/index',
+	},
+	{
+		icon: car,
+		active: car,
+		text: '购物车',
+		width: '32px',
+		height: '32px',
+		url: 'pages/goods/category/index',
 		cornerMark:true
 	},
-		// {
-		// 	icon: icon2,
-		// 	active:icon2Active,
-		// 	text: '资源列表',
-		// 	width: '36px',
-		// 	height: '36px',
-		// 	url: 'pages/goods/category/index',
-		// },
-		// {
-		// 	icon: icon2,
-		// 	active:icon2Active,
-		// 	text: '资源列表',
-		// 	width: '36px',
-		// 	height: '36px',
-		// 	url: 'pages/goods/category/index',
-		// },
+
 	])
 
 	const outerApertureBorderColor = ref('#f2f3f7')
 	const iconBackgroundColor = ref()
 	const iconNmae = ref()
 
+	const radioChange = (evt) => {
+		for (let i = 0; i < colorList.value.length; i++) {
+			if (colorList.value[i].value === evt.detail.value) {
+				current.value = i;
+				break;
+			}
+		}
+		outerApertureBorderColor.value = evt.detail.value
+	}
 </script>
 
 <style>

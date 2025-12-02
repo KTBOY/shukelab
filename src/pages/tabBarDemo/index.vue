@@ -47,7 +47,7 @@
 	import icon2Active from "@/static/icon2.png"
 	import icon2 from "@/static/77.png"
 	import airec from "@/static/airec.png"
-	import airec2 from "@/static/airec2.png"
+	import car from "@/static/car.png"
 
 	const colorList = ref([{
 		value: '#e07800',
@@ -95,7 +95,7 @@
 		name: '切换',
 		checked: 'true',
 		icon: airec,
-		active: airec2,
+		active: airec,
 	},
 
 
@@ -119,22 +119,15 @@
 		height: '36px',
 		url: 'pages/goods/category/index',
 	},
-		// {
-		// 	icon: icon2,
-		// 	active:icon2Active,
-		// 	text: '资源列表',
-		// 	width: '36px',
-		// 	height: '36px',
-		// 	url: 'pages/goods/category/index',
-		// },
-		// {
-		// 	icon: icon2,
-		// 	active:icon2Active,
-		// 	text: '资源列表',
-		// 	width: '36px',
-		// 	height: '36px',
-		// 	url: 'pages/goods/category/index',
-		// },
+	{
+		icon: car,
+		active: car,
+		text: '购物车',
+		width: '32px',
+		height: '32px',
+		url: 'pages/goods/category/index',
+	},
+		
 	])
 
 	const outerApertureBorderColor = ref('#f2f3f7')

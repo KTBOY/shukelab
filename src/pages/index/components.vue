@@ -34,6 +34,7 @@
 		setup() {
 			function handleRouter(nav, packageItem) {
 				uni.setStorageSync('moduleData', packageItem)
+				console.log(packageItem.pathList);
 				uni.navigateTo({
 					url: packageItem.pathList ? packageItem.pathList : '/pages/index/list'
 				})

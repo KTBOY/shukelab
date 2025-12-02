@@ -3,8 +3,11 @@
 		<block v-for="(item,index) in list" :key="index">
 			<view :class="['menu-item', currIndex==index ? 'active':'']" @click="tabClick(item,index)">
 				<image :class="['iconfont']" :src="currIndex==index?item.active:item.icon"
-					:style="{width:item.width, height:item.height}"></image>
+					:style="{width:item.width, height:item.height}"/>
 				<text>{{item.text}}</text>
+				<view class="corner" v-if="item.cornerMark&&corner">
+					{{corner}}
+				</view>
 			</view>
 		</block>
 		<view class="active-tabbar-box" :style="{'--n':currIndex, '--color':props.outerApertureBorderColor,
@@ -21,6 +24,7 @@
 		active : string,
 		width : string,
 		height : string,
+		cornerMark:boolean
 	}
 
 	interface indexType {
@@ -42,9 +46,9 @@
 			type: String,
 			default: 'rgb(3, 3, 3)'
 		},
-		cornerMark:{
-			type:Boolean,
-			default:false
+
+		corner:{
+			type: [String,Number]
 		}
 	})
 
