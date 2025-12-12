@@ -39,6 +39,13 @@
 			"style": {
 				"navigationBarTitleText": "自定义角标"
 			}
+		},
+		
+		{
+			"path": "pages/cssPage/index",
+			"style": {
+				"navigationBarTitleText": "css魔法"
+			}
 		}
 		
 		

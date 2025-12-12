@@ -95,6 +95,7 @@
 |           data           | tabBar[] |              |               数据       |
 | outerApertureBorderColor |  String  |   #f2f3f7    | 按钮底层颜色，需要和page颜色相同 |
 |   iconBackgroundColor    |  String  | rgb(3, 3, 3) |            按钮背景色            |
+| corner | String,Number |  | 角标内容 |
 
 
 ### Methods
@@ -112,3 +113,4 @@
 | active | String |   无   | 当前选中的图标 |
 | width  | String |   无   |    图标宽带    |
 | height | String |   无   |    图标高带    |
+| cornerMark | Boolean |   无   |    开启角标    |

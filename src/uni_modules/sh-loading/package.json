@@ -1,14 +1,12 @@
 {
-  "id": "sk-tab-bar",
-  "displayName": "小程序自定义tabBar",
-  "version": "1.0.3",
-  "description": "组件形式tabBar",
+  "id": "sh-loading",
+  "displayName": "sh-loading",
+  "version": "1.0.0",
+  "description": "sh-loading",
   "keywords": [
-    "sk-tab-bar",
-    "小程序tabBar",
-    "自定义tabBar"
+    "sh-loading"
 ],
-  "repository": "https://github.com/KTBOY/shukelab",
+  "repository": "",
   "engines": {
     "HBuilderX": "^3.1.0"
   },
@@ -26,9 +24,9 @@
       "qq": ""
     },
     "declaration": {
-      "ads": "无",
-      "data": "无",
-      "permissions": "无"
+      "ads": "",
+      "data": "",
+      "permissions": ""
     },
     "npmurl": ""
   },
@@ -37,36 +35,35 @@
     "encrypt": [],
     "platforms": {
       "cloud": {
-        "tcb": "y",
-        "aliyun": "y",
-        "alipay": "y"
+        "tcb": "u",
+        "aliyun": "u",
+        "alipay": "u"
       },
       "client": {
         "Vue": {
-          "vue2": "n",
-          "vue3": "y"
+          "vue2": "u",
+          "vue3": "u"
         },
         "App": {
-            "app-vue": "u",
-            "app-nvue": "u",
-            "app-uvue": "u",
-            "app-harmony": "u"
+          "app-vue": "u",
+          "app-nvue": "u",
+          "app-uvue": "u"
         },
         "H5-mobile": {
           "Safari": "u",
-          "Android Browser": "y",
-          "微信浏览器(Android)": "y",
-          "QQ浏览器(Android)": "y"
+          "Android Browser": "u",
+          "微信浏览器(Android)": "u",
+          "QQ浏览器(Android)": "u"
         },
         "H5-pc": {
-          "Chrome": "y",
+          "Chrome": "u",
           "IE": "u",
-          "Edge": "y",
-          "Firefox": "y",
+          "Edge": "u",
+          "Firefox": "u",
           "Safari": "u"
         },
         "小程序": {
-          "微信": "y",
+          "微信": "u",
           "阿里": "u",
           "百度": "u",
           "字节跳动": "u",

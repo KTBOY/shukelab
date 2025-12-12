@@ -2,12 +2,6 @@
 	--w: calc(750rpx / var(--length));
 	--t: 750rpx;
 	--c: 120rpx;
-	/* 	--bg: rgb(3, 3, 3);
-	--color: #f2f3f7; */
-	/* 	padding-bottom: calc(constant(safe-area-inset-bottom) +140rpx);
-	padding-bottom: calc(env(safe-area-inset-bottom) + 140rpx); */
-
-
 }
 
 .tabbar-box {
@@ -23,9 +17,8 @@
 	left: 0;
 	bottom: 0;
 	z-index: 10;
-
 	padding-bottom: constant(safe-area-inset-bottom);
-	 padding-bottom: env(safe-area-inset-bottom)
+	padding-bottom: env(safe-area-inset-bottom)
 }
 
 .menu-item {

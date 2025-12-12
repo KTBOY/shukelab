@@ -45,7 +45,27 @@
 			
 			
 			]
-		}
+		},
+		{
+				"name": "css",
+				"enName": "css",
+				"packages": [
+					
+					{
+					"enName": "炫酷的css",
+					"cName": "",
+					"desc": "联动菜单",
+					"show": true,
+					"path": "/pages/cssPage/index",
+					"pathList": "/pages/cssPage/index",
+					"packages": [{
+							"name": "基础用法",
+							"show": true,
+							"path": "/pages/virtualMenuGanged/index"
+						},
+						
+					]
+				},
 
 
 

@@ -10,7 +10,7 @@
 	<view class="index">
 		<view class="index-components">
 			<view class="nav-item" v-for="nav in nav" :key="nav">
-				<!-- <view class="nav-name">{{ nav.name }}</view> -->
+				 <view class="nav-name">{{ nav.name }}</view> 
 				<template v-for="packageItem in nav.packages" :key="packageItem">
 					<view v-if="packageItem.show" @click="handleRouter(nav,packageItem)">
 						<view class="nav-info">
