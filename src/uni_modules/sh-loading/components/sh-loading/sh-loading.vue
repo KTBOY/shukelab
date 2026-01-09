@@ -10,10 +10,12 @@
   <view v-if="localVisible" class="sh-loading-wrapper" :style="props.wrapperStyle">
     <view v-if="mask" class="mask" @click="onMaskClick"></view>
     <view class="loading" :style="{ width: props.width, height: props.height }">
-      <breathing-light v-if="itemIndex === 0" class="item-inner" />
-      <sleep v-else-if="itemIndex === 1" class="item-inner" />
-      <rectangle v-else-if="itemIndex === 2" class="item-inner" />
-      <three-stars v-else-if="itemIndex === 3" class="item-inner" />
+      <breathing-light v-if="props.type === '1'"/>
+      <sleep v-else-if="props.type === '2'" />
+      <rectangle v-else-if="props.type === '3'" />
+      <three-stars v-else-if="props.type ==='4'"  />
+	  <triangle v-else-if="props.type === '5'"  />
+	    <taiJi v-else-if="props.type === '6'"  />
     </view>
 
     <slot name="tip">
@@ -28,7 +30,8 @@ import breathingLight from './modules/breathing-light.vue'
 import sleep from './modules/sleep.vue'
 import rectangle from './modules/rectangle.vue'
 import threeStars from './modules/three-stars.vue'
-
+import triangle from './modules/triangle.vue'
+import taiJi from './modules/tai-ji.vue'
 const props = defineProps({
   type: {
     type: [String, Number],
@@ -131,17 +134,11 @@ function onMaskClick() {
 }
 
 /* 使内部组件占满容器（根据具体组件样式可调整） */
-.item-inner {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
+
 
 .hint {
   margin: 20rpx 0;
-  font-size: 14rpx;
-  color: #c3c3c3;
+  font-size: 18rpx;
+  color: #a6a6a6;
 }
 </style>

@@ -18,8 +18,8 @@
 	  top: 50%;
 	  left: 50%;
 	  border-radius: 50%;
-	  height: 150rpx;
-	  width: 150rpx;
+	  height: 100%;
+	  width: 100%;
 	  animation: rotate_3922 1.2s linear infinite;
 	  background-color: #9b59b6;
 	  background-image: linear-gradient(#9b59b6, #84cdfa, #5ad1cd);

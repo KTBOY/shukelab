@@ -21,6 +21,9 @@
 				</view>
 			</view>
 		</view>
+		<button class="button" @click="navigateToMiniProgram">
+		  BUTTON
+		</button>
 	</view>
 </template>
 
@@ -31,6 +34,7 @@
 			url
 		})
 	}
+
 </script>
 
 <style lang="scss" scoped>
@@ -110,4 +114,5 @@
 			}
 		}
 	}
+
 </style>

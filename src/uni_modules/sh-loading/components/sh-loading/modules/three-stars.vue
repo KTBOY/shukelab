@@ -1,142 +1,164 @@
 <template>
-  <view class="honeycomb-box">
-    <view class="honeycomb">
-      <view
-        v-for="(item, index) in hexagons"
-        :key="index"
-        class="hexagon"
-        :class="getHexagonClass(index)"
-        :style="getHexagonStyle(index)"
-      >
-        <view class="top-triangle"></view>
-        <view class="main-shape"></view>
-        <view class="bottom-triangle"></view>
-      </view>
-    </view>
+<view class="loader">
+  <view class="box box-1">
+    <view class="side-left"></view>
+    <view class="side-right"></view>
+    <view class="side-top"></view>
   </view>
+  <view class="box box-2">
+    <view class="side-left"></view>
+    <view class="side-right"></view>
+    <view class="side-top"></view>
+  </view>
+  <view class="box box-3">
+    <view class="side-left"></view>
+    <view class="side-right"></view>
+    <view class="side-top"></view>
+  </view>
+  <view class="box box-4">
+    <view class="side-left"></view>
+    <view class="side-right"></view>
+    <view class="side-top"></view>
+  </view>
+</view>
 </template>
 
 <script setup>
-import { ref } from 'vue'
 
-// 定义hexagons数组用于v-for循环
-const hexagons = ref(new Array(7).fill(null))
-
-// 获取hexagon的class名称
-const getHexagonClass = (index) => {
-  return `hexagon-${index + 1}`
-}
-
-// 获取hexagon的样式（包括动画延迟）
-const getHexagonStyle = (index) => {
-  const positions = [
-    { left: '-28rpx', top: '0' },
-    { left: '-14rpx', top: '22rpx' },
-    { left: '14rpx', top: '22rpx' },
-    { left: '28rpx', top: '0' },
-    { left: '14rpx', top: '-22rpx' },
-    { left: '-14rpx', top: '-22rpx' },
-    { left: '0', top: '0' },
-  ]
-
-  const delays = ['0s', '0.1s', '0.2s', '0.3s', '0.4s', '0.5s', '0.6s']
-
-  return {
-    ...positions[index],
-    animationDelay: delays[index],
-  }
-}
 </script>
 
 <style scoped>
-@keyframes honeycomb {
-  0%,
-  20% {
-    opacity: 0;
-    transform: scale(0);
-  }
 
-  30%,
-  70% {
-    opacity: 1;
-    transform: scale(1);
-  }
 
-  80%,
-  100% {
-    opacity: 0;
-    transform: scale(0);
-  }
+.loader {
+  scale: 3;
+  height: 50rpx;
+  width: 40rpx;
 }
 
-.honeycomb-box {
-  overflow: hidden;
-}
-
-.honeycomb {
+.box {
   position: relative;
-  width: 24rpx;
-  height: 24rpx;
+  opacity: 0;
+  left: 10rpx;
 }
 
-.hexagon {
+.side-left {
   position: absolute;
-/*  animation: honeycomb 2.1s infinite; */
+  background-color: #286cb5;
+  width: 19rpx;
+  height: 5rpx;
+  transform: skew(0deg, -25deg);
+  top: 14rpx;
+  left: 10rpx;
 }
 
-.main-shape {
-  width: 24rpx;
-  height: 12rpx;
-  background: #000;
-}
-
-.top-triangle,
-.bottom-triangle {
+.side-right {
   position: absolute;
-  left: 0;
-  width: 0;
-  height: 0;
-  border-left: 12rpx solid transparent;
-  border-right: 12rpx solid transparent;
+  background-color: #2f85e0;
+  width: 19rpx;
+  height: 5rpx;
+  transform: skew(0deg, 25deg);
+  top: 14rpx;
+  left: -9rpx;
 }
 
-.top-triangle {
-  top: -6rpx;
-  border-bottom: 6rpx solid #000;
+.side-top {
+  position: absolute;
+  background-color: #5fa8f5;
+  width: 20rpx;
+  height: 20rpx;
+  rotate: 45deg;
+  transform: skew(-20deg, -20deg);
 }
 
-.bottom-triangle {
-  bottom: -6rpx;
-  border-top: 6rpx solid #000;
+.box-1 {
+  animation: from-left 4s infinite;
 }
 
-/* 为每个hexagon定义位置 */
-.hexagon-1 {
-  left: -28rpx;
-  top: 0;
+.box-2 {
+  animation: from-right 4s infinite;
+  animation-delay: 1s;
 }
-.hexagon-2 {
-  left: -14rpx;
-  top: 22rpx;
+
+.box-3 {
+  animation: from-left 4s infinite;
+  animation-delay: 2s;
 }
-.hexagon-3 {
-  left: 14rpx;
-  top: 22rpx;
+
+.box-4 {
+  animation: from-right 4s infinite;
+  animation-delay: 3s;
 }
-.hexagon-4 {
-  left: 28rpx;
-  top: 0;
+
+@keyframes from-left {
+  0% {
+    z-index: 20;
+    opacity: 0;
+    translate: -20rpx -6rpx;
+  }
+
+  20% {
+    z-index: 10;
+    opacity: 1;
+    translate: 0rpx 0rpx;
+  }
+
+  40% {
+    z-index: 9;
+    translate: 0rpx 4rpx;
+  }
+
+  60% {
+    z-index: 8;
+    translate: 0rpx 8rpx;
+  }
+
+  80% {
+    z-index: 7;
+    opacity: 1;
+    translate: 0rpx 12rpx;
+  }
+
+  100% {
+    z-index: 5;
+    translate: 0rpx 30rpx;
+    opacity: 0;
+  }
 }
-.hexagon-5 {
-  left: 14rpx;
-  top: -22rpx;
-}
-.hexagon-6 {
-  left: -14rpx;
-  top: -22rpx;
-}
-.hexagon-7 {
-  left: 0;
-  top: 0;
+
+@keyframes from-right {
+  0% {
+    z-index: 20;
+    opacity: 0;
+    translate: 20rpx -6rpx;
+  }
+
+  20% {
+    z-index: 10;
+    opacity: 1;
+    translate: 0rpx 0rpx;
+  }
+
+  40% {
+    z-index: 9;
+    translate: 0rpx 4rpx;
+  }
+
+  60% {
+    z-index: 8;
+    translate: 0rpx 8rpx;
+  }
+
+  80% {
+    z-index: 7;
+    opacity: 1;
+    translate: 0rpx 12rpx;
+  }
+
+  100% {
+    z-index: 5;
+    translate: 0rpx 30rpx;
+    opacity: 0;
+  }
 }
 </style>

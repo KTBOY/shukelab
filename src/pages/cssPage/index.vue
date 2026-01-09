@@ -13,6 +13,12 @@
 		<view class="css-border">
 			<sh-loading type="4" :wrapperStyle="{position: 'absolute'}" :visible="true" />
 		</view>
+		<view class="css-border">
+			<sh-loading type="5" :wrapperStyle="{position: 'absolute'}" :visible="true" />
+		</view>
+		<view class="css-border">
+			<sh-loading type="6" :wrapperStyle="{position: 'absolute'}" :visible="true" />
+		</view>
 
 	</view>
 </template>
