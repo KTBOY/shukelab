@@ -6,7 +6,7 @@
 
 插件地址：https://ext.dcloud.net.cn/plugin?id=22894
 
-![d4389960-103a-11f0-a627-2f63d4e8edd3_0](https://github.com/user-attachments/assets/8fa94ecd-31c7-492e-8cc0-0a6b057f4611)
+<img src="https://github.com/user-attachments/assets/8fa94ecd-31c7-492e-8cc0-0a6b057f4611" alt="d4389960-103a-11f0-a627-2f63d4e8edd3_0" style="zoom:50%;" />
 
 
 ## 2.自定义tabBar
