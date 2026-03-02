@@ -58,6 +58,7 @@
 		width: '36px',
 		height: '36px',
 		url: 'pages/goods/category/index',
+		cornerMark:true
 	},
 	{
 		icon: car,
@@ -66,6 +67,7 @@
 		width: '32px',
 		height: '32px',
 		url: 'pages/goods/category/index',
+		
 		cornerMark:true
 	},
 
