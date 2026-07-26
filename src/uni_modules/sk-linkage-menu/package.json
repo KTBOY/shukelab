@@ -1,7 +1,7 @@
 {
   "id": "sk-linkage-menu",
   "displayName": "vue3左右菜单联动，购物点单",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "左右菜单联动，一般用于商场分类",
   "keywords": [
     "sk-linkage-menu",

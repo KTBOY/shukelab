@@ -8,7 +8,7 @@
 
 
 		</div>
-		<sk-tab-bar :data="list" :corner="corner" :iconBackgroundColor="iconBackgroundColor"
+		<sk-tab-bar @change="changeTabBar" :data="list" :corner="corner" :iconBackgroundColor="iconBackgroundColor"
 			:outerApertureBorderColor="outerApertureBorderColor"></sk-tab-bar>
 
 
@@ -85,6 +85,10 @@
 			}
 		}
 		outerApertureBorderColor.value = evt.detail.value
+	}
+	const changeTabBar=(v)=>{
+		
+		console.log(v);
 	}
 </script>
 

@@ -17,9 +17,33 @@
 		},
 
 		{
-			"path": "pages/virtualMenuGanged/index",
+			"path": "pages/virtualMenuGanged/basic",
 			"style": {
-				"navigationBarTitleText": "virtualMenuGanged"
+				"navigationBarTitleText": "基础用法"
+			}
+		},
+		{
+			"path": "pages/virtualMenuGanged/style",
+			"style": {
+				"navigationBarTitleText": "自定义样式"
+			}
+		},
+		{
+			"path": "pages/virtualMenuGanged/sticky",
+			"style": {
+				"navigationBarTitleText": "分组吸顶标题"
+			}
+		},
+		{
+			"path": "pages/virtualMenuGanged/control",
+			"style": {
+				"navigationBarTitleText": "受控模式与实例方法"
+			}
+		},
+		{
+			"path": "pages/virtualMenuGanged/loadmore",
+			"style": {
+				"navigationBarTitleText": "异步与分页加载"
 			}
 		},
 		// {
@@ -38,6 +62,30 @@
 			"path": "pages/tabBarDemo/corner",
 			"style": {
 				"navigationBarTitleText": "自定义角标"
+			}
+		},
+		{
+			"path": "pages/tabBarDemo/badge",
+			"style": {
+				"navigationBarTitleText": "角标/红点(新API)"
+			}
+		},
+		{
+			"path": "pages/tabBarDemo/control",
+			"style": {
+				"navigationBarTitleText": "受控与拦截"
+			}
+		},
+		{
+			"path": "pages/tabBarDemo/route-a",
+			"style": {
+				"navigationBarTitleText": "路由联动A"
+			}
+		},
+		{
+			"path": "pages/tabBarDemo/route-b",
+			"style": {
+				"navigationBarTitleText": "路由联动B"
 			}
 		},
 		

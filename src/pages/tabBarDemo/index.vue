@@ -1,6 +1,13 @@
 <template>
 	<view class="bg" :style="{'--bg':outerApertureBorderColor}">
 		<div class="tab-demo">
+			<view class="uni-title uni-common-mt">更多案例</view>
+			<view class="nav-list">
+				<view class="nav-item" v-for="nav in demoNavs" :key="nav.path" @click="goDemo(nav.path)">
+					{{ nav.name }}
+				</view>
+			</view>
+
 			<view class="uni-title uni-common-mt">切换弧度背景样式</view>
 
 			<radio-group @change="radioChange" class="flex">
@@ -48,6 +55,8 @@
 	import icon2 from "@/static/77.png"
 	import airec from "@/static/airec.png"
 	import car from "@/static/car.png"
+		import fightingGame2 from "@/static/fighting-game2.png"
+			import fightingGame from "@/static/fighting-game.png"
 
 	const colorList = ref([{
 		value: '#e07800',
@@ -112,6 +121,14 @@
 		url: 'pages/home/home',
 	},
 	{
+		icon: fightingGame,
+		active: fightingGame2,
+		text: '游戏中心',
+		width: '32px',
+		height: '32px',
+		url: 'pages/goods/category/index',
+	},
+	{
 		icon: icon2,
 		active: icon2Active,
 		text: '资源列表',
@@ -119,14 +136,7 @@
 		height: '36px',
 		url: 'pages/goods/category/index',
 	},
-	{
-		icon: car,
-		active: car,
-		text: '购物车',
-		width: '32px',
-		height: '32px',
-		url: 'pages/goods/category/index',
-	},
+
 		
 	])
 
@@ -146,15 +156,25 @@
 
 
 	const radioChange2 = (evt) => {
-		console.log(evt)
 		for (let i = 0; i < colorList2.value.length; i++) {
-			if (colorList.value[i].value === evt.detail.value) {
+			if (colorList2.value[i].value === evt.detail.value) {
 				current2.value = i;
 				break;
 			}
 		}
 		iconBackgroundColor.value = evt.detail.value
 
+	}
+
+	const demoNavs = [
+		{ name: '角标/红点(新API)', path: '/pages/tabBarDemo/badge' },
+		{ name: '受控与拦截', path: '/pages/tabBarDemo/control' },
+		{ name: '路由联动', path: '/pages/tabBarDemo/route-a' },
+		{ name: '旧版角标(兼容)', path: '/pages/tabBarDemo/corner' },
+	]
+
+	const goDemo = (url : string) => {
+		uni.navigateTo({ url })
 	}
 
 	const radioChange3 = (evt) => {
@@ -189,7 +209,6 @@
 	}
 
 	.tab-demo {
-		height: 390rpx;
 		background-color: #f2f3f7;
 		padding: 10rpx;
 	}
@@ -197,5 +216,21 @@
 	.flex {
 		display: flex;
 		margin: 5rpx;
+	}
+
+	.nav-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 12rpx;
+		margin: 12rpx 0;
+	}
+
+	.nav-item {
+		padding: 10rpx 24rpx;
+		background-color: #fff;
+		border-radius: 30rpx;
+		font-size: 24rpx;
+		color: #333;
+		border: 1rpx solid #e5e5e5;
 	}
 </style>

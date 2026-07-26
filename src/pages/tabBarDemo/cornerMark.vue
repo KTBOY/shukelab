@@ -4,10 +4,8 @@
 			<view class="uni-title uni-common-mt">切换弧度背景样式</view>
 
 		</div>
-		<sk-tab-bar :data="list" :iconBackgroundColor="iconBackgroundColor"
-			:outerApertureBorderColor="outerApertureBorderColor"></sk-tab-bar>
-
-
+		<sk-tab-bar @change="changeTabBar" :data="list" :iconBackgroundColor="iconBackgroundColor"
+			:outerApertureBorderColor="outerApertureBorderColor" ></sk-tab-bar>
 	</view>
 </template>
 
@@ -112,7 +110,11 @@
 	const outerApertureBorderColor = ref('#f2f3f7')
 	const iconBackgroundColor = ref()
 	const iconNmae = ref()
-
+	
+	const changeTabBar=(v)=>{
+		
+		console.log(v);
+	}
 </script>
 
 <style>

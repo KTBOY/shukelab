@@ -12,7 +12,7 @@
 ```
 <template>
 	<view>
-		<sk-linkage-menu :list="state.test" :height="500">
+		<sk-linkage-menu :list="state.test" :virtual-menu-height="500">
 			<template v-slot="{data}">
 				<view>
 					<view class="class-item">
@@ -78,28 +78,50 @@
 
 ### Props
 
-|      属性名       |      类型      |                  默认值                   |        说明        |
-| :---------------: | :------------: | :---------------------------------------: | :----------------: |
-| virtualMenuHeight |     Number     | uni.getSystemInfoSync().windowHeight - 44 |      组件高度      |
-|       list        | MenuDataItem[] |                                           |  右侧滚动内容列表  |
-|    itemHeight     |     Number     |                    130                    |    每一项的高度    |
-|   leftBarStyle    |     Object     |                                           | 左侧未选中菜单样式 |
-|  leftBarUnStyle   |     Object     |                                           | 左侧已选中菜单样式 |
+| 属性名 | 类型 | 默认值 | 说明 |
+| --- | --- | --- | --- |
+| virtualMenuHeight | Number | 窗口高度 - 44 | 组件可视高度（px） |
+| list | MenuDataItem[] | [] | 菜单数据，结构见下方 MenuDataItem |
+| virtual | Boolean | true | 分组级虚拟渲染开关，大数据量建议保持开启 |
+| current | Number | 0 | 当前选中菜单下标，支持 `v-model:current` |
+| showTitle | Boolean | false | 是否显示右侧分组吸顶标题 |
+| menuWidth | String | '180rpx' | 左侧菜单宽度 |
+| scrollWithAnimation | Boolean | true | 右侧程序化滚动是否使用动画 |
+| leftBarStyle | Object | - | 左侧选中滑块样式 |
+| leftBarUnStyle | Object | - | 左侧未选中菜单项样式 |
+| itemHeight | Number | 130 | 已废弃：分组高度改为自动测量，保留仅为兼容旧版 |
 
+### Events
 
-### Methods
+| 事件名 | 说明 | 回调参数 |
+| --- | --- | --- |
+| change | 选中分类变化时触发（点击、滚动、方法调用均会触发） | `{ ...item, index, currenIndex, source }`，source 为 `click` / `scroll` / `method` |
+| update:current | 选中下标变化，配合 `v-model:current` 使用 | `index: number` |
+| scrolltolower | 右侧内容区滚动触底，可用于分页加载 | 原生事件对象 |
 
-|      属性名       |      类型      |                  说明                   |
-| :---------------: | :------------: | :---------------------------------------: |
-|       change       | Functuon |                 左侧选中的回调，参数是点击当前项的数据                 |
+### Slots
 
-**MenuDataItem类型**
+| 插槽名 | 说明 | 作用域参数 |
+| --- | --- | --- |
+| default | 右侧内容项，每条数据渲染一次 | `{ data }`（分组与内容项字段合并） |
+| menu | 左侧菜单项，可自定义图标/角标 | `{ item, index, active }` |
+| title | 右侧分组吸顶标题（需开启 showTitle） | `{ item, index }` |
+| empty | list 为空时的占位内容 | - |
 
-| 属性名 |    类型    | 默认值 |            说明            |
-| :----: | :--------: | :----: | :------------------------: |
-|  name  |   String   |        | 左侧菜单名称，必传不能为空 |
-|  data  | Array<any> |        |      右侧滚动内容列表      |
-|   id   |   number   |        |    菜单id，必传不能为空    |
+### Methods（通过 ref 调用）
+
+| 方法名 | 说明 | 参数 |
+| --- | --- | --- |
+| scrollToIndex | 程序化跳转到指定菜单 | `index: number` |
+| refresh | 重新测量布局。数据变更后组件会自动调用，插槽内容高度变化（如图片撑高）时可手动调用 | - |
+
+**MenuDataItem 类型**
+
+| 属性名 | 类型 | 必填 | 说明 |
+| --- | --- | --- | --- |
+| name | String | 是 | 左侧菜单名称 |
+| data | Array | 是 | 右侧内容列表 |
+| id | Number/String | 建议 | 唯一标识，优先作为渲染 key |
 
 ### 壁纸小程序
 

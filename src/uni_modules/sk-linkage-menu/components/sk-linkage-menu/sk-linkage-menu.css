@@ -1,4 +1,7 @@
-
+/**
+ * sk-linkage-menu 组件样式
+ * 布局尺寸相关的默认值可通过 menuWidth / leftBarStyle / leftBarUnStyle 覆盖
+ */
 
 .vessel-info {
 	overflow: hidden;
@@ -10,16 +13,12 @@
 	align-content: flex-start;
 }
 
+/* ==================== 左侧菜单区 ==================== */
 
 .left-vessel {
 	width: 180rpx;
 	box-sizing: border-box;
 	font-size: 32rpx;
-
-}
-
-.left-vessel-scroll {
-	background-color: #f2f4f6;
 }
 
 .info .item {
@@ -28,55 +27,67 @@
 	box-sizing: border-box;
 	display: flex;
 	align-items: center;
+	justify-content: center;
 	font-size: 26rpx;
 	color: #444;
 	font-weight: 400;
-	justify-content: center;
 }
 
+/* 选中滑块：位置由 transform 驱动，尺寸随选中项自适应 */
 .item-active {
 	width: 180rpx;
 	height: 100rpx;
 	position: absolute;
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	font-size: 28rpx;
 	font-weight: 600;
 	background: #000;
 	color: #fff;
-	display: flex;
-	align-items: center;
-	justify-content: center;
 	transition: all 0.5s;
-
-
 }
 
 .active-name {
 	z-index: 10;
 }
 
-/* 右侧区域 */
+/* ==================== 右侧内容区 ==================== */
+
 .right-vessel {
 	flex: 1;
-
 }
 
-
 .info {
-/* 	background-color: #f2f4f6; */
 	width: 100%;
 }
 
 .item-parent {
-	width: 530rpx;
+	width: 100%;
+	box-sizing: border-box;
 }
 
-.item-parent+.item-parent {
+.item-parent + .item-parent {
 	border-top: 2rpx solid #e3e4e6;
 }
 
-.item-title {
+/* 虚拟渲染占位符：仅撑起等高空间，无内容 */
+.item-placeholder {
+	overflow: hidden;
+}
+
+/* 分组吸顶标题 */
+.item-sticky-title {
+	position: sticky;
+	top: 0;
+	z-index: 5;
+	padding: 16rpx 20rpx;
+	background-color: #fff;
+	box-sizing: border-box;
+}
+
+.item-title-text {
 	font-size: 28rpx;
-	font-family: Source Han Sans CN;
-	color: #222222;
+	color: #222;
 	font-weight: bold;
 }
