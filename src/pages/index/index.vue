@@ -10,7 +10,7 @@
 	<view class="content">
 		<view class="body">
 			<view class="module-list">
-				<view class="button" @click="handlerPageRouter('/pages/virtualMenuGanged/index')">
+				<view class="button" @click="handlerPageRouter('/pages/virtualMenuGanged/basic')">
 					<view class="module-name">联动菜单</view>
 				</view>
 				<view class="button" @click="handlerPageRouter('/pages/takePhotoDemo/index')">

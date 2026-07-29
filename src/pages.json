@@ -90,6 +90,30 @@
 		},
 		
 		{
+			"path": "pages/skCameraDemo/basic",
+			"style": {
+				"navigationBarTitleText": "固定区域裁剪（基础）"
+			}
+		},
+		{
+			"path": "pages/skCameraDemo/switch",
+			"style": {
+				"navigationBarTitleText": "前后置切换"
+			}
+		},
+		{
+			"path": "pages/skCameraDemo/control",
+			"style": {
+				"navigationBarTitleText": "受控与实例方法"
+			}
+		},
+		{
+			"path": "pages/skCameraDemo/crop",
+			"style": {
+				"navigationBarTitleText": "自定义裁剪区域"
+			}
+		},
+		{
 			"path": "pages/cssPage/index",
 			"style": {
 				"navigationBarTitleText": "css魔法"

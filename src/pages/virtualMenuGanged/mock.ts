@@ -5,10 +5,10 @@ import type { MenuDataItem } from '@/uni_modules/sk-linkage-menu/components/sk-l
 
 /** 本地测试图池：按下标伪随机分配，保证多次渲染结果稳定 */
 const GOODS_IMAGES = [
-	'/static/test/663.png',
-	'/static/test/test1.png',
-	'/static/test/test2.png',
-	'/static/test/test3.png'
+	'/static/test/663.jpg',
+	'/static/test/test1.jpg',
+	'/static/test/test2.jpg',
+	'/static/test/test3.jpg'
 ]
 
 const GROUP_NAMES = ['热销爆款', '新品上市', '折扣专区', '经典奶茶', '果茶鲜萃', '咖啡特调', '小食甜品', '面包烘焙']
