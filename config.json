@@ -111,6 +111,42 @@
 					]
 				}
 			]
+		},
+		{
+			"name": "特殊组件",
+			"enName": "special",
+			"packages": [
+				{
+					"enName": "sk-flux-capsule",
+					"cName": "WebGL流体色彩胶囊",
+					"desc": "基于 WebGL 域扭曲 FBM 的流体色彩胶囊，支持交互动力学与多色调色板",
+					"show": true,
+					"path": "/pages/skFluxCapsuleDemo/basic",
+					"pathList": "/pages/index/list",
+					"packages": [
+						{
+							"name": "基础用法",
+							"show": true,
+							"path": "/pages/skFluxCapsuleDemo/basic"
+						},
+						{
+							"name": "Props 演示",
+							"show": true,
+							"path": "/pages/skFluxCapsuleDemo/props"
+						},
+						{
+							"name": "主题切换",
+							"show": true,
+							"path": "/pages/skFluxCapsuleDemo/themes"
+						},
+						{
+							"name": "事件与插槽",
+							"show": true,
+							"path": "/pages/skFluxCapsuleDemo/events"
+						}
+					]
+				}
+			]
 		}
 	]
 }

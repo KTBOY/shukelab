@@ -1,0 +1,88 @@
+{
+  "id": "sk-flux-capsule",
+  "displayName": "WebGL流体色彩胶囊 sk-flux-capsule",
+  "version": "1.0.0",
+  "description": "基于 WebGL 域扭曲 FBM 着色器的流体色彩胶囊组件，支持 1~6 色调色板、交互动力学（按压/搅动）、玻璃高光层、受控暂停，兼容 H5 与微信小程序。",
+  "keywords": [
+    "sk-flux-capsule",
+    "WebGL",
+    "流体动画",
+    "胶囊组件",
+    "canvas"
+  ],
+  "repository": "https://github.com/KTBOY/shukelab",
+  "engines": {
+    "HBuilderX": "^3.1.0"
+  },
+  "dcloudext": {
+    "type": "component-vue",
+    "sale": {
+      "regular": {
+        "price": "0.00"
+      },
+      "sourcecode": {
+        "price": "0.00"
+      }
+    },
+    "contact": {
+      "qq": ""
+    },
+    "declaration": {
+      "ads": "无",
+      "data": "无",
+      "permissions": "无"
+    },
+    "npmurl": ""
+  },
+  "uni_modules": {
+    "dependencies": [],
+    "encrypt": [],
+    "platforms": {
+      "cloud": {
+        "tcb": "u",
+        "aliyun": "u",
+        "alipay": "u"
+      },
+      "client": {
+        "Vue": {
+          "vue2": "n",
+          "vue3": "y"
+        },
+        "App": {
+          "app-vue": "u",
+          "app-nvue": "n",
+          "app-uvue": "n",
+          "app-harmony": "u"
+        },
+        "H5-mobile": {
+          "Safari": "y",
+          "Android Browser": "y",
+          "微信浏览器(Android)": "y",
+          "QQ浏览器(Android)": "y"
+        },
+        "H5-pc": {
+          "Chrome": "y",
+          "IE": "n",
+          "Edge": "y",
+          "Firefox": "y",
+          "Safari": "y"
+        },
+        "小程序": {
+          "微信": "y",
+          "阿里": "u",
+          "百度": "u",
+          "字节跳动": "u",
+          "QQ": "u",
+          "钉钉": "u",
+          "快手": "u",
+          "飞书": "u",
+          "京东": "u"
+        },
+        "快应用": {
+          "华为": "u",
+          "联盟": "u"
+        }
+      }
+    }
+  }
+}

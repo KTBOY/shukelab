@@ -118,6 +118,31 @@
 			"style": {
 				"navigationBarTitleText": "css魔法"
 			}
+		},
+
+		{
+			"path": "pages/skFluxCapsuleDemo/basic",
+			"style": {
+				"navigationBarTitleText": "基础用法"
+			}
+		},
+		{
+			"path": "pages/skFluxCapsuleDemo/props",
+			"style": {
+				"navigationBarTitleText": "Props 演示"
+			}
+		},
+		{
+			"path": "pages/skFluxCapsuleDemo/themes",
+			"style": {
+				"navigationBarTitleText": "主题切换"
+			}
+		},
+		{
+			"path": "pages/skFluxCapsuleDemo/events",
+			"style": {
+				"navigationBarTitleText": "事件与插槽"
+			}
 		}
 		
 		
