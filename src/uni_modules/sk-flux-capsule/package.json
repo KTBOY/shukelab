@@ -1,7 +1,7 @@
 {
   "id": "sk-flux-capsule",
   "displayName": "WebGL流体色彩胶囊 sk-flux-capsule",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "基于 WebGL 域扭曲 FBM 着色器的流体色彩胶囊组件，支持 1~6 色调色板、交互动力学（按压/搅动）、玻璃高光层、受控暂停，兼容 H5 与微信小程序。",
   "keywords": [
     "sk-flux-capsule",

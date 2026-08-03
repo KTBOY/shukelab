@@ -7,7 +7,7 @@
 - WebGL 实时渲染，60fps 流体动画
 - 支持 1~6 色调色板（单色自动派生明暗层次）
 - 按压/搅动交互动力学（smoothstep 缓动）
-- 玻璃高光层（iOS 镜面反光效果）
+- 玻璃高光层（iOS 镜面反光，默认关闭，按需开启）
 - 受控暂停/恢复，页面切后台自动停帧
 - 多实例噪声种子隔离，纹理永不同步
 - 零外部依赖，仅需 uni-app + Vue3
@@ -27,10 +27,11 @@
 | title | string | '' | 标题（默认插槽优先） |
 | subtitle | string | '' | 副标题 |
 | width | number \| string | '100%' | 宽度，数字按 rpx |
-| height | number \| string | 160 | 高度，数字按 rpx |
+| height | number \| string | 120 | 高度，数字按 rpx |
 | radius | number \| string | 药丸形 | 圆角 |
 | speed | number | 0.22 | 基础流速 |
-| gloss | boolean | true | 玻璃高光层 |
+| gloss | boolean | false | 玻璃高光层 |
+| lazy | boolean | true | 视口懒激活：进入视口附近才初始化/恢复，离开暂停 |
 | interactive | boolean | true | 触摸交互 |
 | paused | boolean | false | 受控暂停 |
 | seed | number | 随机 | 噪声种子 |

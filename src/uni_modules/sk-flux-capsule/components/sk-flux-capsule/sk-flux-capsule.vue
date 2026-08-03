@@ -54,6 +54,7 @@
  *
  * 性能约定：
  * - DPR 上限 2；dt 钳制 100ms；卸载停帧并 dispose GPU 资源
+ * - 默认懒激活：进入视口附近才初始化/恢复，离开视口暂停，多实例不并发
  * - paused prop 受控暂停；页面 onHide 可调 pause()/resume()
  */
 import { computed, getCurrentInstance, onBeforeUnmount, onMounted, ref, watch } from 'vue'
@@ -70,14 +71,16 @@ interface Props {
   subtitle?: string
   /** 宽度：数字按 rpx，字符串原样 */
   width?: number | string
-  /** 高度：数字按 rpx，字符串原样 */
+  /** 高度：数字按 rpx，字符串原样，默认 120 */
   height?: number | string
   /** 圆角：缺省保持药丸形（高度一半） */
   radius?: number | string
   /** 基础流速 */
   speed?: number
-  /** iOS 玻璃高光层 */
+  /** iOS 玻璃高光层，默认关闭以降低多实例合成开销 */
   gloss?: boolean
+  /** 懒激活：进入视口附近才初始化/恢复渲染，离开视口暂停（多实例场景显著降耗） */
+  lazy?: boolean
   /** 触摸按压/搅动交互 */
   interactive?: boolean
   /** 受控暂停 */
@@ -91,10 +94,11 @@ const props = withDefaults(defineProps<Props>(), {
   title: '',
   subtitle: '',
   width: '100%',
-  height: 160,
+  height: 120,
   radius: undefined,
   speed: 0.22,
-  gloss: true,
+  gloss: false,
+  lazy: true,
   interactive: true,
   paused: false,
   seed: undefined,
@@ -154,6 +158,10 @@ let renderer: SkFluxRenderer | null = null
 let running = false
 let rafId = 0
 let lastTs = 0
+/** 视口可见性（懒激活用；非懒模式始终视为可见） */
+const inView = ref(true)
+/** 平台视口观察器实例 */
+let io: any = null
 /** 平台注入的帧调度函数 */
 let raf: (cb: (ts: number) => void) => number = () => 0
 let caf: (id: number) => void = () => undefined
@@ -168,7 +176,7 @@ function frame(ts: number): void {
 }
 
 function resume(): void {
-  if (running || !renderer || props.paused) return
+  if (running || !renderer || props.paused || !inView.value) return
   running = true
   lastTs = 0
   rafId = raf(frame)
@@ -184,7 +192,10 @@ defineExpose({ pause, resume })
 
 watch(
   () => props.paused,
-  (paused) => (paused ? pause() : resume()),
+  (paused) => {
+    if (paused) pause()
+    else if (inView.value) resume()
+  },
 )
 
 /* ---------- 触摸交互 ---------- */
@@ -288,13 +299,62 @@ function setupCanvas(): void {
   /* #endif */
 }
 
-onMounted(() => {
-  /* 延迟一帧，确保布局完成后再取画布尺寸 */
+/* ---------- 视口懒激活 ---------- */
+
+/** 进入/离开视口回调：可见时初始化或恢复，不可见时暂停 */
+function handleVisible(visible: boolean): void {
+  inView.value = visible
+  if (!visible) {
+    pause()
+    return
+  }
+  if (props.paused) return
+  if (renderer) resume()
+  else setupCanvas()
+}
+
+/** 建立视口观察器；平台不支持时兜底直接初始化 */
+function setupObserver(): void {
+  /* #ifdef H5 */
+  const host = document.getElementById(canvasId)
+  if (host && typeof IntersectionObserver !== 'undefined') {
+    io = new IntersectionObserver(
+      (entries) => handleVisible(entries[0]?.isIntersecting ?? false),
+      { rootMargin: '200px 0px' },
+    )
+    io.observe(host)
+    return
+  }
+  /* #endif */
+  /* #ifdef MP-WEIXIN */
+  try {
+    const obs: any = uni.createIntersectionObserver(instance?.proxy as any, {
+      thresholds: [0],
+      observeAll: false,
+    })
+    obs.relativeToViewport({ top: 200, bottom: 200 })
+    obs.observe('.sk-flux-capsule', (res: any) => {
+      handleVisible((res?.intersectionRatio ?? 0) > 0)
+    })
+    io = obs
+    return
+  } catch (_) {
+    /* 观察器创建失败，走兜底 */
+  }
+  /* #endif */
+  /* 兜底：不支持视口观察时直接初始化 */
   setTimeout(setupCanvas, 50)
+}
+
+onMounted(() => {
+  if (props.lazy) setupObserver()
+  else setTimeout(setupCanvas, 50) /* 延迟一帧，确保布局完成后再取画布尺寸 */
 })
 
 onBeforeUnmount(() => {
   pause()
+  io?.disconnect?.()
+  io = null
   renderer?.dispose()
   renderer = null
 })
