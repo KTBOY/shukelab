@@ -63,7 +63,7 @@
 					"enName": "sk-camera",
 					"cName": "H5拍照相机",
 					"desc": "H5 getUserMedia 拍照，前后置/裁剪",
-					"show": true,
+					"show": false,
 					"path": "/pages/skCameraDemo/basic",
 					"pathList": "/pages/index/list",
 					"packages": [

@@ -12,7 +12,7 @@
 		>
 			<view class="filters__track">
 				<view
-					v-for="option in filterOptions"
+					v-for="option in displayFilterOptions"
 					:key="option.id"
 					:id="'chip-' + option.id"
 					class="filters__chip"
@@ -68,6 +68,11 @@ const filterOptions = computed<readonly FilterOption[]>(() => [
 	{ id: ALL, name: 'ALL', accent: 'linear-gradient(135deg,#ff4fa0,#7c3fff)' },
 	...SK_FLUX_THEMES.map((t) => ({ id: t.id, name: t.name, accent: t.accent })),
 ])
+
+/** 实际渲染的分类：当前仅展示 ALL，其余分类隐藏（数据保留在 filterOptions，未删除，便于恢复） */
+const displayFilterOptions = computed<readonly FilterOption[]>(() =>
+	filterOptions.value.filter((o) => o.id === ALL),
+)
 
 const activeFilter = ref<string>(ALL)
 
