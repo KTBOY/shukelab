@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<style>
+	/*评论框祖传猫猫*/
+	.comment_textarea{
+	background:#f5f5f5 url(https://files-cdn.cnblogs.com/files/WNpursue/comment.gif) right bottom no-repeat!important;
+	}
+	
+	/* 看板娘 */
+	
+	canvas#live2dcanvas {
+	border: 0 !important;
+	left: 0;
+	width:200px;
+	}
+	
+	
+	#loading{bottom:0;left:0;position:fixed;right:0;top:0;z-index:9999;background-color:#f4f5f5;pointer-events:none;}.loader-inner{will-change:transform;width:40px;height:40px;position:absolute;top:50%;left:50%;margin:-20px 0 0 -20px;background-color:#3742fa;border-radius:50%;animation:scaleout 0.6s infinite ease-in-out forwards;text-indent:-99999px;z-index:999991;}@keyframes scaleout{0%{transform:scale(0);opacity:0;}40%{opacity:1;}100%{transform:scale(1);opacity:0;}}
+	/* 让页面本身透明，露出底下的背景容器 */
+	body {
+	    background: transparent !important;
+	}
+	
+	/* 三层背景容器：固定铺满全屏，垫在所有内容底下 */
+	.mask-image-container {
+	    position: fixed;
+	    inset: 0;
+	    z-index: -1;
+	    overflow: hidden;
+	    pointer-events: none;
+	    background: #fffdfd;
+	}
+	
+	.image-layer {
+	    position: absolute;
+	    inset: 0;
+	    background-position: center top;
+	    background-size: cover;
+	    background-repeat: no-repeat;
+	}
+	
+	/* 底图：图1（常驻显示） */
+	.background-layer {
+	    background-image: url(https://img2024.cnblogs.com/blog/1963715/202607/1963715-20260725211802514-2141336750.png);
+	}
+	
+	/* 上层图：图2（黄色版），平时被 mask 完全遮住，鼠标经过才露出 */
+	.foreground-layer {
+	    background-image: url(https://img2024.cnblogs.com/blog/1963715/202607/1963715-20260725211350128-783873648.png);
+	    -webkit-mask-image: radial-gradient(circle at -999px -999px, black 0%, transparent 0%);
+	    mask-image: radial-gradient(circle at -999px -999px, black 0%, transparent 0%);
+	    opacity: 0;
+	    transition: opacity .5s ease;
+	}
+	
+	/* 淡橙色光晕层 */
+	.orange-gradient-layer {
+	    opacity: 0;
+	    transition: opacity .5s ease;
+	}
+	
+	/* 自动闪烁层：同样是黄色版图2，由 JS 在随机位置生成光斑遮罩，模拟猫爪一闪一闪 */
+	.twinkle-layer {
+	    background-image: url(https://img2024.cnblogs.com/blog/1963715/202607/1963715-20260725211350128-783873648.png);
+	    -webkit-mask-image: radial-gradient(circle at -999px -999px, black 0%, transparent 0%);
+	    mask-image: radial-gradient(circle at -999px -999px, black 0%, transparent 0%);
+	}
+</style>
+<body>
+	<div class="mask-image-container background-mask">
+	    <div class="image-layer background-layer"></div>
+	    <div class="image-layer twinkle-layer"></div>
+	    <div class="image-layer foreground-layer"></div>
+	    <div class="image-layer orange-gradient-layer"></div>
+	</div>
+</body>
+<script>
+(function () {
+    var fg = document.querySelector('.foreground-layer');
+    var glow = document.querySelector('.orange-gradient-layer');
+    if (!fg || !glow) return;
+
+    var tx = -999, ty = -999,  // 鼠标真实位置
+        x = -999, y = -999,    // 当前渲染位置（缓动追踪）
+        active = false;
+
+    document.addEventListener('mousemove', function (e) {
+        tx = e.clientX;
+        ty = e.clientY;
+        if (!active) {          // 第一次进入时直接跳到鼠标处，避免从远处飞过来
+            x = tx; y = ty;
+            active = true;
+        }
+        fg.style.opacity = 1;
+        glow.style.opacity = 1;
+    });
+
+    document.addEventListener('mouseleave', function () {
+        fg.style.opacity = 0;
+        glow.style.opacity = 0;
+    });
+
+    function render() {
+        x += (tx - x) * 0.15;   // 0.15 越小拖尾越明显
+        y += (ty - y) * 0.15;
+
+
+        var mask = 'radial-gradient(circle at ' + x + 'px ' + y + 'px, ' +
+            'black 0%, rgba(0,0,0,0.6) 56px, rgba(0,0,0,0.4) 112px, ' +
+            'rgba(0,0,0,0.2) 168px, rgba(0,0,0,0.1) 224px, ' +
+            'rgba(0,0,0,0.05) 252px, transparent 280px)';
+        fg.style.webkitMaskImage = mask;
+        fg.style.maskImage = mask;
+
+        // 同步的白色柔光（不带色相，只提一点亮度）
+        glow.style.background = 'radial-gradient(circle at ' + x + 'px ' + y + 'px, ' +
+            'rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.05) 56px, ' +
+            'rgba(255,255,255,0.04) 112px, rgba(255,255,255,0.03) 168px, ' +
+            'rgba(255,255,255,0.015) 224px, rgba(255,255,255,0.008) 252px, ' +
+            'transparent 280px)';
+
+        requestAnimationFrame(render);
+    }
+    render();
+})();
+
+/* 自动闪烁：随机位置冒出光斑，渐亮再渐灭地露出黄色猫爪 */
+(function () {
+    var layer = document.querySelector('.twinkle-layer');
+    if (!layer) return;
+
+    var spots = [];   // 当前正在闪的光斑
+
+    // 随机生成一个光斑：位置、大小、闪烁周期都随机
+    function spawn() {
+        spots.push({
+            x: Math.random() * window.innerWidth,
+            y: Math.random() * window.innerHeight,
+            r: 90 + Math.random() * 90,        // 光斑半径 90~180px
+            t: 0,                              // 已存活时间
+            life: 1200 + Math.random() * 1200  // 生命周期 1.2s~2.4s
+        });
+        setTimeout(spawn, 300 + Math.random() * 1); // 每 0.3~0.8s 冒一个新的
+    }
+    spawn();
+
+    var last = performance.now();
+    function tick(now) {
+        var dt = now - last;
+        last = now;
+
+        var masks = [];
+        for (var i = spots.length - 1; i >= 0; i--) {
+            var s = spots[i];
+            s.t += dt;
+            var p = s.t / s.life;
+            if (p >= 1) { spots.splice(i, 1); continue; }
+            // 正弦曲线 0→1→0：渐亮再渐灭，形成"闪"的节奏
+            var a = Math.sin(p * Math.PI);
+            masks.push('radial-gradient(circle at ' + s.x + 'px ' + s.y + 'px, ' +
+                'rgba(0,0,0,' + a.toFixed(3) + ') 0%, ' +
+                'rgba(0,0,0,' + (a * 0.5).toFixed(3) + ') ' + (s.r * 0.5) + 'px, ' +
+                'transparent ' + s.r + 'px)');
+        }
+        // 多个 radial-gradient 逗号拼接 = 多层 mask 叠加（默认 add 合成）
+        // 没有光斑时给一个全透明遮罩，避免整张黄图露出来
+        var mask = masks.length ? masks.join(',')
+            : 'radial-gradient(circle at -999px -999px, black 0%, transparent 0%)';
+        layer.style.webkitMaskImage = mask;
+        layer.style.maskImage = mask;
+
+        requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+})();
+</script>
+</html>
