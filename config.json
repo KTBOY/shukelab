@@ -105,12 +105,12 @@
 					"packages": [
 						{
 							"name": "基础用法",
-							"show": true,
+							"show": false,
 							"path": "/pages/skFluxCapsuleDemo/basic"
 						},
 						{
 							"name": "Props 演示",
-							"show": true,
+							"show": false,
 							"path": "/pages/skFluxCapsuleDemo/props"
 						},
 						{
@@ -120,7 +120,7 @@
 						},
 						{
 							"name": "事件与插槽",
-							"show": true,
+							"show": false,
 							"path": "/pages/skFluxCapsuleDemo/events"
 						}
 					]

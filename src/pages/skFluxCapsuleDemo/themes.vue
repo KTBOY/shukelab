@@ -12,7 +12,7 @@
 		>
 			<view class="filters__track">
 				<view
-					v-for="option in displayFilterOptions"
+					v-for="option in filterOptions"
 					:key="option.id"
 					:id="'chip-' + option.id"
 					class="filters__chip"
@@ -138,12 +138,20 @@ onHide(() => capsules.forEach((c) => c.pause()))
 onShow(() => capsules.forEach((c) => c.resume()))
 </script>
 
-<style lang="scss" scoped>
+<!-- page 样式需非 scoped 才能命中页面元素（与项目其他页面写法一致）：
+     App.vue 全局给 page 设了 height:100% + overflow:hidden（锁定视口、禁止滚动），
+     本页内容超出一屏，覆盖 overflow 恢复页面滚动 -->
+<style lang="scss">
 page {
-	background: #f7f8fa;
+	overflow-y: auto;
+	-webkit-overflow-scrolling: touch;
 }
+</style>
 
+<style lang="scss" scoped>
 .page {
+	min-height: 100%;
+	background: #f7f8fa;
 	padding: 32rpx 32rpx 80rpx;
 }
 
