@@ -60,7 +60,7 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 
 ## 预览
 
-<img src="D:/my/git/%E6%96%87%E7%AB%A0/articles-images/%E5%9B%BE%E7%89%87/ScreenShot_%E3%80%89%E3%80%87%E3%80%89%E3%80%8D-%E3%80%87%E3%80%8F-%E3%80%87%E3%80%8B_%E3%80%88%E3%80%8A%E3%80%89%E3%80%88%E3%80%87%E3%80%8C_%E3%80%89%E3%80%8E%E3%80%8D.png" alt="ScreenShot_〉〇〉」-〇』-〇》_〈《〉〈〇「_〉『」" style="zoom: 50%;" />
+<img src="D:/my/git/shukelab/image/README/ScreenShot_%E3%80%89%E3%80%87%E3%80%89%E3%80%8D-%E3%80%87%E3%80%8F-%E3%80%87%E3%80%8B_%E3%80%88%E3%80%8A%E3%80%89%E3%80%88%E3%80%87%E3%80%8C_%E3%80%89%E3%80%8E%E3%80%8D.png" alt="ScreenShot_〉〇〉」-〇』-〇》_〈《〉〈〇「_〉『」" style="zoom:50%;" />
 
 ### sk-linkage-menu
 
