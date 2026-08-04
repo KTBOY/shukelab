@@ -21,12 +21,12 @@ shukelab 是一套基于 **uni-app + Vue3 + TypeScript** 的跨端组件库，�
 
 ## 组件列表
 
-| 组件 | 说明 | 插件地址 |
-|------|------|----------|
+| 组件            | 说明                                              | 插件地址                                                  |
+| --------------- | ------------------------------------------------- | --------------------------------------------------------- |
 | sk-linkage-menu | 左右联动菜单列表，支持吸顶/受控/异步加载/虚拟列表 | [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=22894) |
-| sk-tab-bar | 凹陷弧形自定义 tabBar，支持角标/守卫/路由联动 | [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=24578) |
-| sk-camera | H5 拍照相机组件，getUserMedia 前后置/裁剪 | `待发布` |
-| sk-flux-capsule | WebGL 流体色彩胶囊，扭曲 FBM 着色器               | `待发布` |
+| sk-tab-bar      | 凹陷弧形自定义 tabBar，支持角标/守卫/路由联动     | [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=24578) |
+| sk-camera       | H5 拍照相机组件，getUserMedia 前后置/裁剪         | `待发布`                                                |
+| sk-flux-capsule | WebGL 流体色彩胶囊，扭曲 FBM 着色器               | `待发布`                                                |
 
 ---
 
@@ -60,7 +60,7 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 
 ## 预览
 
-<img src="https://github.com/user-attachments/assets/7d77a285-c1d4-4c31-9e6d-1ea338eb8fde" alt="下载" style="zoom:50%;" />
+<img src="D:/my/git/%E6%96%87%E7%AB%A0/articles-images/%E5%9B%BE%E7%89%87/ScreenShot_%E3%80%89%E3%80%87%E3%80%89%E3%80%8D-%E3%80%87%E3%80%8F-%E3%80%87%E3%80%8B_%E3%80%88%E3%80%8A%E3%80%89%E3%80%88%E3%80%87%E3%80%8C_%E3%80%89%E3%80%8E%E3%80%8D.png" alt="ScreenShot_〉〇〉」-〇』-〇》_〈《〉〈〇「_〉『」" style="zoom: 50%;" />
 
 ### sk-linkage-menu
 
@@ -74,18 +74,18 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 
 ### sk-flux-capsule
 
-<img src="D:/my/git/%E6%96%87%E7%AB%A0/articles-images/%E5%9B%BE%E7%89%87/%E5%AE%9E%E9%AA%8C%E5%AE%A4/sk-flux-capsule/%E5%BD%95%E5%B1%8F_20260803_171034.gif" alt="录屏_20260803_171034" style="zoom:33%;" />
+<img src="image/README/1785820661385.gif" alt="1785820661385" style="zoom:33%;" />
 
 ---
 
 ## 平台兼容性
 
-| 组件 | H5 | 微信小程序 | App |
-|------|:--:|:---------:|:---:|
-| sk-linkage-menu | ✅ | ✅ | — |
-| sk-tab-bar | ✅ | ✅ | — |
-| sk-camera | ✅ | ✅ | — |
-| sk-flux-capsule | ✅ | ✅ | — |
+| 组件            | H5 | 微信小程序 | App |
+| --------------- | :-: | :--------: | :-: |
+| sk-linkage-menu | ✅ |     ✅     | — |
+| sk-tab-bar      | ✅ |     ✅     | — |
+| sk-camera       | ✅ |     ✅     | — |
+| sk-flux-capsule | ✅ |     ✅     | — |
 
 > ✅ 已验证 &nbsp; — 未测试/不适用
 
