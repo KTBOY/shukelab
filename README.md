@@ -26,7 +26,7 @@ shukelab 是一套基于 **uni-app + Vue3 + TypeScript** 的跨端组件库，�
 | sk-linkage-menu | 左右联动菜单列表，支持吸顶/受控/异步加载/虚拟列表 | [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=22894) |
 | sk-tab-bar | 凹陷弧形自定义 tabBar，支持角标/守卫/路由联动 | [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=24578) |
 | sk-camera | H5 拍照相机组件，getUserMedia 前后置/裁剪 | `待发布` |
-| sk-flux-capsule | WebGL 流体色彩胶囊，域扭曲 FBM 着色器             | `待发布` |
+| sk-flux-capsule | WebGL 流体色彩胶囊，扭曲 FBM 着色器               | `待发布` |
 
 ---
 
