@@ -23,11 +23,10 @@ shukelab 是一套基于 **uni-app + Vue3 + TypeScript** 的跨端组件库，�
 
 | 组件 | 说明 | 插件地址 |
 |------|------|----------|
-| sk-linkage-menu | 左右联动菜单列表，支持吸顶/受控/异步加载 | [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=22894) |
+| sk-linkage-menu | 左右联动菜单列表，支持吸顶/受控/异步加载/虚拟列表 | [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=22894) |
 | sk-tab-bar | 凹陷弧形自定义 tabBar，支持角标/守卫/路由联动 | [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=24578) |
 | sk-camera | H5 拍照相机组件，getUserMedia 前后置/裁剪 | `待发布` |
-| sh-loading | 加载动画组件 | `待发布` |
-| sk-flux-capsule | WebGL 流体色彩胶囊，域扭曲 FBM 着色器 | `待发布` |
+| sk-flux-capsule | WebGL 流体色彩胶囊，域扭曲 FBM 着色器             | `待发布` |
 
 ---
 
@@ -63,15 +62,19 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 
 <img src="https://github.com/user-attachments/assets/7d77a285-c1d4-4c31-9e6d-1ea338eb8fde" alt="下载" style="zoom:50%;" />
 
-### 左右联动菜单
+### sk-linkage-menu
 
-<img src="https://github.com/user-attachments/assets/8fa94ecd-31c7-492e-8cc0-0a6b057f4611" alt="d4389960-103a-11f0-a627-2f63d4e8edd3_0" style="zoom:50%;" />
+<img src="https://github.com/user-attachments/assets/8fa94ecd-31c7-492e-8cc0-0a6b057f4611" alt="d4389960-103a-11f0-a627-2f63d4e8edd3_0" style="zoom: 33%;" />
 
-### 自定义 tabBar
+### sk-tab-bar
 
-<img src="https://github.com/user-attachments/assets/698e92dc-8edb-463c-8369-8a2c4227382f" alt="录屏_20250807_192802" style="zoom:50%;" />
+<img src="https://github.com/user-attachments/assets/698e92dc-8edb-463c-8369-8a2c4227382f" alt="录屏_20250807_192802" style="zoom: 33%;" />
 
-<img src="https://github.com/user-attachments/assets/29c96aa9-0df4-43dd-b190-9d6839546a5b" alt="录屏_20260107_192559" style="zoom:50%;" />
+<img src="https://github.com/user-attachments/assets/29c96aa9-0df4-43dd-b190-9d6839546a5b" alt="录屏_20260107_192559" style="zoom: 33%;" />
+
+### sk-flux-capsule
+
+<img src="D:/my/git/%E6%96%87%E7%AB%A0/articles-images/%E5%9B%BE%E7%89%87/%E5%AE%9E%E9%AA%8C%E5%AE%A4/sk-flux-capsule/%E5%BD%95%E5%B1%8F_20260803_171034.gif" alt="录屏_20260803_171034" style="zoom:33%;" />
 
 ---
 
