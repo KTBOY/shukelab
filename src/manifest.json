@@ -81,11 +81,12 @@
     "vueVersion" : "3",
     "h5" : {
         "devServer" : {
-            "https" : false
+            "https" : false,
+            "port" : 5175
         },
         "router" : {
-            "mode" : "history",
-            "base" : "/"
+            "mode" : "hash",
+            "base" : "/shukelab/"
         }
     }
 }
