@@ -1,0 +1,14 @@
+# 构建脚本允许清单：pnpm 11 起用 allowBuilds 映射（strictDepBuilds 默认开启，
+# 未允许的构建脚本在 CI 里会以 ERR_PNPM_IGNORED_BUILDS 直接失败）；
+# onlyBuiltDependencies 为 pnpm 10 的旧格式，保留以兼容本地旧版本。
+# - esbuild：安装平台二进制，vite 构建必需
+# - @parcel/watcher：vite 文件监听的原生模块
+# - core-js：仅打印 funding 横幅
+allowBuilds:
+  '@parcel/watcher': true
+  core-js: true
+  esbuild: true
+onlyBuiltDependencies:
+  - '@parcel/watcher'
+  - core-js
+  - esbuild
