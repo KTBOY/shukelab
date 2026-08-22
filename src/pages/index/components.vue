@@ -7,201 +7,184 @@
  * @FilePath: \project-template\uni_template\pages\index\components.vue
 -->
 <template>
-	<view class="index">
-		<view class="index-components">
-			<view class="nav-item" v-for="nav in nav" :key="nav">
-				<view class="nav-name">{{ nav.name }}</view>
-				<template v-for="packageItem in nav.packages" :key="packageItem">
-					<view v-if="packageItem.show" @click="handleRouter(nav,packageItem)">
-						<view class="nav-info">
-							<view class="child-name">{{ packageItem.enName }} {{ packageItem.cName }}</view>
-							<view>
-								<uni-icons type="forward" size="20"></uni-icons>
-							</view>
-						</view>
-					</view>
-				</template>
-			</view>
-
-<!-- 			<view class="nav-name">有情链接</view>
-			<view class="rest">
-
-				<view class="button" @click="navigateToMiniProgram">
-					壁纸小程序
-				</view>
-
-			</view> -->
-
-		</view>
-
-	</view>
+  <view class="index">
+    <view class="index-components">
+      <view v-for="nav in nav" :key="nav" class="nav-item">
+        <view class="nav-name">{{ nav.name }}</view>
+        <template v-for="packageItem in nav.packages" :key="packageItem">
+          <view v-if="packageItem.show" @click="handleRouter(nav, packageItem)">
+            <view class="nav-info">
+              <view class="child-name">{{ packageItem.enName }} {{ packageItem.cName }}</view>
+              <view>
+                <uni-icons type="forward" size="20"></uni-icons>
+              </view>
+            </view>
+          </view>
+        </template>
+      </view>
+    </view>
+  </view>
 </template>
 <script lang="ts">
-	import { defineComponent, reactive } from "vue";
-	import { nav } from "../../../config.json"
-	//defineComponent:对setup的option参数进行封装，在ts下并且正确的类型推断，
-	export default {
-		name: "doc",
-		setup() {
-			function handleRouter(nav, packageItem) {
-				uni.setStorageSync('moduleData', packageItem)
-				console.log(packageItem.pathList);
-				uni.navigateTo({
-					url: packageItem.pathList ? packageItem.pathList : '/pages/index/list'
-				})
-			}
-			function navigateToMiniProgram(){
-				uni.navigateToMiniProgram({
-				  appId: '',
-				  path: '/pages/home/home',
-				  extraData: {
-				    foo: 'bar'
-				  },
-				  success(res) {
-				    // 打开成功
-				  },
-				  complete(res){
-					  console.log(res);
-				  }
-				  
-				})
-			}
-			return reactive({
-				nav,
-				handleRouter,
-				navigateToMiniProgram
-			});
-		},
-	};
+import { defineComponent, reactive } from 'vue'
+import { nav } from '../../../config.json'
+//defineComponent:对setup的option参数进行封装，在ts下并且正确的类型推断，
+export default {
+  name: 'Doc',
+  setup() {
+    function handleRouter(nav, packageItem) {
+      uni.setStorageSync('moduleData', packageItem)
+      console.log(packageItem.pathList)
+      uni.navigateTo({
+        url: packageItem.pathList ? packageItem.pathList : '/pages/index/list',
+      })
+    }
+    function navigateToMiniProgram() {
+      uni.navigateToMiniProgram({
+        appId: '',
+        path: '/pages/home/home',
+        extraData: {
+          foo: 'bar',
+        },
+        success(res) {
+          // 打开成功
+        },
+        complete(res) {
+          console.log(res)
+        },
+      })
+    }
+    return reactive({
+      nav,
+      handleRouter,
+      navigateToMiniProgram,
+    })
+  },
+}
 </script>
 <style lang="scss" scoped>
-	page {
-		background: #f7f8fa;
+page {
+  background: #f7f8fa;
+}
 
-	}
+.index {
+  height: 100%;
+  width: 100%;
 
-	.index {
-		height: 100%;
-		width: 100%;
+  &-header {
+    width: 750rpx;
+    height: 234rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 
-		&-header {
-			width: 750rpx;
-			height: 234rpx;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			justify-content: center;
-			text-align: center;
+    > img {
+      width: 120rpx;
+      height: 120rpx;
+      margin-right: 20rpx;
+      flex-shrink: 0;
+    }
 
-			>img {
-				width: 120rpx;
-				height: 120rpx;
-				margin-right: 20rpx;
-				flex-shrink: 0;
-			}
+    .info {
+      display: flex;
+      flex-direction: column;
 
-			.info {
-				display: flex;
-				flex-direction: column;
+      h1 {
+        height: 48rpx;
+        line-height: 48rpx;
+        font-size: 34rpx;
+        color: rgba(51, 51, 51, 1);
+      }
 
-				h1 {
-					height: 48rpx;
-					line-height: 48rpx;
-					font-size: 34rpx;
-					color: rgba(51, 51, 51, 1);
-				}
+      p {
+        height: 18rpx;
+        line-height: 18rpx;
+        font-size: 12rpx;
+        color: rgba(154, 155, 157, 1);
+      }
+    }
+  }
 
-				p {
-					height: 18rpx;
-					line-height: 18rpx;
-					font-size: 12rpx;
-					color: rgba(154, 155, 157, 1);
-				}
-			}
-		}
+  &-components {
+    background: #f7f8fa;
+    // border-radius: 80rpx 80rpx 0 0;
+    overflow: hidden;
+    padding: 60rpx 50rpx;
+    height: 100%;
 
-		&-components {
-			background: #f7f8fa;
-			// border-radius: 80rpx 80rpx 0 0;
-			overflow: hidden;
-			padding: 60rpx 50rpx;
-			height: 100%;
+    .nav-name {
+      line-height: 40rpx;
+      font-size: 26rpx;
+      color: rgba(144, 156, 164, 1);
+      margin-bottom: 20rpx;
+    }
 
+    .nav-info {
+      width: 100%;
+      height: 85rpx;
+      line-height: 85rpx;
+      padding: 0 10rpx;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 50rpx;
+      background: #ffffff;
+      //box-shadow: 0rpx 2rpx 8rpx 0rpx rgba(245, 245, 245, 0.1);
+      margin-bottom: 20rpx;
+      // -webkit-border-radius: 70px;
+      // border-radius: 70px;
+      // -webkit-box-shadow: 8px 8px 21px#ffffff, -8px -8px 21px #ffffff;
+      // box-shadow: 8px 8px 21px #ffffff, -8px -8px 21px #ffffff;
+      box-shadow: 0 1px 4px #6666660f;
 
-			.nav-name {
-				line-height: 40rpx;
-				font-size: 26rpx;
-				color: rgba(144, 156, 164, 1);
-				margin-bottom: 20rpx;
+      .child-name {
+        font-size: 15px;
+        font-weight: 700;
+        display: block;
+        color: #333;
+      }
+    }
+  }
+}
 
-			}
+.rest {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+}
 
-			.nav-info {
-				width: 100%;
-				height: 85rpx;
-				line-height: 85rpx;
-				padding: 0 10rpx;
-				display: flex;
-				align-items: center;
-				justify-content: space-between;
-				border-radius: 50rpx;
-				background: #ffffff;
-				//box-shadow: 0rpx 2rpx 8rpx 0rpx rgba(245, 245, 245, 0.1);
-				margin-bottom: 20rpx;
-				// -webkit-border-radius: 70px;
-				// border-radius: 70px;
-				// -webkit-box-shadow: 8px 8px 21px#ffffff, -8px -8px 21px #ffffff;
-				// box-shadow: 8px 8px 21px #ffffff, -8px -8px 21px #ffffff;
-				box-shadow: 0 1px 4px #6666660f;
+.button {
+  --bg: #644dff;
+  --bg2: #4836bb;
+  --bg3: #654dff63;
+  cursor: pointer;
+  width: 368rpx;
+  height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  font-size: 1.125em;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #fff;
+  background: var(--bg);
+  border: 2px solid var(--bg2);
+  border-radius: 0.75rem;
+  box-shadow: 0 4rpx 0 var(--bg2);
+  transform: skew(-10deg);
+  transition: all 0.1s ease;
+  filter: drop-shadow(0 10rpx 15rpx var(--bg3));
+  margin-top: 20rpx;
+  margin-left: 10rpx;
+}
 
-				.child-name {
-					font-size: 15px;
-					font-weight: 700;
-					display: block;
-					color: #333;
-				}
-			}
-		}
-	}
-
-	.rest {
-		display: flex;
-		justify-content: flex-start;
-		align-items: center;
-		width: 100%;
-	}
-
-
-
-	.button {
-		--bg: #644dff;
-		--bg2: #4836bb;
-		--bg3: #654dff63;
-		cursor: pointer;
-		width: 368rpx;
-		height: 96rpx;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		gap: 1rem;
-		font-size: 1.125em;
-		font-weight: 800;
-		letter-spacing: 2px;
-		color: #fff;
-		background: var(--bg);
-		border: 2px solid var(--bg2);
-		border-radius: .75rem;
-		box-shadow: 0 4rpx 0 var(--bg2);
-		transform: skew(-10deg);
-		transition: all .1s ease;
-		filter: drop-shadow(0 10rpx 15rpx var(--bg3));
-		margin-top: 20rpx;
-		margin-left: 10rpx;
-	}
-
-	.button:active {
-		letter-spacing: 0px;
-		transform: skew(-10deg) translateY(8px);
-		box-shadow: 0 0 0 var(--bg3);
-	}
+.button:active {
+  letter-spacing: 0px;
+  transform: skew(-10deg) translateY(8px);
+  box-shadow: 0 0 0 var(--bg3);
+}
 </style>

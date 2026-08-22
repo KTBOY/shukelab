@@ -7,28 +7,17 @@
  * @FilePath: \project-template\uni_template\pages\index\list.vue
 -->
 <template>
-	<view class="collapse">
-		<list-pages :nav="moduleData"></list-pages>
-	</view>
+  <view class="collapse">
+    <list-pages :nav="moduleData"></list-pages>
+  </view>
 </template>
 
-
-
 <script lang="ts" setup>
-	import {
-		defineComponent,
-		reactive,
-		ref,
-	} from 'vue'
-	import listPages from '@/components/list/listPages/index.vue'
-	import {
-		nav
-	} from "../../../config.json"
+import { defineComponent, reactive, ref } from 'vue'
+import listPages from '@/components/list/listPages/index.vue'
+import { nav } from '../../../config.json'
 
-
-	const moduleData = ref(uni.getStorageSync('moduleData'))
-	console.log(moduleData)
+const moduleData = ref(uni.getStorageSync('moduleData'))
+console.log(moduleData)
 </script>
-<style scoped>
-
-</style>
+<style scoped></style>
