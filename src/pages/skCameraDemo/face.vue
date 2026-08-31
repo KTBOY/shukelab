@@ -44,12 +44,16 @@ const img = ref('')
 
 /**
  * 人脸取景引导配置：
- * 模型与 wasm 使用项目自托管资源（离线可用）；
+ * 模型与 wasm 使用项目自托管资源（离线可用），路径需带部署 base（如 /shukelab/）；
  * 生产环境可改传 CDN 或自有静态地址。检测全程端上推理，人脸数据不出端。
  */
+let assetBase = '/'
+// #ifdef H5
+assetBase = import.meta.env.BASE_URL || '/'
+// #endif
 const faceGuide = computed(() => ({
-	modelUrl: '/static/models/blaze_face_short_range.tflite',
-	wasmPath: '/static/mediapipe/wasm',
+	modelUrl: `${assetBase}static/models/blaze_face_short_range.tflite`,
+	wasmPath: `${assetBase}static/mediapipe/wasm`,
 	autoCapture: autoCapture.value ? { stableMs: 1500 } : false,
 }))
 

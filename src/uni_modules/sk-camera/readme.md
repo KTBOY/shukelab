@@ -112,7 +112,7 @@ const onCapture = (res) => {
 
 1. 项目安装 `pnpm add @mediapipe/tasks-vision`，将 `node_modules/@mediapipe/tasks-vision/wasm/` 下 `vision_wasm_internal.*` 与 `vision_wasm_nosimd_internal.*` 拷到 H5 静态目录；
 2. 下载 [blaze_face_short_range.tflite](https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite)（229KB）放入同一静态目录；
-3. 通过 `modelUrl` / `wasmPath` 传入。本仓库已内置于根目录 `h5-static/`（`models/`、`mediapipe/wasm/`），由 `vite.config.ts` 中仅 H5 生效的插件按 `/static/*` 提供，demo 页 `pages/skCameraDemo/face` 直接演示。
+3. 通过 `modelUrl` / `wasmPath` 传入（相对部署 base 拼接，如 `${import.meta.env.BASE_URL}static/...`）。本仓库已内置于根目录 `h5-static/`（`models/`、`mediapipe/wasm/`），由 `vite.config.ts` 中仅 H5 生效的插件按 `base + static/*` 提供，demo 页 `pages/skCameraDemo/face` 直接演示。
 
 > 注意：wasm 约 23MB，**不要放进 `src/static`** —— uni-app 会将其拷入所有平台构建产物，导致微信小程序包超限。请放入仅 H5 发布/服务的目录（如本仓库的 `h5-static/` 方案）。
 
@@ -354,11 +354,11 @@ interface SkCameraError { code: SkCameraErrorCode; message: string; raw?: unknow
 
 ## 本地测试
 
-> 本项目 `manifest.json` 中 H5 为 `history` 路由（`base: /`），直接用路径访问，无需 `#`。
+> 本项目 `manifest.json` 中 H5 为 `hash` 路由（`base: /shukelab/`，devServer 端口 5175），访问地址需带 `/#/`。
 
 ```bash
 pnpm dev:h5
-# 基础/裁剪/切换：http://localhost:<port>/pages/skCameraDemo/basic
-# 人脸取景引导：http://localhost:<port>/pages/skCameraDemo/face
-# 如需 HTTPS：先执行 pnpm add -D vite-plugin-mkcert，再访问 https://localhost:<port>
+# 基础/裁剪/切换：http://localhost:5175/shukelab/#/pages/skCameraDemo/basic
+# 人脸取景引导：http://localhost:5175/shukelab/#/pages/skCameraDemo/face
+# 如需 HTTPS：先执行 pnpm add -D vite-plugin-mkcert，再访问 https://localhost:5175/shukelab/
 ```

@@ -29,17 +29,21 @@ function h5OnlyStatic(): Plugin {
 	}
 	let outDir = ''
 	let isBuild = false
+	let base = '/'
 	return {
 		name: 'sk-h5-only-static',
 		configResolved(config) {
 			outDir = config.build.outDir
 			isBuild = config.command === 'build'
+			base = config.base || '/'
 		},
 		configureServer(server) {
 			server.middlewares.use((req: any, res: any, next: any) => {
+				// 与页面同源的资源路径带部署 base（如 /shukelab/static/...），本地 base 为 / 时即 /static/...
+				const prefix = base + 'static/'
 				const url: string = req.url || ''
-				if (!url.startsWith('/static/')) return next()
-				const rel = normalize(url.slice('/static/'.length).split('?')[0])
+				if (!url.startsWith(prefix)) return next()
+				const rel = normalize(url.slice(prefix.length).split('?')[0])
 				const file = resolve(baseDir, rel)
 				if (!file.startsWith(baseDir + sep) || !existsSync(file) || !statSync(file).isFile()) {
 					return next()
