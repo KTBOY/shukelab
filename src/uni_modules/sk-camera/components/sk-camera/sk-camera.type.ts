@@ -7,6 +7,12 @@ export type SkCameraResolution = '480p' | '720p' | '1080p' | { width: number; he
 /** 拍照输出格式：base64（默认）或额外附带 Blob */
 export type SkCameraFormat = 'base64' | 'blob'
 
+/** 闪光灯/手电筒模式。小程序/App 直传原生 camera；H5 端仅 'torch'（常亮手电筒）可通过轨道约束实现，'on'/'auto' 在 H5 无对应能力会被忽略 */
+export type SkCameraFlash = 'off' | 'on' | 'auto' | 'torch'
+
+/** 成像来源：实时媒体流 / 兜底拍照（环境不支持实时预览时） */
+export type SkCameraSource = 'stream' | 'fallback'
+
 /**
  * 裁剪区域：坐标均为相对“预览可视区域”的比例（0~1）。
  * 组件按 object-fit: cover 映射回原始像素，做到所见即所得（与屏幕上取景框位置一致）。
@@ -32,6 +38,8 @@ export type SkCameraErrorCode =
 	| 'NOT_READABLE' // 摄像头被占用/无法启动
 	| 'OVERCONSTRAINED' // 分辨率等约束不被满足
 	| 'NOT_READY' // 相机尚未就绪
+	| 'STREAM_LOST' // 预览流意外断开且自动恢复失败
+	| 'FACE_GUIDE_UNAVAILABLE' // 人脸取景引导初始化失败（模型/运行库加载失败）
 	| 'UNKNOWN'
 
 /** 统一的错误结构 */
@@ -57,6 +65,44 @@ export interface SkCameraCaptureResult {
 	facing: SkCameraFacing
 	/** 是否已按 crop 区域裁剪 */
 	cropped: boolean
+	/** 成像来源；兜底拍照（如微信 H5 不支持实时预览时）为 'fallback'，默认 'stream' */
+	source?: SkCameraSource
+}
+
+/**
+ * 人脸取景引导配置（仅 H5 端生效，基于 MediaPipe BlazeFace 端上检测，人脸数据不出端）。
+ * `face-guide` 传 `true` 时使用全部默认值。
+ */
+export interface SkFaceGuideOptions {
+	/** BlazeFace tflite 模型地址；默认官方 Google Storage 地址，国内/离线环境请自托管后传入 */
+	modelUrl?: string
+	/** @mediapipe/tasks-vision 的 wasm 目录地址；默认 jsdelivr CDN，可自托管 */
+	wasmPath?: string
+	/** 最低检测置信度 0~1，默认 0.5 */
+	minConfidence?: number
+	/** 检测节流间隔（ms），默认 200；低端机可调大 */
+	interval?: number
+	/** 是否渲染内置人脸框，默认 true */
+	showBox?: boolean
+	/** 人脸持续稳定在画面中达到时长后自动拍照；传对象可自定义稳定时长，默认 1200ms */
+	autoCapture?: boolean | { stableMs?: number }
+}
+
+/** 单个人脸检测结果（供 @face 事件与内置人脸框渲染） */
+export interface SkFaceBox {
+	/** 人脸框，相对预览可视区域的比例（0~1，可能略微越界） */
+	x: number
+	y: number
+	width: number
+	height: number
+	/** 置信度 0~1 */
+	score: number
+}
+
+/** 可枚举的摄像头设备（授权后才有 label） */
+export interface SkCameraDevice {
+	deviceId: string
+	label: string
 }
 
 /** 组件 Props 类型（供 defineProps 泛型与外部引用） */
@@ -77,4 +123,13 @@ export interface SkCameraProps {
 	showControls?: boolean
 	/** 固定区域裁剪（相对预览可视区域）：true=居中最大正方形；传区域对象=预览内比例矩形。默认 false */
 	crop?: boolean | SkCameraCropRegion
+	/** 实时预览不可用时（如微信 iOS H5 限制）是否降级为系统拍照兜底，默认 true */
+	fallback?: boolean
+	/** 闪光灯/手电筒模式，默认 off；H5 端仅 torch 生效 */
+	flash?: SkCameraFlash
+	/** 人脸取景引导（仅 H5）：true 用默认配置，或传 SkFaceGuideOptions */
+	faceGuide?: boolean | SkFaceGuideOptions
+	/** 内置「关闭」按钮点击后是否自动执行返回上一页/回首页导航，默认 true；
+	 * 关闭后可仅监听 @close 自行处理 */
+	navigateOnClose?: boolean
 }

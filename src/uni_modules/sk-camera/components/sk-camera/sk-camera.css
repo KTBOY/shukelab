@@ -74,3 +74,32 @@
 	background: #1f8fff;
 	font-weight: 600;
 }
+
+/* 兜底拍照提示：环境不支持实时预览时显示 */
+.sk-camera__fallback {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	color: rgba(255, 255, 255, 0.75);
+	font-size: 28rpx;
+	line-height: 1.8;
+	text-align: center;
+}
+
+/* 内置人脸框（face-guide showBox）：跟随检测结果移动 */
+.sk-camera__face-box {
+	position: absolute;
+	z-index: 2;
+	border: 4rpx solid #41e079;
+	border-radius: 16rpx;
+	box-shadow: 0 0 0 2rpx rgba(0, 0, 0, 0.25);
+	transition: all 0.12s ease-out;
+	pointer-events: none;
+}

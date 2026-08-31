@@ -114,6 +114,12 @@
 			}
 		},
 		{
+			"path": "pages/skCameraDemo/face",
+			"style": {
+				"navigationBarTitleText": "人脸取景引导"
+			}
+		},
+		{
 			"path": "pages/cssPage/index",
 			"style": {
 				"navigationBarTitleText": "css魔法"

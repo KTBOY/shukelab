@@ -1,13 +1,16 @@
 {
   "id": "sk-camera",
-  "displayName": "H5拍照相机组件 sk-camera",
-  "version": "1.0.0",
-  "description": "基于 getUserMedia 的 H5 拍照组件，修复大量机型打不开/拍照变形/卡死问题；支持前后置切换、约束逐级降级、镜像、固定区域裁剪，小程序/App 自动降级为原生 camera。",
+  "displayName": "H5拍照相机组件 sk-camera（人脸取景引导/兜底拍照）",
+  "version": "1.1.0",
+  "description": "基于 getUserMedia 的 H5 拍照组件，修复大量机型打不开/拍照变形/卡死问题；支持前后置切换、约束逐级降级、镜像、固定区域裁剪、人脸取景引导（BlazeFace 端上检测+自动快门）、手电筒/变焦/多设备选择、断流自愈、微信 iOS 等环境的系统拍照兜底；小程序/App 自动降级为原生 camera。",
   "keywords": [
     "sk-camera",
     "H5拍照",
     "getUserMedia",
-    "前后置切换"
+    "前后置切换",
+    "人脸检测",
+    "取景引导",
+    "兜底拍照"
 ],
   "repository": "https://github.com/KTBOY/shukelab",
   "engines": {
@@ -29,7 +32,7 @@
     "declaration": {
       "ads": "无",
       "data": "无",
-      "permissions": "H5 端需用户授权摄像头（getUserMedia）"
+      "permissions": "H5 端需用户授权摄像头（getUserMedia）；启用人脸取景引导时需加载 BlazeFace 模型与 wasm 资源（建议自托管，人脸数据不出端）"
     },
     "npmurl": ""
   },

@@ -116,11 +116,34 @@ export function mapRectToSource(
 }
 
 /**
+ * mapRectToSource 的逆运算：把「原始画面像素矩形」换算为「预览容器像素矩形」。
+ * 用于人脸检测等场景：检测在视频原始帧上进行，结果需按 cover 映射回预览可视区域渲染。
+ * 不做范围裁剪——允许矩形超出容器（由外层 overflow:hidden 处理）。
+ */
+export function mapSourceToRect(
+	rect: { x: number; y: number; width: number; height: number },
+	cw: number,
+	ch: number,
+	vw: number,
+	vh: number
+): { x: number; y: number; width: number; height: number } {
+	const scale = Math.max(cw / vw, ch / vh)
+	const offX = (vw * scale - cw) / 2
+	const offY = (vh * scale - ch) / 2
+	return {
+		x: rect.x * scale - offX,
+		y: rect.y * scale - offY,
+		width: rect.width * scale,
+		height: rect.height * scale,
+	}
+}
+
+/**
  * 将当前视频帧绘制到 canvas：可选水平镜像 + 可选裁剪。
  * 关键：预览使用 object-fit: cover，屏幕看到的只是原始画面被裁掉两边后的中间部分，
  * 因此裁剪坐标以“预览可视区域”为基准（0~1），再按 cover 映射回原始像素，做到所见即所得。
- * - 输出 canvas 取自视频原始分辨率对应区域，避免拉伸变形；
- * - 镜像使用 GPU 加速的 ctx.scale(-1,1)，取代逐像素循环。
+ * 性能：直接按源矩形一次 drawImage 直出目标画布（镜像先把矩形换算到翻转后的源区域），
+ * 全程只分配一个全分辨率画布，避免旧实现「全帧画布 + 裁剪画布」的双倍内存峰值。
  */
 export function captureFrame(
 	video: HTMLVideoElement,
@@ -133,40 +156,38 @@ export function captureFrame(
 ): HTMLCanvasElement {
 	const vw = video.videoWidth
 	const vh = video.videoHeight
-	// 先绘制“显示朝向”的完整原始帧（前置镜像后与预览一致）
-	const full = document.createElement('canvas')
-	full.width = vw
-	full.height = vh
-	const ctx = full.getContext('2d') as CanvasRenderingContext2D
-	if (options.mirror) {
-		ctx.translate(vw, 0)
-		ctx.scale(-1, 1)
-	}
-	ctx.drawImage(video, 0, 0, vw, vh)
-	ctx.setTransform(1, 0, 0, 1, 0, 0)
-
 	const cw = options.containerWidth || vw
 	const ch = options.containerHeight || vh
 	const rect = resolveCropRect(options.crop, cw, ch)
-	if (!rect) return full
 
-	// object-fit: cover 映射：预览容器像素 → 原始画面像素（与小程序端共用同一纯函数）
+	// 不裁剪：整帧直出（镜像用一次 GPU 变换）
+	if (!rect) {
+		const out = document.createElement('canvas')
+		out.width = vw
+		out.height = vh
+		const ctx = out.getContext('2d') as CanvasRenderingContext2D
+		if (options.mirror) {
+			ctx.translate(vw, 0)
+			ctx.scale(-1, 1)
+		}
+		ctx.drawImage(video, 0, 0, vw, vh)
+		return out
+	}
+
+	// 裁剪：预览容器像素 → 原始画面像素（与小程序端共用同一纯函数）
 	const src = mapRectToSource(rect, cw, ch, vw, vh)
-
+	// 镜像显示满足 M(x) = V(vw-1-x)：裁剪矩形对应在翻转后的源矩形 [vw-x-w, vw-x)，
+	// 对该区域再做一次 scale(-1,1) 绘制，结果与「整帧镜像后再裁剪」完全一致
+	const sx = options.mirror ? vw - src.x - src.width : src.x
 	const out = document.createElement('canvas')
 	out.width = src.width
 	out.height = src.height
-	;(out.getContext('2d') as CanvasRenderingContext2D).drawImage(
-		full,
-		src.x,
-		src.y,
-		src.width,
-		src.height,
-		0,
-		0,
-		src.width,
-		src.height
-	)
+	const ctx = out.getContext('2d') as CanvasRenderingContext2D
+	if (options.mirror) {
+		ctx.translate(src.width, 0)
+		ctx.scale(-1, 1)
+	}
+	ctx.drawImage(video, sx, src.y, src.width, src.height, 0, 0, src.width, src.height)
 	return out
 }
 
