@@ -1,6 +1,6 @@
 # sk-tab-bar
 
-组件形式的凹陷弧形 tabBar，选中项自动上浮进入圆形按钮，凹槽随切换平滑移动。
+组件形式的镂空弧形 tabBar，选中项自动上浮进入圆形按钮，凹槽随切换平滑移动。默认 `mode="notch"` 采用 clip-path 真实镂空，页面背景任意（图片/渐变均可）；如需旧版伪类凹陷效果可设 `mode="concave"`。
 
 - ✅ `v-model:current` 受控选中，支持外部设置初始项与程序化切换
 - ✅ item 级角标（数字 / 红点 / 99+ 上限）
@@ -142,7 +142,8 @@ const list = ref<SkTabBarItem[]>([
 | :--- | :--- | :--- | :--- |
 | data | `SkTabBarItem[]` | `[]` | tab 数据源 |
 | current | `Number` | `0` | 当前选中下标，支持 `v-model:current` |
-| outerApertureBorderColor | `String` | `#f2f3f7` | 弧形外光圈颜色，需与页面背景一致 |
+| mode | `String` | `notch` | 形态：`notch` 镂空弧形（默认），clip-path 裁出真实缺口、透出任意页面背景（图片/渐变均可），缺口随切换平移动画；`concave` 伪类凹陷弧形，光圈需与页面背景同色；`plain` 纯净模式，无内凹弧形与外光圈 |
+| outerApertureBorderColor | `String` | `#f2f3f7` | 弧形外光圈颜色，需与页面背景一致（`notch`/`plain` 模式下不生效） |
 | iconBackgroundColor | `String` | `rgb(3, 3, 3)` | 选中圆形按钮背景色 |
 | background | `String` | `#fff` | tabBar 背景色 |
 | textColor | `String` | `#222` | 文字颜色 |
@@ -202,3 +203,5 @@ const list = ref<SkTabBarItem[]>([
 | :--- | :--- |
 | 组件级 `corner` + item `cornerMark` | item 级 `badge` / `dot` |
 | `change` 回调中的 `currenIndex` | `currentIndex` |
+
+2.0.0 起默认形态由 `concave`（伪类光圈）改为 `notch`（clip-path 镂空），视觉上凹槽与圆钮间留有一圈透明缝隙，且不再依赖 `outerApertureBorderColor` 与页面背景同色。升级后若希望保持旧版观感，显式传入 `mode="concave"` 即可。

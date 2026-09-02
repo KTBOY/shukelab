@@ -1,7 +1,17 @@
 <template>
 	<!-- 占位节点：fixed 模式下撑起同高空间，避免 tabBar 遮挡页面内容 -->
 	<view v-if="fixed && placeholder" class="sk-tab-bar__placeholder" :style="{ height: height }" />
-	<view class="sk-tab-bar" :class="{ 'sk-tab-bar--fixed': fixed }" :style="rootStyle">
+	<view
+		class="sk-tab-bar"
+		:class="{
+			'sk-tab-bar--fixed': fixed,
+			'sk-tab-bar--plain': mode !== 'concave',
+			'sk-tab-bar--notch': mode === 'notch'
+		}"
+		:style="rootStyle"
+	>
+		<!-- notch 模式：底色填充层，clip-path 在圆钮处裁出真实镂空缺口 -->
+		<view v-if="mode === 'notch' && list.length" class="sk-tab-bar__fill" />
 		<view
 			v-for="(item, index) in list"
 			:key="item.text || index"
@@ -48,7 +58,8 @@
  * item 级角标/红点、切换守卫、路由联动、字体图标与插槽自定义。
  * @tutorial https://ext.dcloud.net.cn/plugin?name=sk-tab-bar
  *
- * @property {SkTabBarItem[]} data tab 数据源
+	 * @property {SkTabBarItem[]} data tab 数据源
+	 * @property {String} mode 形态：notch 镂空弧形（默认，clip-path 真实镂空，适配任意背景）/ concave 伪类凹陷弧形（光圈需与页面背景同色）/ plain 纯净模式
  * @property {Number} current 当前选中下标，支持 v-model:current
  * @property {String} outerApertureBorderColor 弧形外光圈颜色，需与页面背景一致（默认 #f2f3f7）
  * @property {String} iconBackgroundColor 选中圆形按钮背景色（默认 rgb(3, 3, 3)）
@@ -71,7 +82,7 @@
  */
 import { computed, ref, watch } from 'vue'
 import type { PropType, CSSProperties } from 'vue'
-import type { SkTabBarBeforeChange, SkTabBarChangeEvent, SkTabBarItem } from './sk-tab-bar.type'
+import type { SkTabBarBeforeChange, SkTabBarChangeEvent, SkTabBarItem, SkTabBarMode } from './sk-tab-bar.type'
 
 defineOptions({ name: 'SkTabBar' })
 
@@ -88,6 +99,11 @@ const props = defineProps({
 	current: {
 		type: Number,
 		default: 0
+	},
+	/** 形态：notch 镂空弧形（默认，clip-path 真实镂空，页面背景任意）；concave 伪类凹陷弧形，光圈需与页面背景同色；plain 纯净模式，不渲染内凹伪类与外光圈 */
+	mode: {
+		type: String as PropType<SkTabBarMode>,
+		default: 'notch'
 	},
 	/** 弧形外光圈颜色，需与页面背景一致 */
 	outerApertureBorderColor: {

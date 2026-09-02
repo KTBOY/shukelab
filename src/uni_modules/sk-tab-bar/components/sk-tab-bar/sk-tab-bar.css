@@ -164,3 +164,62 @@
 	border-radius: 30rpx 0 0 0;
 	box-shadow: 0 -15rpx 0 0 var(--color, #f2f3f7);
 }
+
+/* 纯净/镂空模式：页面背景为图片/渐变等无法与外光圈同色时，
+   去掉内凹伪类与外光圈描边，仅保留圆钮悬浮效果 */
+.sk-tab-bar--plain .sk-tab-bar__bump {
+	border-color: transparent;
+}
+
+.sk-tab-bar--plain .sk-tab-bar__bump::before,
+.sk-tab-bar--plain .sk-tab-bar__bump::after {
+	display: none;
+}
+
+/* 镂空模式：根节点不再绘制底色，由 __fill 填充层负责，
+   缺口处真实透明，透出任意页面背景 */
+.sk-tab-bar--notch {
+	background: transparent;
+}
+
+/* 底色填充层：clip-path 以 24 段折线拟合半圆缺口，
+   顶点全部由 --w/--n/--c 表达，随选中项平移且可插值动画；
+   缺口半径取 var(--c)/2，与圆钮（border-box，含 10rpx 透明描边）间留出光圈缝 */
+.sk-tab-bar__fill {
+	position: absolute;
+	inset: 0;
+	background: var(--bar-bg, #fff);
+	border-radius: 10rpx 10rpx 0 0;
+	transition: clip-path var(--duration);
+	clip-path: polygon(
+		0 0,
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.5) 0,
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.49572) calc(var(--c) * 0.06526),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.48296) calc(var(--c) * 0.12941),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.46194) calc(var(--c) * 0.19134),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.43301) calc(var(--c) * 0.25),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.39668) calc(var(--c) * 0.30438),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.35355) calc(var(--c) * 0.35355),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.30438) calc(var(--c) * 0.39668),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.25) calc(var(--c) * 0.43301),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.19134) calc(var(--c) * 0.46194),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.12941) calc(var(--c) * 0.48296),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.06526) calc(var(--c) * 0.49572),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2) calc(var(--c) * 0.5),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.06526) calc(var(--c) * 0.49572),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.12941) calc(var(--c) * 0.48296),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.19134) calc(var(--c) * 0.46194),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.25) calc(var(--c) * 0.43301),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.30438) calc(var(--c) * 0.39668),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.35355) calc(var(--c) * 0.35355),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.39668) calc(var(--c) * 0.30438),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.43301) calc(var(--c) * 0.25),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.46194) calc(var(--c) * 0.19134),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.48296) calc(var(--c) * 0.12941),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.49572) calc(var(--c) * 0.06526),
+		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.5) 0,
+		100% 0,
+		100% 100%,
+		0 100%
+	);
+}

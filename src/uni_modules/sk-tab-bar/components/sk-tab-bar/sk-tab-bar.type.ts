@@ -1,3 +1,6 @@
+/** tabBar 形态：notch 镂空弧形（默认，clip-path 裁出真实缺口，适配任意背景）/ concave 伪类凹陷弧形（光圈需与页面背景色一致）/ plain 纯净模式（无内凹弧形与外光圈） */
+export type SkTabBarMode = 'concave' | 'plain' | 'notch'
+
 /** tab 项路由跳转方式 */
 export type SkTabBarSwitchMode = 'switchTab' | 'reLaunch' | 'navigateTo' | 'redirectTo'
 
