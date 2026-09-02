@@ -27,6 +27,9 @@ shukelab 是一套基于 **uni-app + Vue3 + TypeScript** 的跨端组件库，�
 | sk-tab-bar      | 凹陷弧形自定义 tabBar，支持角标/守卫/路由联动     | [DCloud 插件市场](https://ext.dcloud.net.cn/plugin?id=24578) |
 | sk-camera       | H5 拍照相机组件，getUserMedia 前后置/裁剪         | `待发布`                                                |
 | sk-flux-capsule | WebGL 流体色彩胶囊，扭曲 FBM 着色器               | `待发布`                                                |
+| sk-swipe-page   | 整页横滑容器，仿小黑盒频道页/tab联动/懒挂载       | `待发布`                                                |
+| sk-scroll-list  | 滚动列表容器，下拉刷新/上拉加载/状态footer        | `待发布`                                                |
+| sk-scroll-tabs  | 顶部滚动标签栏，滑块动画，可与整页横滑联动        | `待发布`                                                |
 
 ---
 
@@ -76,6 +79,18 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 
 <img src="image/README/1785820661385.gif" alt="1785820661385" style="zoom:33%;" />
 
+### sk-swipe-page / sk-scroll-tabs / sk-scroll-list（整页横滑频道页）
+
+<img src="image/README/sk-swipe-page-demo.gif" alt="整页横滑频道页演示：自定义下拉刷新/翻页/触底加载/回顶" style="zoom:33%;" />
+
+<img src="image/README/sk-swipe-page-tabs-linkage.png" alt="仿小黑盒频道页" style="zoom:33%;" />
+
+<img src="image/README/sk-scroll-tabs-style.png" alt="滚动标签栏自定义样式：胶囊/分段器/徽标红点禁用拦截" style="zoom:33%;" />
+
+<img src="image/README/sk-scroll-list-demo.png" alt="滚动列表容器综合示例：下拉刷新/失败重试/空态/自定义footer" style="zoom:33%;" />
+
+<img src="image/README/sk-swipe-page-basic.png" alt="整页横滑基础用法" style="zoom:33%;" />
+
 ---
 
 ## 平台兼容性
@@ -86,6 +101,9 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 | sk-tab-bar      | ✅ |     ✅     | — |
 | sk-camera       | ✅ |     ✅     | — |
 | sk-flux-capsule | ✅ |     ✅     | — |
+| sk-swipe-page   | ✅ |     ✅     | — |
+| sk-scroll-list  | ✅ |     ✅     | — |
+| sk-scroll-tabs  | ✅ |     ✅     | — |
 
 > ✅ 已验证 &nbsp; — 未测试/不适用
 

@@ -1,0 +1,79 @@
+/**
+ * sk-scroll-tabs 组件样式
+ * 滑块位置由 transform 驱动，宽度随选中标签自适应；主题色可通过 activeColor / sliderStyle 覆盖
+ */
+
+.sk-scroll-tabs__scroll {
+  width: 100%;
+  white-space: nowrap;
+  background-color: #fff;
+}
+
+/* 内容容器：inline-block 使宽度收缩为内容实际宽度，保证 scroll-x 可滚动 */
+.sk-scroll-tabs__content {
+  position: relative;
+  display: inline-block;
+  min-width: 100%;
+}
+
+/* 选中滑块：先于标签渲染，位置由 transform 驱动 */
+.sk-scroll-tabs__slider {
+  position: absolute;
+  bottom: 8rpx;
+  left: 0;
+  height: 6rpx;
+  border-radius: 6rpx;
+  background-color: #111;
+  transition: transform 0.3s, width 0.3s;
+}
+
+/* 标签项：relative 使其绘制在滑块之上 */
+.sk-scroll-tabs__item {
+  position: relative;
+  display: inline-block;
+  padding: 20rpx 30rpx;
+  box-sizing: border-box;
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.4;
+}
+
+.sk-scroll-tabs__item--active {
+  font-weight: 600;
+}
+
+.sk-scroll-tabs__item--disabled {
+  color: #ccc;
+}
+
+.sk-scroll-tabs__text {
+  font-size: inherit;
+}
+
+/* 数字角标：挂在标签右上角 */
+.sk-scroll-tabs__badge {
+  position: absolute;
+  top: 2rpx;
+  right: 4rpx;
+  min-width: 28rpx;
+  height: 28rpx;
+  padding: 0 8rpx;
+  border-radius: 14rpx;
+  background-color: #fa5151;
+  color: #fff;
+  font-size: 18rpx;
+  line-height: 28rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+/* 红点：无数字的小圆点 */
+.sk-scroll-tabs__dot {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  background-color: #fa5151;
+}

@@ -1,0 +1,57 @@
+/**
+ * sk-scroll-list 组件样式
+ * 滚动容器高度由 height prop 控制；footer / 空态文案可用插槽整体替换
+ */
+
+.sk-scroll-list {
+  width: 100%;
+}
+
+/* 自定义下拉头容器：高度随插槽内容撑开 */
+.sk-scroll-list__refresher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sk-scroll-list__footer {
+  padding: 32rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sk-scroll-list__footer-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.sk-scroll-list__footer-text--error {
+  color: #fa5151;
+}
+
+.sk-scroll-list__empty {
+  padding: 160rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sk-scroll-list__empty-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 首屏失败且无数据：错误态（点击重试） */
+.sk-scroll-list__error {
+  padding: 160rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sk-scroll-list__error-text {
+  font-size: 26rpx;
+  color: #fa5151;
+}

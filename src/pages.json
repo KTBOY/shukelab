@@ -46,6 +46,12 @@
 				"navigationBarTitleText": "异步与分页加载"
 			}
 		},
+		{
+			"path": "pages/virtualMenuGanged/with-tabbar",
+			"style": {
+				"navigationBarTitleText": "搭配底部 tabBar"
+			}
+		},
 		// {
 		// 	"path": "pages/takePhotoDemo/index",
 		// 	"style": {
@@ -149,10 +155,32 @@
 			"style": {
 				"navigationBarTitleText": "事件与插槽"
 			}
+		},
+
+		{
+			"path": "pages/skSwipePageDemo/basic",
+			"style": {
+				"navigationBarTitleText": "整页横滑·基础用法"
+			}
+		},
+		{
+			"path": "pages/skSwipePageDemo/tabs-linkage",
+			"style": {
+				"navigationBarTitleText": "整页横滑·仿小黑盒频道页"
+			}
+		},
+		{
+			"path": "pages/skSwipePageDemo/tabs-style",
+			"style": {
+				"navigationBarTitleText": "标签栏·自定义样式"
+			}
+		},
+		{
+			"path": "pages/skSwipePageDemo/scroll-list",
+			"style": {
+				"navigationBarTitleText": "列表容器·综合示例"
+			}
 		}
-		
-		
-		
 	],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

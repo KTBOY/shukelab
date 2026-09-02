@@ -1,0 +1,9 @@
+/**
+ * sk-swipe-page 组件样式
+ * 容器高度由 height prop 控制，页面内容由 page 插槽提供（建议每页用 scroll-view 占满）
+ */
+
+.sk-swipe-page {
+  display: block;
+  width: 100%;
+}

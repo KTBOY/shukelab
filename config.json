@@ -36,6 +36,11 @@
 							"name": "异步与分页加载",
 							"show": true,
 							"path": "/pages/virtualMenuGanged/loadmore"
+						},
+						{
+							"name": "搭配底部 tabBar",
+							"show": true,
+							"path": "/pages/virtualMenuGanged/with-tabbar"
 						}
 					]
 				},
@@ -56,6 +61,66 @@
 							"name": "自定义角标",
 							"show": true,
 							"path": "/pages/tabBarDemo/corner"
+						}
+					]
+				},
+				{
+					"enName": "sk-swipe-page",
+					"cName": "整页横滑容器",
+					"desc": "仿小黑盒频道页：整页横滑/tab联动/懒挂载",
+					"show": true,
+					"path": "/pages/skSwipePageDemo/basic",
+					"pathList": "/pages/index/list",
+					"packages": [
+						{
+							"name": "基础用法",
+							"show": true,
+							"path": "/pages/skSwipePageDemo/basic"
+						},
+						{
+							"name": "仿小黑盒频道页",
+							"show": true,
+							"path": "/pages/skSwipePageDemo/tabs-linkage"
+						}
+					]
+				},
+				{
+					"enName": "sk-scroll-list",
+					"cName": "滚动列表容器",
+					"desc": "下拉刷新/上拉加载/状态footer，配合usePagedList",
+					"show": true,
+					"path": "/pages/skSwipePageDemo/scroll-list",
+					"pathList": "/pages/index/list",
+					"packages": [
+						{
+							"name": "综合示例",
+							"show": true,
+							"path": "/pages/skSwipePageDemo/scroll-list"
+						},
+						{
+							"name": "频道页内演示",
+							"show": true,
+							"path": "/pages/skSwipePageDemo/tabs-linkage"
+						}
+					]
+				},
+				{
+					"enName": "sk-scroll-tabs",
+					"cName": "滚动标签栏",
+					"desc": "顶部滚动标签栏：滑块动画，可与整页横滑联动",
+					"show": true,
+					"path": "/pages/skSwipePageDemo/tabs-style",
+					"pathList": "/pages/index/list",
+					"packages": [
+						{
+							"name": "自定义样式",
+							"show": true,
+							"path": "/pages/skSwipePageDemo/tabs-style"
+						},
+						{
+							"name": "与整页横滑联动",
+							"show": true,
+							"path": "/pages/skSwipePageDemo/tabs-linkage"
 						}
 					]
 				},

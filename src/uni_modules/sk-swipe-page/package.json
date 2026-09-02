@@ -1,0 +1,89 @@
+{
+  "id": "sk-swipe-page",
+  "displayName": "vue3整页横滑容器，仿小黑盒频道页/tab联动/懒挂载",
+  "version": "1.0.0",
+  "description": "整页横滑容器：基于 swiper 封装，页面级懒挂载常驻、v-model 受控、可与 sk-scroll-tabs 联动，仿小黑盒/今日头条频道页，支持 H5 与微信小程序",
+  "keywords": [
+    "sk-swipe-page",
+    "整页横滑",
+    "横滑翻页",
+    "swiper",
+    "频道页",
+    "tab联动"
+  ],
+  "repository": "https://github.com/KTBOY/shukelab",
+  "engines": {
+    "HBuilderX": "^3.1.0"
+  },
+  "dcloudext": {
+    "type": "component-vue",
+    "sale": {
+      "regular": {
+        "price": "0.00"
+      },
+      "sourcecode": {
+        "price": "0.00"
+      }
+    },
+    "contact": {
+      "qq": ""
+    },
+    "declaration": {
+      "ads": "无",
+      "data": "插件不采集任何数据",
+      "permissions": "无"
+    },
+    "npmurl": ""
+  },
+  "uni_modules": {
+    "dependencies": [],
+    "encrypt": [],
+    "platforms": {
+      "cloud": {
+        "tcb": "y",
+        "aliyun": "y",
+        "alipay": "y"
+      },
+      "client": {
+        "Vue": {
+          "vue2": "n",
+          "vue3": "y"
+        },
+        "App": {
+          "app-vue": "y",
+          "app-nvue": "u",
+          "app-uvue": "u",
+          "app-harmony": "u"
+        },
+        "H5-mobile": {
+          "Safari": "y",
+          "Android Browser": "y",
+          "微信浏览器(Android)": "y",
+          "QQ浏览器(Android)": "y"
+        },
+        "H5-pc": {
+          "Chrome": "y",
+          "IE": "n",
+          "Edge": "y",
+          "Firefox": "y",
+          "Safari": "y"
+        },
+        "小程序": {
+          "微信": "y",
+          "阿里": "u",
+          "百度": "u",
+          "字节跳动": "u",
+          "QQ": "u",
+          "钉钉": "u",
+          "快手": "u",
+          "飞书": "u",
+          "京东": "u"
+        },
+        "快应用": {
+          "华为": "u",
+          "联盟": "u"
+        }
+      }
+    }
+  }
+}
