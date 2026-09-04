@@ -1,9 +1,10 @@
 <!--
 	案例：sk-scroll-list 综合示例——readme 文档中的能力逐项演示
-	1. 基础用法：触底加载 + 到底文案 + scrollToTop 回顶按钮
-	2. 首屏失败重试：错误态（点击重试）→ 成功后正常分页
-	3. 空态 + 自定义 finished 文案 + #footer 插槽整体替换
-	4. 刷新区定制：refresher-background + refresherDefaultStyle=white + customStyle
+	1. 基础用法：内置四态下拉头 + 触底加载 footer + scrollToTop 回顶按钮
+	2. 首屏失败重试：无内容 + error → 居中错误态（点击重试）→ 成功后正常分页
+	3. 空态插槽 + 自定义 finished 文案 + #footer 插槽整体替换
+	4. 深色容器：customStyle 覆盖 --sk-* 主题变量（圆圈变色 + 菱形 PNG 反白）
+	5. 下拉头定制：四态文案 + successDuration 驻留时长；#refresher 插槽接管（作用域 state/dy/progress）
 	所有列表的数据流均来自 usePagedList（状态受控，组件不持有数据）。
 -->
 <template>
@@ -11,7 +12,7 @@
     <!-- 1. 基础用法 -->
     <view class="demo-block">
       <view class="demo-block__head">
-        <text class="demo-block__title">基础用法（触底加载 + 回顶按钮）</text>
+        <text class="demo-block__title">基础用法（内置指示器四态 + 回顶按钮）</text>
         <text class="demo-block__action" @click="baseRef?.scrollToTop(true)">回顶</text>
       </view>
       <sk-scroll-list
@@ -21,9 +22,8 @@
         :loading="base.loading.value"
         :finished="base.finished.value"
         :error="!!base.error.value"
-        :empty="base.list.value.length === 0 && !base.loading.value"
+        :empty="base.list.value.length === 0"
         height="300px"
-        finished-text="没有更多了"
         @refresh="base.reload()"
         @load-more="base.loadNext()"
         @retry="base.loadNext()"
@@ -36,15 +36,16 @@
 
     <!-- 2. 首屏失败重试 -->
     <view class="demo-block">
-      <text class="demo-block__title">首屏失败重试（前 1 次请求必失败，点击重试）</text>
+      <text class="demo-block__title">首屏失败重试（前 1 次请求必失败，居中错误态点击重试）</text>
       <sk-scroll-list
         class="demo-list"
         :refreshing="retry.refreshing.value"
         :loading="retry.loading.value"
         :finished="retry.finished.value"
         :error="!!retry.error.value"
-        :empty="retry.list.value.length === 0 && !retry.loading.value"
+        :empty="retry.list.value.length === 0"
         height="220px"
+        initial-loading-text="正在加载"
         @refresh="retry.reload()"
         @load-more="retry.loadNext()"
         @retry="retry.loadNext()"
@@ -63,7 +64,7 @@
         :refreshing="emptyList.refreshing.value"
         :loading="emptyList.loading.value"
         :finished="emptyList.finished.value"
-        :empty="emptyList.list.value.length === 0 && !emptyList.loading.value"
+        :empty="emptyList.list.value.length === 0"
         height="160px"
         @refresh="emptyList.reload()"
         @load-more="emptyList.loadNext()"
@@ -98,25 +99,76 @@
       </sk-scroll-list>
     </view>
 
-    <!-- 4. 刷新区定制 -->
+    <!-- 4. 深色容器：一组 CSS 变量搞定圆圈与菱形 -->
     <view class="demo-block">
-      <text class="demo-block__title">刷新区定制（深色背景 + 白色圆点 + customStyle 圆角）</text>
+      <text class="demo-block__title">深色容器（customStyle 覆盖 --sk-* 变量，PNG 用 filter 反白）</text>
       <sk-scroll-list
         class="demo-list demo-list--dark"
         :refreshing="dark.refreshing.value"
         :loading="dark.loading.value"
         :finished="dark.finished.value"
         :error="!!dark.error.value"
-        :empty="dark.list.value.length === 0 && !dark.loading.value"
+        :empty="dark.list.value.length === 0"
         height="220px"
         refresher-background="#2b2b33"
-        refresher-default-style="white"
-        :custom-style="{ borderRadius: '12px', overflow: 'hidden' }"
+        :custom-style="darkVars"
         @refresh="dark.reload()"
         @load-more="dark.loadNext()"
       >
         <view v-for="item in dark.list.value" :key="item.id" class="row row--dark">
           <text class="row__title row__title--dark">{{ item.title }}</text>
+        </view>
+      </sk-scroll-list>
+    </view>
+
+    <!-- 5. 下拉头定制 -->
+    <view class="demo-block">
+      <text class="demo-block__title">四态文案定制（successDuration 控制结果驻留时长）</text>
+      <sk-scroll-list
+        class="demo-list"
+        :refreshing="customText.refreshing.value"
+        :loading="customText.loading.value"
+        :finished="customText.finished.value"
+        :error="!!customText.error.value"
+        :empty="customText.list.value.length === 0"
+        height="220px"
+        pulling-text="下拉看最新"
+        loosing-text="松手看最新"
+        refreshing-text="正在加载最新"
+        success-text="已是最新"
+        :success-duration="1000"
+        @refresh="customText.reload()"
+        @load-more="customText.loadNext()"
+      >
+        <view v-for="item in customText.list.value" :key="item.id" class="row">
+          <text class="row__title">{{ item.title }}</text>
+        </view>
+      </sk-scroll-list>
+
+      <text class="demo-block__subtitle">#refresher 插槽完全接管：作用域 state / dy / progress 自绘进度条</text>
+      <sk-scroll-list
+        class="demo-list demo-list--gap"
+        :refreshing="slotRefresher.refreshing.value"
+        :loading="slotRefresher.loading.value"
+        :finished="slotRefresher.finished.value"
+        :error="!!slotRefresher.error.value"
+        :empty="slotRefresher.list.value.length === 0"
+        height="220px"
+        @refresh="slotRefresher.reload()"
+        @load-more="slotRefresher.loadNext()"
+      >
+        <template #refresher="{ state, dy, progress }">
+          <view class="bar-refresher">
+            <view class="bar-refresher__track">
+              <view class="bar-refresher__fill" :style="{ width: progress * 100 + '%' }"></view>
+            </view>
+            <text class="bar-refresher__text">
+              {{ REFRESHER_TIP[state] || `下拉 ${Math.round(dy)}px` }}
+            </text>
+          </view>
+        </template>
+        <view v-for="item in slotRefresher.list.value" :key="item.id" class="row">
+          <text class="row__title">{{ item.title }}</text>
         </view>
       </sk-scroll-list>
     </view>
@@ -157,7 +209,25 @@ function makeFetcher(
   }
 }
 
-// 1. 基础：18 条 / 每页 6 条 → 3 页到底
+/** 深色容器主题：圆圈两个变量 + 菱形文字色与反白 filter */
+const darkVars = {
+  borderRadius: '12px',
+  overflow: 'hidden',
+  '--sk-loading-color': '#fff',
+  '--sk-loading-track-color': 'rgba(255, 255, 255, 0.18)',
+  '--sk-indicator-color': '#bbb',
+  '--sk-indicator-filter': 'brightness(0) invert(1)',
+}
+
+/** #refresher 插槽各状态文案（idle / pulling 用实时距离兜底） */
+const REFRESHER_TIP: Record<string, string> = {
+  loosing: '松手立即刷新',
+  refreshing: '正在刷新…',
+  success: '更新成功',
+  failed: '刷新失败',
+}
+
+// 1. 基础：18 条 / 每页 12 条 → 2 页到底
 const baseRef = ref<SkScrollListExpose>()
 const base = usePagedList(makeFetcher(18), { pageSize: 12 })
 
@@ -168,8 +238,12 @@ const retry = usePagedList(makeFetcher(12, { failFirst: 1 }), { pageSize: 6 })
 const emptyList = usePagedList(makeFetcher(0, { empty: true }), { pageSize: 6 })
 const customFooter = usePagedList(makeFetcher(6), { pageSize: 6 })
 
-// 4. 深色刷新区
+// 4. 深色容器
 const dark = usePagedList(makeFetcher(20), { pageSize: 8 })
+
+// 5. 下拉头定制
+const customText = usePagedList(makeFetcher(20), { pageSize: 8 })
+const slotRefresher = usePagedList(makeFetcher(20), { pageSize: 8 })
 </script>
 
 <style lang="scss" scoped>
@@ -198,6 +272,13 @@ const dark = usePagedList(makeFetcher(20), { pageSize: 8 })
     color: #666;
   }
 
+  &__subtitle {
+    display: block;
+    margin: 24rpx 0 20rpx;
+    font-size: 24rpx;
+    color: #999;
+  }
+
   &__action {
     font-size: 24rpx;
     color: #1677ff;
@@ -215,6 +296,35 @@ const dark = usePagedList(makeFetcher(20), { pageSize: 8 })
 
   &--dark {
     border-color: #3a3a44;
+  }
+}
+
+/* 插槽接管下拉头：自绘进度条 + 文案 */
+.bar-refresher {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+
+  &__track {
+    width: 160rpx;
+    height: 6rpx;
+    border-radius: 6rpx;
+    background: #eee;
+    overflow: hidden;
+  }
+
+  &__fill {
+    height: 100%;
+    background: #fa5151;
+  }
+
+  &__text {
+    margin-top: 10rpx;
+    font-size: 22rpx;
+    color: #999;
   }
 }
 

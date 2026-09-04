@@ -1,8 +1,8 @@
 {
   "id": "sk-swipe-page",
-  "displayName": "vue3整页横滑容器，仿小黑盒频道页/tab联动/懒挂载",
-  "version": "1.0.0",
-  "description": "整页横滑容器：基于 swiper 封装，页面级懒挂载常驻、v-model 受控、可与 sk-scroll-tabs 联动，仿小黑盒/今日头条频道页，支持 H5 与微信小程序",
+  "displayName": "vue3整页横滑容器，频道页/tab联动/懒挂载",
+  "version": "1.0.1",
+  "description": "整页横滑容器：基于 swiper 封装，页面级懒挂载常驻、v-model 受控、可与 sk-scroll-tabs 联动，仿今日头条频道页，支持 H5 与微信小程序",
   "keywords": [
     "sk-swipe-page",
     "整页横滑",

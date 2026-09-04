@@ -1,57 +1,185 @@
 /**
  * sk-scroll-list 组件样式
- * 滚动容器高度由 height prop 控制；footer / 空态文案可用插槽整体替换
+ * 滚动容器高度由 height prop 控制；状态区、footer、下拉头均可用插槽整体替换
+ *
+ * 主题变量（可在组件根节点 customStyle 或父级 :style 覆盖）：
+ * --sk-indicator-color      指示器文字色（下拉头 / footer 文案），默认 #999
+ * --sk-indicator-filter     菱形 PNG 着色方式，深色容器填 brightness(0) invert(1)
+ * --sk-loading-color        首屏圆圈 loading 主色，默认 #111
+ * --sk-loading-track-color  首屏圆圈 loading 轨道色
  */
 
 .sk-scroll-list {
   width: 100%;
+  --sk-indicator-color: #999;
+  --sk-indicator-filter: none;
+  --sk-loading-color: #111;
+  --sk-loading-track-color: rgba(17, 17, 17, 0.15);
 }
 
-/* 自定义下拉头容器：高度随插槽内容撑开 */
+/* 下拉头容器：外层 refresher 区域高度即阈值带宽，内容底锚、随下拉逐步露出 */
 .sk-scroll-list__refresher {
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 
-.sk-scroll-list__footer {
+/* 状态区（首屏 loading / 空态 / 错误态）：共用居中容器，保证三者同一水平线 */
+.sk-scroll-list__state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 100%;
   padding: 32rpx 0;
+}
+
+.sk-scroll-list__initial {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 首屏圆圈 loading：纯 CSS，变色只改两个变量，不依赖位图 */
+.sk-loading {
+  box-sizing: border-box;
+  width: 56rpx;
+  height: 56rpx;
+  border: 4rpx solid var(--sk-loading-track-color);
+  border-top-color: var(--sk-loading-color);
+  border-radius: 50%;
+  animation: sk-spin 0.8s linear infinite;
+}
+
+.sk-scroll-list__initial-text {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  line-height: 1.2;
+  color: var(--sk-indicator-color);
+}
+
+.sk-scroll-list__state-text {
+  font-size: 26rpx;
+  line-height: 1.4;
+  color: var(--sk-indicator-color);
+}
+
+.sk-scroll-list__state-text--error {
+  color: #fa5151;
+}
+
+/* ==================== 菱形指示器（下拉头 / footer 共用） ==================== */
+
+.sk-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* 自转层：与图标层分开，同一元素上两个 animation 的 transform 会互相覆盖 */
+.sk-indicator__spin {
+  display: flex;
+}
+
+.sk-indicator__icon {
+  width: 40rpx;
+  height: 40rpx;
+  filter: var(--sk-indicator-filter);
+}
+
+.sk-indicator__text {
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  line-height: 1.2;
+  color: var(--sk-indicator-color);
+}
+
+/* loosing：补完最后 90° 并回弹一次 */
+.sk-indicator--loosing .sk-indicator__icon {
+  animation: sk-loosing 0.24s ease-out both;
+}
+
+/* refreshing / footer 加载中：外层匀速自转，内层呼吸 */
+.sk-indicator--refreshing .sk-indicator__spin {
+  animation: sk-spin 0.9s linear infinite;
+}
+
+.sk-indicator--refreshing .sk-indicator__icon {
+  animation: sk-breathe 0.9s ease-in-out infinite;
+}
+
+/* success / failed：图标缩起淡出，只留结果文案 */
+.sk-indicator--success .sk-indicator__icon,
+.sk-indicator--failed .sk-indicator__icon {
+  animation: sk-indicator-out 0.3s ease-out both;
+}
+
+@keyframes sk-spin {
+  from {
+    transform: rotate(0);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sk-breathe {
+  0%,
+  100% {
+    transform: scale(0.85);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes sk-loosing {
+  0% {
+    transform: rotate(90deg) scale(1.15);
+  }
+  100% {
+    transform: rotate(90deg) scale(1);
+  }
+}
+
+@keyframes sk-indicator-out {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* ==================== footer ==================== */
+
+.sk-scroll-list__footer {
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 32rpx 0;
+}
+
+/* 触底加载指示器比下拉头小一档 */
+.sk-indicator--footer .sk-indicator__icon {
+  width: 36rpx;
+  height: 36rpx;
 }
 
 .sk-scroll-list__footer-text {
   font-size: 24rpx;
-  color: #999;
+  line-height: 1.2;
+  color: var(--sk-indicator-color);
 }
 
 .sk-scroll-list__footer-text--error {
-  color: #fa5151;
-}
-
-.sk-scroll-list__empty {
-  padding: 160rpx 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sk-scroll-list__empty-text {
-  font-size: 26rpx;
-  color: #999;
-}
-
-/* 首屏失败且无数据：错误态（点击重试） */
-.sk-scroll-list__error {
-  padding: 160rpx 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.sk-scroll-list__error-text {
-  font-size: 26rpx;
   color: #fa5151;
 }

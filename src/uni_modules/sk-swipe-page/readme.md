@@ -1,6 +1,6 @@
 # sk-swipe-page
 
-整页横滑容器（仿小黑盒 / 今日头条频道页）。基于原生 `swiper` 封装：跟手滑动、边界回弹，页面级懒挂载 + 常驻（keep-alive），配合 `sk-scroll-tabs` 通过 `v-model` 完成双向联动，适配 H5 与微信小程序。
+整页横滑容器（仿今日头条频道页）。基于原生 `swiper` 封装：跟手滑动、边界回弹，页面级懒挂载 + 常驻（keep-alive），配合 `sk-scroll-tabs` 通过 `v-model` 完成双向联动，适配 H5 与微信小程序。
 
 ### 基础使用
 
@@ -22,7 +22,7 @@ const current = ref(0)
 </script>
 ```
 
-### 仿小黑盒频道页（sk-scroll-tabs + 每页独立分页列表）
+### 频道页示例（sk-scroll-tabs + 每页独立分页列表）
 
 顶部标签栏与整页横滑容器绑定同一个 `v-model:current`，即完成双向联动（组件间零耦合）：
 
@@ -33,8 +33,8 @@ const current = ref(0)
     <sk-swipe-page v-model:current="tabIndex" :count="channels.length" :height="pageHeight + 'px'">
       <template #page="{ index, mounted }">
         <view v-if="mounted" style="height: 100%">
-          <!-- 每个频道页一个独立分页列表，挂载时才加载第一页 -->
-          <channel-feed :channel="channels[index]" />
+          <!-- 每个频道页一个独立分页列表；数据实例由页面层持有，挂载时才拉第一页 -->
+          <channel-feed :state="getFeedState(index)" />
         </view>
       </template>
     </sk-swipe-page>
@@ -45,6 +45,7 @@ const current = ref(0)
 - 点击 tab → `tabIndex` 变化 → 容器翻页（`change.source === 'method'`）
 - 滑动内容区 → `update:current` 回写 `tabIndex` → tab 高亮跟随并自动滚入可视区
 - 每页列表的分页加载用 `usePagedList` + `scrolltolower` 实现（渲染与数据流分层，见 `src/composables/use-paged-list.ts`）
+- 设置 `maxAlive` 时，被淘汰的是页面**组件**：数据实例与滚动位置应提到页面层按频道 id 持有，页面层用 `sk-scroll-list` 的 `getScrollTop` / `setScrollTop` 在卸载与重建之间中转，回滑才能数据秒出、位置还原
 
 ## API 参考
 

@@ -1,6 +1,6 @@
 <!--
  * @Author: sk
- * @Description: sk-swipe-page 整页横滑容器（仿小黑盒频道页）
+ * @Description: sk-swipe-page 整页横滑容器
  *
  * 实现要点：
  * 1. 基于原生 swiper 封装：跟手滑动、边界回弹，H5 / 微信小程序一致的整页翻页体验。
@@ -31,7 +31,6 @@
 
 <script lang="ts" setup>
 import { computed, getCurrentInstance, onBeforeUnmount, onMounted, reactive, watch } from 'vue'
-import type { PropType } from 'vue'
 import type { ChangePayload, TransitionPayload } from './sk-swipe-page.types'
 
 defineOptions({ name: 'SkSwipePage' })
@@ -156,6 +155,8 @@ const updateMounted = () => {
 const onSwiperTransition = (e: any) => {
   const dx: number = e.detail.dx || 0
   const dy: number = e.detail.dy || 0
+  // 首帧宽度未测出（挂载即测时容器可能仍为 0 宽）时懒测一次，避免 progress 恒为 0
+  if (containerWidth <= 0) measureWidth()
   const progress = containerWidth > 0 ? dx / containerWidth : 0
   emits('transition', { dx, dy, progress })
 }
@@ -206,12 +207,20 @@ watch(
   }
 )
 
-// 页面总数变化：剪除越界的挂载记录后重算
+// 页面总数变化：剪除越界的挂载记录后重算，并夹取越界的当前页下标
 watch(
   () => props.count,
   () => {
     for (const i of state.mounted) {
       if (i >= props.count) state.mounted.delete(i)
+    }
+    for (let i = mountOrder.length - 1; i >= 0; i--) {
+      if (mountOrder[i] >= props.count) mountOrder.splice(i, 1)
+    }
+    const last = Math.max(props.count - 1, 0)
+    if (state.current > last) {
+      state.current = last
+      emits('update:current', last)
     }
     updateMounted()
   }
@@ -219,11 +228,18 @@ watch(
 
 updateMounted()
 
+/** 窗口尺寸变化（横竖屏切换、H5 缩放）后页宽变了，progress 需按新页宽归一化 */
+const onWindowResize = () => {
+  measureWidth()
+}
+
 onMounted(() => {
   measureWidth()
+  uni.onWindowResize?.(onWindowResize)
 })
 
 onBeforeUnmount(() => {
+  uni.offWindowResize?.(onWindowResize)
   if (programmaticTimer) clearTimeout(programmaticTimer)
 })
 </script>

@@ -1,7 +1,7 @@
 {
   "id": "sk-scroll-list",
   "displayName": "vue3滚动列表容器，下拉刷新/上拉加载/状态footer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "滚动列表容器：内聚 scroll-view、仅顶部可触发的下拉刷新、触底加载守卫、footer 状态机（加载中/没有更多/失败重试）、空态插槽，数据流交由 usePagedList，支持 H5 与微信小程序",
   "keywords": [
     "sk-scroll-list",

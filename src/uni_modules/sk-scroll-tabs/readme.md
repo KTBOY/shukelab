@@ -23,7 +23,7 @@ const current = ref(0)
 </script>
 ```
 
-### 与 sk-swipe-page 整页横滑联动（仿小黑盒频道页）
+### 与 sk-swipe-page 整页横滑联动
 
 两个组件把 `v-model:current` 绑定同一个 ref 即完成双向联动，互不依赖：
 

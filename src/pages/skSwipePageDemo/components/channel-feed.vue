@@ -1,4 +1,8 @@
-<!-- 频道页内的信息流列表：sk-scroll-list 容器（下拉刷新 + 触底加载 + 状态 footer）+ usePagedList 数据流 -->
+<!--
+  频道页信息流：无状态展示组件。
+  数据实例与滚动位置由页面层（tabs-linkage.vue）按 channel.id 持有并传入，
+  本组件卸载重挂只重建视图——下拉刷新/触底加载四态全部交给 sk-scroll-list 内置指示器渲染。
+-->
 <template>
   <sk-scroll-list
     ref="listRef"
@@ -6,24 +10,13 @@
     :loading="loading"
     :finished="finished"
     :error="!!error"
-    :empty="list.length === 0 && !loading"
+    :empty="list.length === 0"
     height="100%"
+    initial-loading-text="正在加载"
     @refresh="reload()"
     @load-more="loadNext()"
     @retry="loadNext()"
   >
-    <!-- 自定义下拉头：state 为 idle/pulling/loosing/refreshing，dy 为实时下拉距离 -->
-    <template #refresher="{ state, dy }">
-      <view class="feed-refresher">
-        <text class="feed-refresher__icon" :class="{ 'feed-refresher__icon--spin': state === 'refreshing' }">
-          {{ state === 'refreshing' ? '◌' : state === 'loosing' ? '↑' : '↓' }}
-        </text>
-        <text class="feed-refresher__text">
-          {{ state === 'refreshing' ? '正在刷新...' : state === 'loosing' ? '松手立即刷新' : '下拉刷新' }}
-        </text>
-        <text v-if="state === 'pulling' && dy > 0" class="feed-refresher__dy">{{ Math.round(dy) }}px</text>
-      </view>
-    </template>
     <view v-for="item in list" :key="item.id" class="feed__item">
       <view class="feed__body">
         <text class="feed__title">{{ item.title }}</text>
@@ -36,72 +29,39 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { SkScrollListExpose } from '@/uni_modules/sk-scroll-list/components/sk-scroll-list/sk-scroll-list.types'
-import { usePagedList } from '@/composables/use-paged-list'
-import type { Channel } from '../mock'
-import { createChannelFetcher } from '../mock'
+import type { ChannelFeedState } from '../mock'
 
-const props = defineProps<{ channel: Channel }>()
+const props = defineProps<{ state: ChannelFeedState }>()
 
-/** 每页条数 */
-const PAGE_SIZE = 10
-
-const { list, loading, refreshing, finished, error, loadNext, reload } = usePagedList(
-  createChannelFetcher(props.channel.id),
-  {
-    pageSize: PAGE_SIZE,
-  }
-)
+/** 数据实例从页面层注入，本组件不持有数据 */
+const { list, loading, refreshing, finished, error, loadNext, reload } = props.state.feed
 
 const listRef = ref<SkScrollListExpose>()
 
-/** 回到顶部（供「再次点击当前频道 tab」调用） */
 const scrollToTop = (smooth = true) => {
   listRef.value?.scrollToTop(smooth)
 }
 
 defineExpose({ scrollToTop })
+
+onMounted(() => {
+  props.state.start()
+  const { lastScrollTop } = props.state
+  if (lastScrollTop > 0) {
+    // 列表首帧渲染后再还原位置，过早设置会被内容高度变化顶掉
+    nextTick(() => listRef.value?.setScrollTop(lastScrollTop))
+  }
+})
+
+/** LRU 淘汰时把滚动位置写回页面层实例，回滑重建后还原 */
+onBeforeUnmount(() => {
+  props.state.lastScrollTop = listRef.value?.getScrollTop() ?? 0
+})
 </script>
 
 <style lang="scss" scoped>
-.feed-refresher {
-  height: 50px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-
-  &__icon {
-    font-size: 16px;
-    color: #999;
-
-    &--spin {
-      display: inline-block;
-      animation: feed-spin 0.8s linear infinite;
-    }
-  }
-
-  &__text {
-    font-size: 13px;
-    color: #999;
-  }
-
-  &__dy {
-    font-size: 12px;
-    color: #ccc;
-  }
-}
-
-@keyframes feed-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .feed__item {
   display: flex;
   align-items: center;

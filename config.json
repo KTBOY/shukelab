@@ -67,7 +67,7 @@
 				{
 					"enName": "sk-swipe-page",
 					"cName": "整页横滑容器",
-					"desc": "仿小黑盒频道页：整页横滑/tab联动/懒挂载",
+					"desc": "整页横滑频道页：tab联动/懒挂载",
 					"show": true,
 					"path": "/pages/skSwipePageDemo/basic",
 					"pathList": "/pages/index/list",
@@ -78,7 +78,7 @@
 							"path": "/pages/skSwipePageDemo/basic"
 						},
 						{
-							"name": "仿小黑盒频道页",
+							"name": "频道页联动",
 							"show": true,
 							"path": "/pages/skSwipePageDemo/tabs-linkage"
 						}
