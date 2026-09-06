@@ -239,9 +239,11 @@ const onPlayChange = (payload: ChangePayload) => {
 </script>
 
 <style lang="scss" scoped>
-/* App.vue 全局 page{height:100%;overflow:hidden} 关掉了原生滚动，所以根节点用 scroll-view，需要确定高度 */
+/* App.vue 全局 page{height:100%;overflow:hidden} 关掉了原生滚动，所以根节点用 scroll-view，需要确定高度。
+   高度必须自足：小程序端 page{height:100%} 得不到确定高度，height:100% 会塌成内容高、scroll-view 不再是滚动容器；
+   --window-top 在 H5 是导航栏 44px，小程序端是 0（原生导航栏不占视口） */
 .demo-page {
-  height: 100%;
+  height: calc(100vh - var(--window-top) - var(--window-bottom));
   box-sizing: border-box;
   background: #f7f8fa;
   padding-bottom: 40rpx;

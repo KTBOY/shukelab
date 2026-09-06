@@ -18,7 +18,7 @@
     :finished="finished"
     :error="!!error"
     :empty="list.length === 0"
-    height="100%"
+    :height="height"
     @refresh="reload()"
     @load-more="loadNext()"
     @retry="loadNext()"
@@ -62,8 +62,10 @@ const props = withDefaults(
     channel: Channel
     /** 刷新图标路径，换成自己的品牌图即可 */
     iconSrc?: string
+    /** 列表容器高度；小程序端请传 px（百分比在组件包裹节点下会塌陷） */
+    height?: string
   }>(),
-  { iconSrc: '/static/zdy.png' }
+  { iconSrc: '/static/zdy.png', height: '100%' }
 )
 
 /** 每页条数 */

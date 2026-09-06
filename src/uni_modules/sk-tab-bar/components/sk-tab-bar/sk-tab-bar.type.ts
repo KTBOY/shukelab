@@ -1,5 +1,5 @@
-/** tabBar 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景色一致）/ filter blur+contrast 融合内凹（曲线更平滑，融合底色同样需与页面背景一致，且小程序低版本基础库可能不支持 contrast）/ plain 纯净模式（实心栏 + 圆钮悬浮，无内凹弧形与外光圈，不依赖背景色） */
-export type SkTabBarMode = 'concave' | 'plain' | 'filter'
+/** tabBar 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景色一致）/ canvas 画布绘制融合内凹（真实透明轮廓，任意背景可用；小程序需基础库 2.9.0+，background 仅纯色，取节点失败自动回退 plain 观感）/ filter blur+contrast 融合内凹（融合底色需与页面背景一致且仅高对比背景可用）/ plain 纯净模式（实心栏 + 圆钮悬浮，不依赖背景色） */
+export type SkTabBarMode = 'concave' | 'plain' | 'filter' | 'canvas'
 
 /** tab 项路由跳转方式 */
 export type SkTabBarSwitchMode = 'switchTab' | 'reLaunch' | 'navigateTo' | 'redirectTo'

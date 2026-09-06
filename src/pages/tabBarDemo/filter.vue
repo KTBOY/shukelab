@@ -1,7 +1,8 @@
-<!-- 案例：三种形态（concave / filter / plain）在纯色·渐变·图片背景下的对比。
-	重点演示：plain 不依赖背景色，任意背景都干净；
-	concave(box-shadow) 与 filter(blur+contrast) 的光圈/融合底色需与页面背景同色，
-	背景为渐变或图片时无法用单一颜色匹配，会穿帮。 -->
+<!-- 案例：形态（concave / canvas / plain）在纯色·深色·渐变·图片背景下的对比。
+	重点演示：canvas 用画布模仿 concave 的"栏顶凹口、圆钮坐进去"观感，且轮廓外真实透明，
+	任意背景（含渐变/图片）都成立、无伪类需同色的局限；
+	plain 无内凹但任意背景干净；concave(box-shadow) 依赖背景色/对比度，
+	背景为渐变或图片时会穿帮。filter 融合暂不开放，不在本页演示。 -->
 <template>
 	<view class="stage" :style="stageStyle">
 		<scroll-view class="content" scroll-y>
@@ -35,9 +36,9 @@
 				<view class="uni-title">原理与取舍</view>
 				<view class="tips">
 					<view>· concave（组件默认）：伪类 + 实色 box-shadow 填内凹，光圈须与页面背景同色。</view>
-					<view>· filter：blur+contrast 让同色底栏与圆钮融合出平滑内凹，曲线比 concave 更自然、切换更有机；但 contrast() 只作用颜色通道、不硬化 alpha，融合层仍须铺一层与页面背景同色的实底 —— 背景依赖与 concave 相同，且小程序低版本基础库可能不支持 contrast()（已加 @supports 降级为实心底栏）。</view>
+					<view>· canvas：画布模仿 concave 的"栏顶凹口、圆钮坐进去"观感，但轮廓外真实透明，任意背景（渐变/图片/深色）都成立、无伪类需同色的局限；小程序需基础库 2.9.0+，background 仅纯色，取节点失败自动回退 plain 观感。</view>
 					<view>· plain：无内凹、无缺口，实心栏 + 圆钮悬浮，不依赖背景色。</view>
-					<view class="tips--warn">试试把背景切到「渐变」或「图片」：plain 依旧干净，concave / filter 因光圈色无法匹配复杂背景而穿帮。</view>
+					<view class="tips--warn">切到「渐变/图片」：canvas 与 plain 依旧干净（canvas 还带凹口），concave 会穿帮。</view>
 				</view>
 			</view>
 		</scroll-view>
@@ -63,13 +64,14 @@
 
 	const modeList: { name: string; value: SkTabBarMode }[] = [
 		{ name: 'concave 伪类', value: 'concave' },
-		{ name: 'filter 融合', value: 'filter' },
+		{ name: 'canvas 绘制', value: 'canvas' },
 		{ name: 'plain 纯净', value: 'plain' },
 	]
 
 	/** 各背景对应的“页面底色”；concave/filter 的光圈只能取单一色，渐变/图片下必然与实际背景不符 */
 	const bgList = [
 		{ name: '纯色', style: { background: '#f2f3f7' }, aperture: '#f2f3f7' },
+		{ name: '深色', style: { background: '#1f1f1f' }, aperture: '#1f1f1f' },
 		{
 			name: '渐变',
 			style: { background: 'linear-gradient(135deg, #667eea 0%, #764ba2 45%, #f093fb 100%)' },
@@ -82,7 +84,7 @@
 		},
 	]
 
-	const mode = ref<SkTabBarMode>('filter')
+	const mode = ref<SkTabBarMode>('canvas')
 	const bgName = ref('纯色')
 	const current = ref(0)
 

@@ -8,6 +8,16 @@
 				</view>
 			</view>
 
+			<view class="uni-title uni-common-mt">切换形态</view>
+			<radio-group @change="radioChangeMode" class="flex">
+				<label class="flex" v-for="(item, index) in modeList" :key="item.value">
+					<view>
+						<radio :value="item.value" :checked="index === currentMode" />
+					</view>
+					<view>{{item.name}}</view>
+				</label>
+			</radio-group>
+
 			<view class="uni-title uni-common-mt">切换弧度背景样式</view>
 
 			<radio-group @change="radioChange" class="flex">
@@ -38,9 +48,20 @@
 				</label>
 			</radio-group>
 
+			<view class="uni-title uni-common-mt">切换角标</view>
+			<radio-group @change="radioChangeBadge" class="flex">
+				<label class="flex" v-for="(item, index) in badgeList" :key="item.value">
+					<view>
+						<radio :value="item.value" :checked="index === currentBadge" />
+					</view>
+					<view>{{item.name}}</view>
+				</label>
+			</radio-group>
+			<view class="tips">角标加在「资源列表」上：数字超 99 显示 99+，为 0 自动隐藏</view>
+
 
 		</div>
-		<sk-tab-bar :data="list" :iconBackgroundColor="iconBackgroundColor"
+		<sk-tab-bar :data="list" :mode="mode" :iconBackgroundColor="iconBackgroundColor"
 			:outerApertureBorderColor="outerApertureBorderColor"></sk-tab-bar>
 
 
@@ -49,6 +70,7 @@
 
 <script lang="ts" setup>
 	import { ref } from 'vue';
+	import type { SkTabBarMode } from '@/uni_modules/sk-tab-bar/components/sk-tab-bar/sk-tab-bar.type';
 	import icon1Active from "@/static/icon1.png"
 	import icon1 from "@/static/66.png"
 	import icon2Active from "@/static/icon2.png"
@@ -135,14 +157,45 @@
 		width: '36px',
 		height: '36px',
 		url: 'pages/goods/category/index',
+		badge: 0,
+		dot: false,
 	},
 
-		
+
 	])
 
 	const outerApertureBorderColor = ref('#f2f3f7')
 	const iconBackgroundColor = ref()
 	const iconNmae = ref()
+
+	/** 形态切换：concave / canvas / plain 就地对比，无需跳转演示页（filter 融合暂不开放） */
+	const modeList = ref([
+		{ name: 'concave 伪类', value: 'concave' },
+		{ name: 'canvas 画布', value: 'canvas' },
+		{ name: 'plain 纯净', value: 'plain' },
+	])
+	const currentMode = ref(0)
+	const mode = ref<SkTabBarMode>('concave')
+	const radioChangeMode = (evt) => {
+		mode.value = evt.detail.value as SkTabBarMode
+		currentMode.value = modeList.value.findIndex((m) => m.value === evt.detail.value)
+	}
+
+	/** 角标切换：红点 / 数字 / 超上限 99+ 就地演示，无需跳转 badge 演示页 */
+	const badgeList = ref([
+		{ name: '无角标', value: 'none' },
+		{ name: '红点 dot', value: 'dot' },
+		{ name: '数字角标', value: 'num' },
+		{ name: '超上限 99+', value: 'over' },
+	])
+	const currentBadge = ref(0)
+	const radioChangeBadge = (evt) => {
+		const value = evt.detail.value
+		currentBadge.value = badgeList.value.findIndex((b) => b.value === value)
+		const item = list.value[2]
+		item.dot = value === 'dot'
+		item.badge = value === 'num' ? 8 : value === 'over' ? 120 : 0
+	}
 
 	const radioChange = (evt) => {
 		for (let i = 0; i < colorList.value.length; i++) {
@@ -167,8 +220,7 @@
 	}
 
 	const demoNavs = [
-		{ name: '形态对比·filter 融合', path: '/pages/tabBarDemo/filter' },
-		{ name: '角标/红点(新API)', path: '/pages/tabBarDemo/badge' },
+		{ name: '四背景形态对比', path: '/pages/tabBarDemo/filter' },
 		{ name: '受控与拦截', path: '/pages/tabBarDemo/control' },
 		{ name: '路由联动', path: '/pages/tabBarDemo/route-a' },
 		{ name: '旧版角标(兼容)', path: '/pages/tabBarDemo/corner' },
@@ -217,6 +269,11 @@
 	.flex {
 		display: flex;
 		margin: 5rpx;
+	}
+
+	.tips {
+		font-size: 24rpx;
+		color: #666;
 	}
 
 	.nav-list {

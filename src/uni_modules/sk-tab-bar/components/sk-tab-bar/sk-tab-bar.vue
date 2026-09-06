@@ -6,10 +6,21 @@
 		:class="{
 			'sk-tab-bar--fixed': fixed,
 			'sk-tab-bar--plain': mode !== 'concave',
-			'sk-tab-bar--filter': mode === 'filter'
+			'sk-tab-bar--filter': mode === 'filter',
+			'sk-tab-bar--canvas': mode === 'canvas',
+			'is-degraded': canvasDegraded
 		}"
 		:style="rootStyle"
 	>
+		<!-- canvas 模式：画布绘制栏色融合轮廓（真透明，任意背景可用）；
+		     深色圆钮/图标/文字仍用 view 叠在其上，canvas 不重绘它们 -->
+		<canvas
+			v-if="mode === 'canvas' && list.length"
+			class="sk-tab-bar__canvas"
+			type="2d"
+			:id="canvasId"
+			:canvas-id="canvasId"
+		/>
 		<!-- filter 模式：blur+contrast 融合层，同色矩形与圆钮经滤镜融合出内凹平滑圆角；
 		     融合层须铺实底色（--color，需与页面背景一致）供 contrast 硬化边缘 -->
 		<view v-if="mode === 'filter' && list.length" class="sk-tab-bar__goo">
@@ -63,7 +74,7 @@
  * @tutorial https://ext.dcloud.net.cn/plugin?name=sk-tab-bar
  *
 	 * @property {SkTabBarItem[]} data tab 数据源
-	 * @property {String} mode 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）/ filter blur+contrast 融合内凹（曲线更平滑，融合底色仍需与页面背景同色，小程序低版本基础库可能不支持 contrast）/ plain 纯净模式（实心栏 + 圆钮悬浮，不依赖背景色）
+	 * @property {String} mode 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）/ canvas 画布绘制融合内凹（真实透明轮廓，任意背景可用；小程序需基础库 2.9.0+，background 仅纯色，失败自动回退 plain 观感；开发者工具模拟器不支持 canvas 同层渲染，自动回退 plain 观感，真机不受影响）/ plain 纯净模式。注：filter 融合为内部保留形态，暂不开放
  * @property {Number} current 当前选中下标，支持 v-model:current
  * @property {String} outerApertureBorderColor 弧形外光圈颜色，需与页面背景一致（默认 #f2f3f7）
  * @property {String} iconBackgroundColor 选中圆形按钮背景色（默认 rgb(3, 3, 3)）
@@ -84,9 +95,18 @@
  * @event {Function} change tab 切换后触发，参数为 SkTabBarChangeEvent
  * @event {Function} update:current 选中下标变化，配合 v-model:current 使用
  */
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch, getCurrentInstance, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import type { PropType, CSSProperties } from 'vue'
 import type { SkTabBarBeforeChange, SkTabBarChangeEvent, SkTabBarItem, SkTabBarMode } from './sk-tab-bar.type'
+import {
+	CANVAS_CONST,
+	createFrameDriver,
+	drawSilhouette,
+	knobCxFor,
+	makeCssEase,
+	type FrameDriver,
+	type SilhouetteGeometry
+} from './sk-tab-bar-canvas'
 
 defineOptions({ name: 'SkTabBar' })
 
@@ -104,7 +124,7 @@ const props = defineProps({
 		type: Number,
 		default: 0
 	},
-	/** 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）；filter blur+contrast 融合内凹，曲线更平滑，融合底色仍需与页面背景同色，小程序低版本基础库可能不支持 contrast；plain 纯净模式，实心栏 + 圆钮悬浮，不渲染内凹伪类与外光圈，不依赖背景色 */
+	/** 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）；canvas 画布绘制融合内凹，真实透明轮廓、任意背景可用（小程序需基础库 2.9.0+，background 仅纯色，取节点失败自动回退 plain 观感；开发者工具模拟器 canvas 非同层会遮挡 tab 项，自动回退 plain 观感）；plain 纯净模式，实心栏 + 圆钮悬浮，不依赖背景色。filter 融合为内部保留形态，暂不开放 */
 	mode: {
 		type: String as PropType<SkTabBarMode>,
 		default: 'concave'
@@ -227,6 +247,197 @@ const rootStyle = computed<CSSProperties>(() => ({
 	'--duration': `${props.duration}ms`,
 	zIndex: props.zIndex
 }))
+
+/* ---------- canvas 形态：画布绘制真透明融合轮廓 ---------- */
+const instance = getCurrentInstance()
+/** 实例级唯一 canvas id，避免 useTabBar 多页面多实例冲突 */
+const canvasId = `sk-tab-bar-canvas-${Date.now().toString(36)}-${Math.floor(Math.random() * 1e6).toString(36)}`
+/** 取节点/绘制失败时降级为 plain 观感，保证任何端都不丢 tabBar */
+const canvasDegraded = ref(false)
+
+let canvasNode: any = null
+let canvasCtx: any = null
+let frameDriver: FrameDriver | null = null
+let silhouette: SilhouetteGeometry | null = null
+let currentCx = 0
+let animId: number | null = null
+let canvasDpr = 1
+let resizeTimer: any = null
+let degradeWarned = false
+const cssEase = makeCssEase()
+
+function degrade(reason: 'init' | 'devtools' = 'init') {
+	if (!degradeWarned) {
+		degradeWarned = true
+		console.warn(
+			reason === 'devtools'
+				? '[sk-tab-bar] 开发者工具模拟器不支持 canvas 2d 同层渲染，画布会盖住 tab 项，已降级为 plain 观感；真机不受影响。'
+				: '[sk-tab-bar] canvas 形态初始化失败，已降级为 plain 观感（实心栏）。小程序需基础库 2.9.0+。'
+		)
+	}
+	canvasDegraded.value = true
+}
+
+/** 开发者工具模拟器检测：模拟器里 canvas（含 2d）非同层、恒盖在 view 之上，真机无此问题 */
+function isDevtoolsSimulator(): boolean {
+	// #ifdef MP-WEIXIN
+	try {
+		const sys: any = (uni as any).getWindowInfo ? (uni as any).getWindowInfo() : (uni as any).getSystemInfoSync()
+		return sys?.platform === 'devtools'
+	} catch (_) {
+		/* 取系统信息失败按真机处理 */
+	}
+	// #endif
+	return false
+}
+
+/** 单帧绘制：分端设置 transform 后清空并重画轮廓。坐标一律 CSS px */
+function drawAt(cx: number) {
+	if (!canvasCtx || !silhouette) return
+	// #ifdef MP-WEIXIN
+	canvasCtx.setTransform(canvasDpr, 0, 0, canvasDpr, 0, 0)
+	// #endif
+	// #ifndef MP-WEIXIN
+	// H5 的 uni-h5 hidpi 已自动按 pixelRatio 缩放坐标，切勿再 scale，否则双重缩放
+	canvasCtx.setTransform(1, 0, 0, 1, 0, 0)
+	// #endif
+	canvasCtx.clearRect(0, 0, silhouette.width, silhouette.height)
+	drawSilhouette(canvasCtx, silhouette, cx, props.background)
+	currentCx = cx
+}
+
+/** 切 tab 时平移凸包；缓动对齐 __bump 的 CSS ease，避免中途错位露缝 */
+function animateKnobTo(target: number) {
+	if (!frameDriver || !silhouette) {
+		drawAt(target)
+		return
+	}
+	if (animId !== null) frameDriver.cancel(animId)
+	const from = currentCx
+	const t0 = Date.now()
+	const dur = Math.max(props.duration, 1)
+	const step = () => {
+		const t = Math.min((Date.now() - t0) / dur, 1)
+		const cx = t < 1 ? from + (target - from) * cssEase(t) : target
+		drawAt(cx)
+		if (t < 1) animId = frameDriver ? frameDriver.request(step) : null
+		else animId = null
+	}
+	animId = frameDriver.request(step)
+}
+
+function teardownCanvas() {
+	if (animId !== null && frameDriver) frameDriver.cancel(animId)
+	animId = null
+	canvasNode = null
+	canvasCtx = null
+	frameDriver = null
+	silhouette = null
+}
+
+/** 查询节点与几何并画首帧；尺寸未就绪时重试，仍失败则降级 */
+function initCanvas(retry = 0) {
+	/* 模拟器里 canvas 恒盖在 view 之上（非同层），tab 项会被白色栏体挡住，直接走 plain 观感 */
+	if (isDevtoolsSimulator()) {
+		degrade('devtools')
+		return
+	}
+	teardownCanvas()
+	const query = uni.createSelectorQuery().in(instance?.proxy ?? null)
+	query.select(`#${canvasId}`).fields({ node: true, size: true }, () => undefined)
+	query.select('.sk-tab-bar__canvas').boundingClientRect()
+	query.select('.sk-tab-bar').boundingClientRect()
+	query.select('.sk-tab-bar__bump').boundingClientRect()
+	query.exec((res: any[]) => {
+		const retryOrDegrade = () => {
+			if (retry < 3) setTimeout(() => initCanvas(retry + 1), 100)
+			else degrade()
+		}
+		try {
+			const nodeField = res?.[0]
+			const canvasRect = res?.[1]
+			const rootRect = res?.[2]
+			const bumpRect = res?.[3]
+			const node = nodeField?.node
+			const cssW = canvasRect?.width || nodeField?.width || 0
+			const cssH = canvasRect?.height || nodeField?.height || 0
+			if (!node || typeof node.getContext !== 'function' || !cssW || !cssH || !rootRect || !bumpRect) {
+				retryOrDegrade()
+				return
+			}
+			const ctx = node.getContext('2d')
+			if (!ctx) {
+				retryOrDegrade()
+				return
+			}
+			canvasNode = node
+			canvasCtx = ctx
+			// #ifdef MP-WEIXIN
+			const sys: any = (uni as any).getWindowInfo ? (uni as any).getWindowInfo() : (uni as any).getSystemInfoSync()
+			canvasDpr = Math.min(sys?.pixelRatio || 1, CANVAS_CONST.maxDpr)
+			node.width = Math.round(cssW * canvasDpr)
+			node.height = Math.round(cssH * canvasDpr)
+			// #endif
+			silhouette = {
+				width: cssW,
+				height: cssH,
+				barTop: rootRect.top - canvasRect.top,
+				knobCy: bumpRect.top + bumpRect.height / 2 - canvasRect.top,
+				/* 凹口半径贴住圆钮元素边缘（内收 0.5px 防抗锯齿发丝线），
+				   缝隙 = 圆钮 10rpx 透明边框，透出页面背景呈均匀半圆环 */
+				knobR: bumpRect.width / 2 - 0.5,
+				filletR: uni.upx2px(CANVAS_CONST.filletRpx),
+				cornerR: uni.upx2px(CANVAS_CONST.cornerRpx)
+			}
+			frameDriver = createFrameDriver(
+				typeof node.requestAnimationFrame === 'function' ? node.requestAnimationFrame.bind(node) : undefined,
+				typeof node.cancelAnimationFrame === 'function' ? node.cancelAnimationFrame.bind(node) : undefined
+			)
+			canvasDegraded.value = false
+			currentCx = knobCxFor(activeIndex.value, list.value.length, cssW)
+			drawAt(currentCx)
+		} catch (e) {
+			retryOrDegrade()
+		}
+	})
+}
+
+function handleWindowResize() {
+	if (props.mode !== 'canvas') return
+	clearTimeout(resizeTimer)
+	resizeTimer = setTimeout(() => initCanvas(), 150)
+}
+
+// 选中变化：仅平移凸包（不重建几何）
+watch(activeIndex, (index) => {
+	if (props.mode === 'canvas' && silhouette) animateKnobTo(knobCxFor(index, list.value.length, silhouette.width))
+})
+// 栏色变化：仅重绘
+watch(
+	() => props.background,
+	() => {
+		if (props.mode === 'canvas') drawAt(currentCx)
+	}
+)
+// 尺寸/数量/形态变化：全量重建或卸载
+watch(
+	[() => props.height, () => list.value.length, () => props.mode],
+	() => {
+		if (props.mode === 'canvas') nextTick(() => setTimeout(() => initCanvas(), 50))
+		else teardownCanvas()
+	}
+)
+
+onMounted(() => {
+	uni.onWindowResize?.(handleWindowResize)
+	if (props.mode === 'canvas') nextTick(() => setTimeout(() => initCanvas(), 50))
+})
+
+onBeforeUnmount(() => {
+	uni.offWindowResize?.(handleWindowResize)
+	clearTimeout(resizeTimer)
+	teardownCanvas()
+})
 
 /** 下标越界保护 */
 function clampIndex(index: number): number {

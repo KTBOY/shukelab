@@ -71,58 +71,37 @@
 	border-top: 2rpx solid #e3e4e6;
 }
 
-/* 虚拟渲染占位符：撑起等高空间，内部渲染骨架屏避免白屏 */
+/* 虚拟渲染占位符：撑起等高空间，空白即可 */
 .item-placeholder {
 	overflow: hidden;
 }
 
-/* ==================== 骨架屏 ==================== */
-
-.skeleton {
-	padding: 20rpx;
-	box-sizing: border-box;
+/* 加载态（loading 插槽默认内容）：容器与可视区等高，转圈 + 文字垂直水平居中 */
+.menu-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 }
 
-.skeleton__line {
-	height: 28rpx;
-	margin-bottom: 20rpx;
-	border-radius: 8rpx;
-	background: linear-gradient(90deg, #f0f1f3 25%, #e2e4e8 37%, #f0f1f3 63%);
-	background-size: 400% 100%;
-	animation: sk-skeleton-shimmer 1.2s ease infinite;
+.menu-loading__spinner {
+	width: 44rpx;
+	height: 44rpx;
+	border: 4rpx solid #e3e4e6;
+	border-top-color: #999;
+	border-radius: 50%;
+	animation: sk-loading-spin 0.8s linear infinite;
 }
 
-.skeleton__line--title {
-	width: 40%;
-	height: 32rpx;
+.menu-loading__text {
+	margin-top: 16rpx;
+	font-size: 22rpx;
+	color: #999;
 }
 
-.skeleton__line--short {
-	width: 60%;
-	margin-bottom: 0;
-}
-
-/* 加载态（loading 插槽默认内容） */
-.skeleton-loading {
-	padding: 24rpx 20rpx;
-	box-sizing: border-box;
-}
-
-.skeleton-loading__row {
-	height: 88rpx;
-	margin-bottom: 24rpx;
-	border-radius: 12rpx;
-	background: linear-gradient(90deg, #f0f1f3 25%, #e2e4e8 37%, #f0f1f3 63%);
-	background-size: 400% 100%;
-	animation: sk-skeleton-shimmer 1.2s ease infinite;
-}
-
-@keyframes sk-skeleton-shimmer {
-	0% {
-		background-position: 100% 50%;
-	}
-	100% {
-		background-position: 0 50%;
+@keyframes sk-loading-spin {
+	to {
+		transform: rotate(360deg);
 	}
 }
 

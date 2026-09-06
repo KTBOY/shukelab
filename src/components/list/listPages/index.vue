@@ -53,9 +53,11 @@
 </script>
 <style lang="scss" scoped>
 
-	/* App.vue 全局 page{height:100%;overflow:hidden} 关掉了原生滚动，滚动交给外层 scroll-view */
+	/* App.vue 全局 page{height:100%;overflow:hidden} 关掉了原生滚动，滚动交给外层 scroll-view。
+	   高度必须自足：本组件在小程序端是自定义组件，外层包裹节点没有高度，height:100% 会塌成内容高，
+	   scroll-view 便不再是滚动容器；--window-top 在 H5 是导航栏 44px、小程序端是 0 */
 	.list-pages-scroll {
-		height: 100%;
+		height: calc(100vh - var(--window-top) - var(--window-bottom));
 	}
 
 	.list-pages {

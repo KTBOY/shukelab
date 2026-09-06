@@ -7,7 +7,7 @@
     :finished="finished"
     :error="!!error"
     :empty="list.length === 0"
-    height="100%"
+    :height="height"
     @refresh="reload()"
     @load-more="loadNext()"
     @retry="loadNext()"
@@ -30,7 +30,14 @@ import { usePagedList } from '@/uni_modules/sk-swipe-feed/components/sk-scroll-l
 import type { Channel } from '../mock'
 import { createChannelFetcher } from '../mock'
 
-const props = defineProps<{ channel: Channel }>()
+const props = withDefaults(
+  defineProps<{
+    channel: Channel
+    /** 列表容器高度；小程序端请传 px（百分比在组件包裹节点下会塌陷） */
+    height?: string
+  }>(),
+  { height: '100%' }
+)
 
 /** 每页条数 */
 const PAGE_SIZE = 10

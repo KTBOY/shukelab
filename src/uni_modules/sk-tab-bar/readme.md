@@ -1,6 +1,6 @@
 # sk-tab-bar
 
-组件形式的镂空弧形 tabBar，选中项自动上浮进入圆形按钮，凹槽随切换平滑移动。默认 `mode="concave"`（伪类凹陷弧形，光圈需与页面背景同色）；页面背景为图片/渐变等复杂背景、无法与光圈同色时，建议显式设 `mode="plain"`（实心栏、不依赖背景色），或选用 `mode="filter"`（blur+contrast 融合内凹，曲线更平滑，取舍见下文）。
+组件形式的镂空弧形 tabBar，选中项自动上浮进入圆形按钮，凹槽随切换平滑移动。默认 `mode="concave"`（伪类凹陷弧形，光圈需与页面背景同色）；页面背景为图片/渐变等复杂背景、无法与光圈同色时，建议显式设 `mode="plain"`（实心栏、不依赖背景色），
 
 - ✅ `v-model:current` 受控选中，支持外部设置初始项与程序化切换
 - ✅ item 级角标（数字 / 红点 / 99+ 上限）
@@ -136,19 +136,25 @@ const list = ref<SkTabBarItem[]>([
 
 ## 形态（mode）与内凹实现流派
 
-GitHub 上「凹陷弧形 tabBar」主要有三种实现流派：①伪类 + box-shadow、②CSS filter(blur+contrast)、③clip-path / 径向渐变切割。本组件采用前两派（`concave`、`filter`），另提供无内凹的 `plain`；第③派（clip-path 真实镂空）经评估与 `plain` 观感过于接近（缺口半径≈圆钮半径，仅在复杂背景下才看得出差异），已移除。
+GitHub 上「凹陷弧形 tabBar」主要有三种实现流派：①伪类 + box-shadow、②CSS filter(blur+contrast)、③clip-path / 径向渐变切割。本组件采用①（`concave`），另以④**画布自绘**（`canvas`）补齐"任意背景 + 内凹观感"这一①②③都给不了的组合，并提供无内凹的 `plain`（② `filter` 融合为内部保留形态，暂不开放）；第③派（clip-path 真实镂空）经评估与 `plain` 观感过于接近，已移除。
 
 | mode | 流派 | 实现 | 是否依赖页面背景色 |
 | :--- | :--- | :--- | :--- |
 | `concave`（默认） | ① 伪类 + box-shadow | 小方块伪元素用圆角 + 实色 `box-shadow` 填出内凹 | 是，光圈色须等于页面背景 |
-| `filter` | ② CSS filter(blur+contrast) | 同色底栏与圆钮经 `blur()+contrast()` 融合出平滑内凹 | 是（见下方说明） |
+| `canvas` | ④ 画布自绘 | canvas 2d 模仿 concave 画"栏顶凹口 + 圆钮坐入"（底栏 + 凹口圆 + 相切凹唇），轮廓外**真实透明** | 否，任意背景都干净 |
 | `plain` | — | 实心栏 + 圆钮悬浮，无内凹 | 否，任意背景都干净 |
 
-**关于 `filter` 的重要取舍**：网上常说「filter 融合不依赖背景色、透明区外原样透出页面背景」，这句**只对 SVG gooey（`feColorMatrix` 作用于 alpha 通道）成立**。纯 CSS 的 `contrast()` **只作用于颜色通道、不硬化 alpha**，要让模糊边重新变硬，被融合的形状必须压在一块**实色背景**上——因此本组件的 `filter` 融合层仍需铺一层与页面背景同色的实底（取 `outerApertureBorderColor`），**背景依赖与 `concave` 相同**。而小程序端 `<view>` 无法内联 SVG filter，真正免底色的 gooey 方案在本组件目标端不可用。
+**`canvas` 模式限制**
 
-`filter` 相对 `concave` 的真实增益是：**曲线更平滑自然、圆钮移动时融合自动重算、切换动画更有机**。代价是：微信小程序低版本基础库可能不支持 `contrast()`，真机会退化成模糊色块（组件已加 `@supports not (filter: contrast(20))` 降级为实心底栏，避免整条消失），**务必真机实测**。
+- 微信小程序需 **canvas 2d（基础库 ≥2.9.0）**；H5 / App-vue 通过 `createSelectorQuery().fields({node:true})` 取节点。
+- **nvue 页面不支持**（无 DOM canvas / SelectorQuery node）。
+- **开发者工具模拟器不支持 canvas 同层渲染**（画布恒盖在 view 之上，会遮住 tab 项，只剩选中图标从凹口透出），组件检测到 `platform === 'devtools'` 会自动降级为 plain 观感并 `console.warn` 提示，**真机不受影响**；canvas 形态的实际观感请以真机为准。
+- `background` 在 canvas 模式下**仅支持纯色**（hex/rgb/rgba），传渐变字符串在小程序端会静默失败。
+- 取节点失败 / 尺寸未就绪 / 绘制异常时**自动降级为 plain 观感**（实心栏），并 `console.warn` 提示，任何端都不会出现整条 tabBar 消失。
+- 切换动画的缓动已对齐 `__bump` 的 CSS `ease`，避免深色钮与画布轮廓中途错位；窗口 resize / 旋转 / `height`、`data` 变化会自动重建重绘。
+- 小程序真机需抽测：低端 Android 同层渲染是否盖层或吞点击、iOS 橡皮筋滚动、从二级页返回画布是否空白。**开发者工具模拟器不代表真机**。
 
-组件默认形态为 `concave`；它依赖 `outerApertureBorderColor` 与页面背景同色，**当页面背景为图片/渐变等复杂背景、无法用单一颜色匹配时，推荐显式设 `mode="plain"`**（实心栏、不依赖背景色）。三形态在纯色 / 渐变 / 图片背景下的直观对比见 demo 页 `pages/tabBarDemo/filter`。
+**页面背景为图片/渐变等复杂背景、又想要内凹观感时，推荐 `mode="canvas"`**（真透明 + 内凹）；只想要极简则用 `plain`。三种形态在纯色 / 深色 / 渐变 / 图片背景下的直观对比见 demo 页 `pages/tabBarDemo/filter`。
 
 ## API
 
@@ -158,8 +164,8 @@ GitHub 上「凹陷弧形 tabBar」主要有三种实现流派：①伪类 + box
 | :--- | :--- | :--- | :--- |
 | data | `SkTabBarItem[]` | `[]` | tab 数据源 |
 | current | `Number` | `0` | 当前选中下标，支持 `v-model:current` |
-| mode | `String` | `concave` | 形态：`concave` 伪类凹陷弧形（默认），光圈需与页面背景同色；`filter` blur+contrast 融合内凹，曲线更平滑、切换更有机，但融合底色仍需与页面背景同色，且微信小程序低版本基础库可能不支持 `contrast()`（已加 `@supports` 降级为实心底栏），建议真机实测；`plain` 纯净模式，实心栏 + 圆钮悬浮，无内凹弧形与外光圈，不依赖背景色 |
-| outerApertureBorderColor | `String` | `#f2f3f7` | 弧形外光圈颜色，需与页面背景一致（`concave`/`filter` 模式生效，`filter` 下作为融合底色；`plain` 模式下不生效） |
+| mode | `String` | `concave` | 形态：`concave` 伪类凹陷弧形（默认），光圈需与页面背景同色；`canvas` 画布绘制融合内凹，轮廓外真实透明、任意背景可用（小程序需基础库 2.9.0+，`background` 仅纯色，失败自动回退 plain 观感）；`plain` 纯净模式，实心栏 + 圆钮悬浮，无内凹弧形与外光圈，不依赖背景色。`filter` 融合为内部保留形态，暂不开放 |
+| outerApertureBorderColor | `String` | `#f2f3f7` | 弧形外光圈颜色，需与页面背景一致（`concave` 模式生效；`canvas`/`plain` 模式下不生效） |
 | iconBackgroundColor | `String` | `rgb(3, 3, 3)` | 选中圆形按钮背景色 |
 | background | `String` | `#fff` | tabBar 背景色 |
 | textColor | `String` | `#222` | 文字颜色 |

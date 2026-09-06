@@ -14,8 +14,8 @@
   <view class="sk-linkage-menu virtual-menu-ganged">
     <view class="menu-vessel">
       <view class="vessel-info">
-        <!-- 左侧菜单区 -->
-        <view class="left-vessel" :style="{ width: menuWidth }">
+        <!-- 左侧菜单区：无数据时整列不渲染，避免首屏加载态被挤到右半区 -->
+        <view v-if="list.length" class="left-vessel" :style="{ width: menuWidth }">
           <scroll-view
             :scroll-y="true"
             class="left-scroll"
@@ -24,7 +24,7 @@
             scroll-with-animation
             :style="{ height: `${virtualMenuHeight}px` }"
           >
-            <view v-if="list.length" class="info">
+            <view class="info">
               <!-- 选中滑块：绝对定位 + translateY 过渡 -->
               <view class="item-active" :style="activeBarStyle">
                 <text class="active-name">{{ activeName }}</text>
@@ -58,29 +58,23 @@
             @scrolltolower="onScrollToLower"
           >
             <view class="info">
-              <!-- 加载态：异步拉数据阶段，可用 loading 插槽自定义 -->
-              <slot v-if="loading" name="loading">
-                <view class="skeleton-loading">
-                  <view v-for="n in 6" :key="n" class="skeleton-loading__row"></view>
+              <!-- 加载态：异步拉数据（loading）或首帧未就绪阶段，可用 loading 插槽自定义 -->
+              <slot v-if="loading || (!state.booted && list.length)" name="loading">
+                <view class="menu-loading" :style="{ height: `${virtualMenuHeight}px` }">
+                  <view class="menu-loading__spinner"></view>
+                  <text class="menu-loading__text">加载中...</text>
                 </view>
               </slot>
               <template v-else>
                 <!-- 空数据插槽 -->
                 <slot v-if="!list.length" name="empty"></slot>
                 <template v-for="(item, index) in list" :key="item.id !== undefined ? item.id : index">
-                  <!-- 虚拟渲染占位符：骨架屏 + 与分组等高（实测或估算），保证 tops 始终有效 -->
+                  <!-- 虚拟渲染占位符：与分组等高（实测或估算）的空白块，保证 tops 始终有效 -->
                   <view
                     v-if="isPlaceholder(index)"
                     class="item-parent item-placeholder"
                     :style="{ height: `${virtualState.groupHeights[index]}px` }"
-                  >
-                    <view class="skeleton">
-                      <view class="skeleton__line skeleton__line--title"></view>
-                      <view class="skeleton__line"></view>
-                      <view class="skeleton__line"></view>
-                      <view class="skeleton__line skeleton__line--short"></view>
-                    </view>
-                  </view>
+                  ></view>
                   <view v-else :id="`right-${index}`" class="item-parent">
                     <!-- 分组吸顶标题：showTitle 开启后生效，支持 title 插槽自定义 -->
                     <view v-if="showTitle" class="item-sticky-title">
@@ -180,7 +174,7 @@ const props = defineProps({
     type: Number,
     default: 300,
   },
-  /** 异步加载数据中：右侧展示 loading 插槽（默认骨架屏） */
+  /** 异步加载数据中：右侧展示 loading 插槽（默认居中转圈 + 文字）；首帧测量完成前也会自动展示 */
   loading: {
     type: Boolean,
     default: false,
@@ -198,6 +192,8 @@ const emits = defineEmits<{
 const state = reactive({
   /** 末尾占位高度（px） */
   fillHeight: 0,
+  /** 首帧（首次测量+渲染）是否就绪 */
+  booted: false,
 })
 
 const leftState = reactive({
@@ -497,6 +493,7 @@ const refresh = () => {
     await measureLayout()
     // 回填真实高度后窗口可能变化，再校正一次
     updateRenderRange(rightState.realScrollTop)
+    state.booted = true
 
     // 首次测量完成后，若初始下标非 0 则定位到对应分组
     if (!firstMeasured) {

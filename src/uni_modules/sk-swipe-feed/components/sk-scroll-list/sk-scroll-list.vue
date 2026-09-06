@@ -146,7 +146,9 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  /** 容器高度。注意 customStyle 中的 height 会覆盖此属性 */
+  /** 容器高度。注意 customStyle 中的 height 会覆盖此属性。
+   *  小程序端百分比高度需整条父链都有确定高度——自定义组件的包裹节点没有高度，
+   *  嵌套在组件内时 100% 会塌成内容高、列表不再可滚，这种场景请传 px */
   height: {
     type: String,
     default: '100%',

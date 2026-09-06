@@ -4,7 +4,7 @@
     <sk-swipe-page v-model:current="tabIndex" :count="channels.length" :max-alive="4" :height="pageHeight + 'px'">
       <template #page="{ index, mounted }">
         <view v-if="mounted" class="channel">
-          <channel-feed :ref="(el) => setFeedRef(index, el)" :channel="channels[index]" />
+          <channel-feed :ref="(el) => setFeedRef(index, el)" :channel="channels[index]" :height="feedHeight" />
         </view>
       </template>
     </sk-swipe-page>
@@ -26,6 +26,13 @@ const tabIndex = ref(0)
 
 /** 内容区高度 = 窗口高度 - 顶部 tabs 高度 */
 const pageHeight = getContentHeight(44)
+
+/** 列表容器高度：H5 父链确定，用 100% 即可；小程序端自定义组件包裹节点没有高度，
+ *  百分比会塌成内容高导致列表不可滚，必须传 px */
+let feedHeight = '100%'
+// #ifdef MP-WEIXIN
+feedHeight = pageHeight + 'px'
+// #endif
 
 /** 各频道页列表实例（用于 re-click 回顶） */
 const feedRefs = new Map<number, SkScrollListExpose>()

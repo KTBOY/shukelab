@@ -66,6 +66,12 @@
 	transition: color var(--duration);
 }
 
+/* uni-h5 的 uni-image 在图片命中缓存时，load 事件可能早于其 onload 绑定，
+   内部 img 的 opacity 停留 0 导致图标隐形；内部 img 属子组件，需 :deep 穿透强制可见 */
+.sk-tab-bar__icon :deep(img) {
+	opacity: 1 !important;
+}
+
 .sk-tab-bar__icon--font {
 	font-size: 60rpx;
 	color: var(--text-color, #222);
@@ -73,6 +79,8 @@
 
 .sk-tab-bar__text {
 	position: absolute;
+	/* 与上方图标/圆钮的间距 +5px（10rpx） */
+	margin-top: 10rpx;
 	font-size: var(--font-size, 26rpx);
 	font-weight: bold;
 	color: var(--text-color, #222);
@@ -93,7 +101,7 @@
 
 .sk-tab-bar__item--active .sk-tab-bar__text {
 	opacity: 1;
-	transform: translateY(22rpx);
+	transform: translateY(12rpx);
 	color: var(--active-text-color, #222);
 }
 
@@ -106,6 +114,7 @@
 	box-sizing: border-box;
 	min-width: 40rpx;
 	height: 40rpx;
+	line-height:40rpx;
 	padding: 0 8rpx;
 	background-color: #f53f3f;
 	border: 4rpx solid var(--bar-bg, #fff);
@@ -169,6 +178,10 @@
    去掉内凹伪类与外光圈描边，仅保留圆钮悬浮效果 */
 .sk-tab-bar--plain .sk-tab-bar__bump {
 	border-color: transparent;
+	/* 背景默认 border-box，会从透明边框下透出，令可视黑钮变成整个 --c（120rpx），
+	   比 concave（实色边框圈住，可视 100rpx）大一圈，还会吞掉 canvas 凹口的 10rpx 透明缝；
+	   收回 padding-box，保证四种形态可视圆钮直径一致 */
+	background-clip: padding-box;
 }
 
 .sk-tab-bar--plain .sk-tab-bar__bump::before,
@@ -243,4 +256,33 @@
 	.sk-tab-bar--filter .sk-tab-bar__goo {
 		display: none;
 	}
+}
+
+/* canvas 形态：根节点不铺底色，由画布绘制真透明的"栏顶凹口"轮廓，透出任意页面背景 */
+.sk-tab-bar--canvas {
+	background: transparent;
+}
+
+/* 画布层：覆盖栏体（凹口向下舀入栏内，栏顶以上无白色，无需向上探出）；
+   置于 item/bump 之下，pointer-events 关闭保证点击穿透 */
+.sk-tab-bar__canvas {
+	position: absolute;
+	z-index: 0;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	/* canvas 为替换元素，top/bottom 不拉伸高度（会落回内禀 150px），必须显式 100% 对齐栏高 */
+	height: 100%;
+	pointer-events: none;
+}
+
+/* canvas 取节点/绘制失败降级：回退实心底栏并隐藏画布，bump 呈 plain 观感 */
+.sk-tab-bar--canvas.is-degraded {
+	background: var(--bar-bg, #fff);
+}
+
+.sk-tab-bar--canvas.is-degraded .sk-tab-bar__canvas {
+	display: none;
 }

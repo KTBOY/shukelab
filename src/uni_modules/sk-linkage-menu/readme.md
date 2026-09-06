@@ -90,6 +90,8 @@
 | leftBarStyle | Object | - | 左侧选中滑块样式 |
 | leftBarUnStyle | Object | - | 左侧未选中菜单项样式 |
 | itemHeight | Number | 130 | 已废弃：分组高度改为自动测量，保留仅为兼容旧版 |
+| loading | Boolean | false | 异步拉数据期间置 true，右侧展示 loading 插槽；首帧测量完成前组件也会自动展示 |
+| estimatedGroupHeight | Number | 300 | 未测量分组的高度估算值（px），虚拟渲染用它撑高占位 |
 
 ### Events
 
@@ -107,6 +109,7 @@
 | menu | 左侧菜单项，可自定义图标/角标 | `{ item, index, active }` |
 | title | 右侧分组吸顶标题（需开启 showTitle） | `{ item, index }` |
 | empty | list 为空时的占位内容 | - |
+| loading | 加载态（loading 为 true 或首帧未就绪时）自定义内容，默认居中转圈 + 文字 | - |
 
 ### Methods（通过 ref 调用）
 

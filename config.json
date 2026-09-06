@@ -63,7 +63,7 @@
 							"path": "/pages/tabBarDemo/corner"
 						},
 						{
-							"name": "形态对比·filter 融合内凹",
+							"name": "形态对比",
 							"show": true,
 							"path": "/pages/tabBarDemo/filter"
 						}
