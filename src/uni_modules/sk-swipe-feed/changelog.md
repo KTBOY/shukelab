@@ -38,7 +38,7 @@
 - 【优化】下拉进度整像素提交，抑制逐帧 setData
 - 【移除】refresherDefaultStyle prop（组件始终自绘刷新头，深色等场景用 #refresher 插槽覆盖）
 - 【修复】refresh / load-more 事件按零参声明外发，类型三方一致
-- 【新增】首屏加载态：`empty && loading` 时展示占满内容区的页面级加载区（`#loading` 插槽，默认居中 spinner，通常放骨架屏）。此前首屏加载只有 footer 的「加载中」，列表无数据时它会贴在空白内容区顶部，视觉上与下拉刷新指示器无法区分
+- 【新增】首屏加载态：`empty && loading` 时展示占满内容区的页面级加载区（`#loading` 插槽，默认居中 loading）。此前首屏加载只有 footer 的「加载中」，列表无数据时它会贴在空白内容区顶部，视觉上与下拉刷新指示器无法区分
 - 【变更】`empty` 语义改为「列表没有任何数据」：直接传 `list.length === 0` 即可，无需自行排除加载中；组件内部以 `empty && loading` / `empty && !loading` 区分首屏加载态与空态
 
 **usePagedList**

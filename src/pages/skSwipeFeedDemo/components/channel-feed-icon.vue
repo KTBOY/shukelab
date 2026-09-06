@@ -23,10 +23,6 @@
     @load-more="loadNext()"
     @retry="loadNext()"
   >
-    <!-- 首屏加载：骨架屏占满内容区，而不是让 footer 的「加载中」贴在空白顶部 -->
-    <template #loading>
-      <feed-skeleton :rows="4" />
-    </template>
     <template #refresher="{ state, progress }">
       <view class="icon-refresher" :class="{ 'icon-refresher--out': state === 'settling' }">
         <image
@@ -60,7 +56,6 @@ import type { SkScrollListExpose, SkScrollListRefresherState } from '@/uni_modul
 import { usePagedList } from '@/uni_modules/sk-swipe-feed/components/sk-scroll-list/use-paged-list'
 import type { Channel } from '../mock'
 import { createChannelFetcher } from '../mock'
-import FeedSkeleton from './feed-skeleton.vue'
 
 const props = withDefaults(
   defineProps<{

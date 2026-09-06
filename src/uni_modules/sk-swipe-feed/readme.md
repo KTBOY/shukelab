@@ -412,7 +412,7 @@ const iconStyle = (state, progress) => {
 
 | 状态 | 条件 | 默认视觉 | 可替换插槽 |
 | --- | --- | --- | --- |
-| 首屏加载 | `empty && loading` | 居中 spinner + loadingText | `#loading`（放骨架屏） |
+| 首屏加载 | `empty && loading` | 居中 loading + loadingText | `#loading`（自定义 loading 视觉） |
 | 首屏失败 | `empty && error` | 居中错误文案，点击重试 | `#error` |
 | 空态 | `empty` 且非 loading | 居中 emptyText | `#empty` |
 | 加载更多 | `loading` 且已有数据 | 底部 spinner + loadingText | `#footer` |
@@ -421,12 +421,12 @@ const iconStyle = (state, progress) => {
 
 `empty` 直接传 `list.length === 0` 即可，**不要**自己写成 `list.length === 0 && !loading`——那样首屏加载会落进「加载更多」分支：列表还没有任何数据时，spinner 会贴在空白内容区顶部，看起来和下拉刷新一模一样。
 
-骨架屏示例（形状与卡片布局一致，加载完成替换为真实数据时不跳布局）：
+默认就是居中 loading + `loadingText`，多数场景无需传插槽。需要品牌化时整体替换：
 
 ```vue
 <sk-scroll-list :empty="list.length === 0" :loading="loading" ...>
   <template #loading>
-    <my-skeleton :rows="4" />
+    <my-loading />
   </template>
 </sk-scroll-list>
 ```
@@ -467,7 +467,7 @@ const iconStyle = (state, progress) => {
 | 插槽名 | 说明 | 作用域参数 |
 | --- | --- | --- |
 | default | 业务列表项 | - |
-| loading | 首屏加载态（列表尚无任何数据时），整体替换内置居中 spinner，通常放骨架屏 | - |
+| loading | 首屏加载态（列表尚无任何数据时），整体替换内置居中 loading | - |
 | refresher | 自定义下拉头，整体替换内置视觉 | `{ state, dy, progress }`，state 为 idle / pulling / loosing / refreshing / settling |
 | footer | 自定义底部状态，整体替换内置状态机 | `{ loading, finished, error, refreshing }` |
 | empty | 空态 | - |

@@ -12,10 +12,6 @@
     @load-more="loadNext()"
     @retry="loadNext()"
   >
-    <!-- 首屏加载：骨架屏占满内容区，而不是让 footer 的「加载中」贴在空白顶部 -->
-    <template #loading>
-      <feed-skeleton :rows="4" />
-    </template>
     <view v-for="item in list" :key="item.id" class="feed__item">
       <view class="feed__body">
         <text class="feed__title">{{ item.title }}</text>
@@ -33,7 +29,6 @@ import type { SkScrollListExpose } from '@/uni_modules/sk-swipe-feed/components/
 import { usePagedList } from '@/uni_modules/sk-swipe-feed/components/sk-scroll-list/use-paged-list'
 import type { Channel } from '../mock'
 import { createChannelFetcher } from '../mock'
-import FeedSkeleton from './feed-skeleton.vue'
 
 const props = defineProps<{ channel: Channel }>()
 
