@@ -15,7 +15,7 @@
 			</template>
 		</sk-linkage-menu>
 
-		<sk-tab-bar v-model:current="current" :data="tabList" :placeholder="false"></sk-tab-bar>
+		<sk-tab-bar v-model:current="current" :data="tabList" mode="plain" :placeholder="false"></sk-tab-bar>
 	</view>
 </template>
 

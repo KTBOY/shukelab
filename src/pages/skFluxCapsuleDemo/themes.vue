@@ -145,6 +145,9 @@ onShow(() => capsules.forEach((c) => c.resume()))
 page {
 	overflow-y: auto;
 	-webkit-overflow-scrolling: touch;
+	/* 小程序端顶部安全区：iOS 刘海 / 安卓全面屏的 status bar 高度，
+	   H5 / App 端浏览器自带导航栏或 uni-app 统一安全区会忽略该值，无副作用 */
+	padding-top: 60rpx;
 }
 </style>
 

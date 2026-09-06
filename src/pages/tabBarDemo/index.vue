@@ -167,6 +167,7 @@
 	}
 
 	const demoNavs = [
+		{ name: '形态对比·filter 融合', path: '/pages/tabBarDemo/filter' },
 		{ name: '角标/红点(新API)', path: '/pages/tabBarDemo/badge' },
 		{ name: '受控与拦截', path: '/pages/tabBarDemo/control' },
 		{ name: '路由联动', path: '/pages/tabBarDemo/route-a' },

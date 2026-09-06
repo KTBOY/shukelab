@@ -1,18 +1,27 @@
 {
-  "id": "sk-tab-bar",
-  "displayName": "小程序自定义tabBar",
-  "version": "1.1.0",
-  "description": "组件形式的凹陷弧形tabBar，支持v-model受控、角标/红点、切换拦截、路由联动、字体图标与插槽自定义",
+  "id": "sk-swipe-feed",
+  "displayName": "整页横滑信息流三件套（tabs联动+下拉刷新）",
+  "version": "1.0.0",
+  "description": "频道页三件套：sk-swipe-page 整页横滑容器（页面级懒挂载 + keepAlive 保滚动位置 + LRU 常驻上限 + transition 实时进度）、sk-scroll-tabs 顶部滚动标签栏（滑块动画 / 不等宽标签 / 徽标红点 / 切换拦截 / 自动滚入居中）、sk-scroll-list 滚动列表容器（内聚 scroll-view、内置下拉刷新头、触底加载守卫、footer 状态机、空态错误态插槽），附 usePagedList 分页状态机。适用于资讯/社区类 App 的频道页（tabs + 整页横滑 + 信息流列表），适配 H5 与微信小程序",
   "keywords": [
-    "sk-tab-bar",
-    "小程序tabBar",
-    "自定义tabBar",
-    "角标",
-    "底部导航"
-],
+    "sk-swipe-feed",
+    "频道页",
+    "整页横滑",
+    "横滑翻页",
+    "标签栏",
+    "tabs",
+    "选项卡",
+    "下拉刷新",
+    "上拉加载",
+    "触底加载",
+    "列表",
+    "scroll-view",
+    "swiper",
+    "信息流"
+  ],
   "repository": "https://github.com/KTBOY/shukelab",
   "engines": {
-    "HBuilderX": "^3.1.0"
+    "HBuilderX": "^4.00"
   },
   "dcloudext": {
     "type": "component-vue",
@@ -29,7 +38,7 @@
     },
     "declaration": {
       "ads": "无",
-      "data": "无",
+      "data": "插件不采集任何数据",
       "permissions": "无"
     },
     "npmurl": ""
@@ -41,7 +50,7 @@
       "cloud": {
         "tcb": "y",
         "aliyun": "y",
-        "alipay": "y"
+        "alipay": "n"
       },
       "client": {
         "Vue": {
@@ -49,10 +58,10 @@
           "vue3": "y"
         },
         "App": {
-            "app-vue": "u",
-            "app-nvue": "u",
-            "app-uvue": "u",
-            "app-harmony": "u"
+          "app-vue": "u",
+          "app-nvue": "u",
+          "app-uvue": "u",
+          "app-harmony": "u"
         },
         "H5-mobile": {
           "Safari": "u",
@@ -62,7 +71,7 @@
         },
         "H5-pc": {
           "Chrome": "y",
-          "IE": "u",
+          "IE": "n",
           "Edge": "y",
           "Firefox": "y",
           "Safari": "u"

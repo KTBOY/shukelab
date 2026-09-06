@@ -1,6 +1,6 @@
 # sk-tab-bar
 
-组件形式的镂空弧形 tabBar，选中项自动上浮进入圆形按钮，凹槽随切换平滑移动。默认 `mode="notch"` 采用 clip-path 真实镂空，页面背景任意（图片/渐变均可）；如需旧版伪类凹陷效果可设 `mode="concave"`。
+组件形式的镂空弧形 tabBar，选中项自动上浮进入圆形按钮，凹槽随切换平滑移动。默认 `mode="concave"`（伪类凹陷弧形，光圈需与页面背景同色）；页面背景为图片/渐变等复杂背景、无法与光圈同色时，建议显式设 `mode="plain"`（实心栏、不依赖背景色），或选用 `mode="filter"`（blur+contrast 融合内凹，曲线更平滑，取舍见下文）。
 
 - ✅ `v-model:current` 受控选中，支持外部设置初始项与程序化切换
 - ✅ item 级角标（数字 / 红点 / 99+ 上限）
@@ -134,6 +134,22 @@ const list = ref<SkTabBarItem[]>([
 />
 ```
 
+## 形态（mode）与内凹实现流派
+
+GitHub 上「凹陷弧形 tabBar」主要有三种实现流派：①伪类 + box-shadow、②CSS filter(blur+contrast)、③clip-path / 径向渐变切割。本组件采用前两派（`concave`、`filter`），另提供无内凹的 `plain`；第③派（clip-path 真实镂空）经评估与 `plain` 观感过于接近（缺口半径≈圆钮半径，仅在复杂背景下才看得出差异），已移除。
+
+| mode | 流派 | 实现 | 是否依赖页面背景色 |
+| :--- | :--- | :--- | :--- |
+| `concave`（默认） | ① 伪类 + box-shadow | 小方块伪元素用圆角 + 实色 `box-shadow` 填出内凹 | 是，光圈色须等于页面背景 |
+| `filter` | ② CSS filter(blur+contrast) | 同色底栏与圆钮经 `blur()+contrast()` 融合出平滑内凹 | 是（见下方说明） |
+| `plain` | — | 实心栏 + 圆钮悬浮，无内凹 | 否，任意背景都干净 |
+
+**关于 `filter` 的重要取舍**：网上常说「filter 融合不依赖背景色、透明区外原样透出页面背景」，这句**只对 SVG gooey（`feColorMatrix` 作用于 alpha 通道）成立**。纯 CSS 的 `contrast()` **只作用于颜色通道、不硬化 alpha**，要让模糊边重新变硬，被融合的形状必须压在一块**实色背景**上——因此本组件的 `filter` 融合层仍需铺一层与页面背景同色的实底（取 `outerApertureBorderColor`），**背景依赖与 `concave` 相同**。而小程序端 `<view>` 无法内联 SVG filter，真正免底色的 gooey 方案在本组件目标端不可用。
+
+`filter` 相对 `concave` 的真实增益是：**曲线更平滑自然、圆钮移动时融合自动重算、切换动画更有机**。代价是：微信小程序低版本基础库可能不支持 `contrast()`，真机会退化成模糊色块（组件已加 `@supports not (filter: contrast(20))` 降级为实心底栏，避免整条消失），**务必真机实测**。
+
+组件默认形态为 `concave`；它依赖 `outerApertureBorderColor` 与页面背景同色，**当页面背景为图片/渐变等复杂背景、无法用单一颜色匹配时，推荐显式设 `mode="plain"`**（实心栏、不依赖背景色）。三形态在纯色 / 渐变 / 图片背景下的直观对比见 demo 页 `pages/tabBarDemo/filter`。
+
 ## API
 
 ### Props
@@ -142,8 +158,8 @@ const list = ref<SkTabBarItem[]>([
 | :--- | :--- | :--- | :--- |
 | data | `SkTabBarItem[]` | `[]` | tab 数据源 |
 | current | `Number` | `0` | 当前选中下标，支持 `v-model:current` |
-| mode | `String` | `notch` | 形态：`notch` 镂空弧形（默认），clip-path 裁出真实缺口、透出任意页面背景（图片/渐变均可），缺口随切换平移动画；`concave` 伪类凹陷弧形，光圈需与页面背景同色；`plain` 纯净模式，无内凹弧形与外光圈 |
-| outerApertureBorderColor | `String` | `#f2f3f7` | 弧形外光圈颜色，需与页面背景一致（`notch`/`plain` 模式下不生效） |
+| mode | `String` | `concave` | 形态：`concave` 伪类凹陷弧形（默认），光圈需与页面背景同色；`filter` blur+contrast 融合内凹，曲线更平滑、切换更有机，但融合底色仍需与页面背景同色，且微信小程序低版本基础库可能不支持 `contrast()`（已加 `@supports` 降级为实心底栏），建议真机实测；`plain` 纯净模式，实心栏 + 圆钮悬浮，无内凹弧形与外光圈，不依赖背景色 |
+| outerApertureBorderColor | `String` | `#f2f3f7` | 弧形外光圈颜色，需与页面背景一致（`concave`/`filter` 模式生效，`filter` 下作为融合底色；`plain` 模式下不生效） |
 | iconBackgroundColor | `String` | `rgb(3, 3, 3)` | 选中圆形按钮背景色 |
 | background | `String` | `#fff` | tabBar 背景色 |
 | textColor | `String` | `#222` | 文字颜色 |
@@ -204,4 +220,4 @@ const list = ref<SkTabBarItem[]>([
 | 组件级 `corner` + item `cornerMark` | item 级 `badge` / `dot` |
 | `change` 回调中的 `currenIndex` | `currentIndex` |
 
-2.0.0 起默认形态由 `concave`（伪类光圈）改为 `notch`（clip-path 镂空），视觉上凹槽与圆钮间留有一圈透明缝隙，且不再依赖 `outerApertureBorderColor` 与页面背景同色。升级后若希望保持旧版观感，显式传入 `mode="concave"` 即可。
+1.1.0 起组件默认形态为 `concave`（伪类光圈，需 `outerApertureBorderColor` 与页面背景同色），并新增可选形态 `filter`（blur+contrast 融合内凹，曲线更平滑）；页面背景为图片/渐变等无法与光圈同色的复杂背景时，可显式设 `mode="plain"`（实心栏、不依赖背景色）。若此前显式使用过某一形态，升级后请按需保留对应的 `mode` 传参；各形态取舍详见上文「形态（mode）与内凹实现流派」。

@@ -6,12 +6,16 @@
 		:class="{
 			'sk-tab-bar--fixed': fixed,
 			'sk-tab-bar--plain': mode !== 'concave',
-			'sk-tab-bar--notch': mode === 'notch'
+			'sk-tab-bar--filter': mode === 'filter'
 		}"
 		:style="rootStyle"
 	>
-		<!-- notch 模式：底色填充层，clip-path 在圆钮处裁出真实镂空缺口 -->
-		<view v-if="mode === 'notch' && list.length" class="sk-tab-bar__fill" />
+		<!-- filter 模式：blur+contrast 融合层，同色矩形与圆钮经滤镜融合出内凹平滑圆角；
+		     融合层须铺实底色（--color，需与页面背景一致）供 contrast 硬化边缘 -->
+		<view v-if="mode === 'filter' && list.length" class="sk-tab-bar__goo">
+			<view class="sk-tab-bar__goo-bar" />
+			<view class="sk-tab-bar__goo-knob" />
+		</view>
 		<view
 			v-for="(item, index) in list"
 			:key="item.text || index"
@@ -46,8 +50,8 @@
 				<text class="sk-tab-bar__text">{{ item.text }}</text>
 			</slot>
 		</view>
-		<!-- 凹陷弧形滑块，随选中项平移 -->
-		<view v-if="list.length" class="sk-tab-bar__bump" :style="{ '--n': activeIndex }" />
+			<!-- 凹陷弧形滑块，随选中项平移；--n 由根节点下发，与 filter 融合凸起共用 -->
+			<view v-if="list.length" class="sk-tab-bar__bump" />
 	</view>
 </template>
 
@@ -59,7 +63,7 @@
  * @tutorial https://ext.dcloud.net.cn/plugin?name=sk-tab-bar
  *
 	 * @property {SkTabBarItem[]} data tab 数据源
-	 * @property {String} mode 形态：notch 镂空弧形（默认，clip-path 真实镂空，适配任意背景）/ concave 伪类凹陷弧形（光圈需与页面背景同色）/ plain 纯净模式
+	 * @property {String} mode 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）/ filter blur+contrast 融合内凹（曲线更平滑，融合底色仍需与页面背景同色，小程序低版本基础库可能不支持 contrast）/ plain 纯净模式（实心栏 + 圆钮悬浮，不依赖背景色）
  * @property {Number} current 当前选中下标，支持 v-model:current
  * @property {String} outerApertureBorderColor 弧形外光圈颜色，需与页面背景一致（默认 #f2f3f7）
  * @property {String} iconBackgroundColor 选中圆形按钮背景色（默认 rgb(3, 3, 3)）
@@ -100,10 +104,10 @@ const props = defineProps({
 		type: Number,
 		default: 0
 	},
-	/** 形态：notch 镂空弧形（默认，clip-path 真实镂空，页面背景任意）；concave 伪类凹陷弧形，光圈需与页面背景同色；plain 纯净模式，不渲染内凹伪类与外光圈 */
+	/** 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）；filter blur+contrast 融合内凹，曲线更平滑，融合底色仍需与页面背景同色，小程序低版本基础库可能不支持 contrast；plain 纯净模式，实心栏 + 圆钮悬浮，不渲染内凹伪类与外光圈，不依赖背景色 */
 	mode: {
 		type: String as PropType<SkTabBarMode>,
-		default: 'notch'
+		default: 'concave'
 	},
 	/** 弧形外光圈颜色，需与页面背景一致 */
 	outerApertureBorderColor: {
@@ -209,9 +213,10 @@ watch(
 	}
 )
 
-/** 根节点样式：通过 CSS 变量向下传递主题配置 */
+/** 根节点样式：通过 CSS 变量向下传递主题配置；--n 为选中下标，bump 平移与 filter 融合凸起平移共用 */
 const rootStyle = computed<CSSProperties>(() => ({
 	'--length': list.value.length || 1,
+	'--n': activeIndex.value,
 	'--color': props.outerApertureBorderColor,
 	'--bg': props.iconBackgroundColor,
 	'--bar-bg': props.background,

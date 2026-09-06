@@ -20,6 +20,7 @@
             :scroll-y="true"
             class="left-scroll"
             :scroll-top="leftScrollTop"
+            :show-scrollbar="false"
             scroll-with-animation
             :style="{ height: `${virtualMenuHeight}px` }"
           >
@@ -49,6 +50,7 @@
           <scroll-view
             :scroll-y="true"
             class="right-scroll"
+            :show-scrollbar="false"
             :style="{ height: `${virtualMenuHeight}px` }"
             :scroll-top="rightState.scrollTop"
             :scroll-with-animation="scrollWithAnimation"
@@ -56,26 +58,41 @@
             @scrolltolower="onScrollToLower"
           >
             <view class="info">
-              <!-- 空数据插槽 -->
-              <slot v-if="!list.length" name="empty"></slot>
-              <template v-for="(item, index) in list" :key="item.id !== undefined ? item.id : index">
-                <!-- 虚拟渲染占位符：与真实分组等高，保证 topArrList 始终有效 -->
-                <view
-                  v-if="isPlaceholder(index)"
-                  class="item-parent item-placeholder"
-                  :style="{ height: `${virtualState.groupHeights[index]}px` }"
-                ></view>
-                <view v-else :id="`right-${index}`" class="item-parent">
-                  <!-- 分组吸顶标题：showTitle 开启后生效，支持 title 插槽自定义 -->
-                  <view v-if="showTitle" class="item-sticky-title">
-                    <slot name="title" :item="item" :index="index">
-                      <text class="item-title-text">{{ item.name }}</text>
-                    </slot>
-                  </view>
-                  <block v-for="(item1, index2) in item.data" :key="item1.id !== undefined ? item1.id : index2">
-                    <slot :data="{ ...item, ...item1 }"></slot>
-                  </block>
+              <!-- 加载态：异步拉数据阶段，可用 loading 插槽自定义 -->
+              <slot v-if="loading" name="loading">
+                <view class="skeleton-loading">
+                  <view v-for="n in 6" :key="n" class="skeleton-loading__row"></view>
                 </view>
+              </slot>
+              <template v-else>
+                <!-- 空数据插槽 -->
+                <slot v-if="!list.length" name="empty"></slot>
+                <template v-for="(item, index) in list" :key="item.id !== undefined ? item.id : index">
+                  <!-- 虚拟渲染占位符：骨架屏 + 与分组等高（实测或估算），保证 tops 始终有效 -->
+                  <view
+                    v-if="isPlaceholder(index)"
+                    class="item-parent item-placeholder"
+                    :style="{ height: `${virtualState.groupHeights[index]}px` }"
+                  >
+                    <view class="skeleton">
+                      <view class="skeleton__line skeleton__line--title"></view>
+                      <view class="skeleton__line"></view>
+                      <view class="skeleton__line"></view>
+                      <view class="skeleton__line skeleton__line--short"></view>
+                    </view>
+                  </view>
+                  <view v-else :id="`right-${index}`" class="item-parent">
+                    <!-- 分组吸顶标题：showTitle 开启后生效，支持 title 插槽自定义 -->
+                    <view v-if="showTitle" class="item-sticky-title">
+                      <slot name="title" :item="item" :index="index">
+                        <text class="item-title-text">{{ item.name }}</text>
+                      </slot>
+                    </view>
+                    <block v-for="(item1, index2) in item.data" :key="item1.id !== undefined ? item1.id : index2">
+                      <slot :data="{ ...item, ...item1 }"></slot>
+                    </block>
+                  </view>
+                </template>
               </template>
             </view>
 
@@ -157,6 +174,16 @@ const props = defineProps({
   scrollWithAnimation: {
     type: Boolean,
     default: true,
+  },
+  /** 分组高度估算值（px）：未测量分组用它撑高，进入渲染窗口测量后回填真实值 */
+  estimatedGroupHeight: {
+    type: Number,
+    default: 300,
+  },
+  /** 异步加载数据中：右侧展示 loading 插槽（默认骨架屏） */
+  loading: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -251,9 +278,30 @@ const leftScrollTop = computed(() => {
 
 /** 该分组是否渲染为占位符 */
 const isPlaceholder = (index: number): boolean => {
-  // 新追加、尚未测量高度的分组必须渲染真实内容，避免出现 0 高占位符
-  if (index >= virtualState.groupHeights.length) return false
-  return props.virtual && virtualState.ready && (index < virtualState.start || index > virtualState.end)
+  if (!props.virtual || !virtualState.ready) return false
+  return index < virtualState.start || index > virtualState.end
+}
+
+/** 依据各组高度（实测或估算）以前缀和重算分组顶部偏移 */
+const recomputeTops = () => {
+  const heights = virtualState.groupHeights
+  const tops: number[] = new Array(heights.length)
+  let acc = 0
+  for (let i = 0; i < heights.length; i++) {
+    tops[i] = acc
+    acc += heights[i] || props.estimatedGroupHeight
+  }
+  rightState.topArrList = tops
+}
+
+/** 将 groupHeights 对齐到 list 长度：新增分组用估算值，已有的保留实测值 */
+const syncGroupHeights = () => {
+  const heights = virtualState.groupHeights
+  const n = props.list.length
+  if (heights.length === n) return
+  if (heights.length > n) heights.length = n
+  while (heights.length < n) heights.push(props.estimatedGroupHeight)
+  recomputeTops()
 }
 
 /** 依据滚动位置更新渲染窗口：可视区上下各扩展一屏缓冲 */
@@ -316,19 +364,24 @@ const unlockScroll = () => {
 
 /** 驱动右侧滚动到指定分组 */
 const scrollRightTo = async (index: number) => {
-  const target = rightState.topArrList[index]
-  if (target === undefined) return
-  // 目标已在当前位置：不会产生 scroll 事件，无需加锁与滚动
-  if (Math.abs(target - rightState.realScrollTop) < SCROLL_TOLERANCE) return
-
+  // 先把目标分组纳入渲染窗口并渲染、测量，避免落点是占位空白、目标偏移失准
   scrollLock.locked = true
-  scrollLock.target = target
   scrollLock.targetIndex = index
+  if (props.virtual && virtualState.ready) updateRenderRange(rightState.realScrollTop)
+  await nextTick()
+  await measureLayout()
 
-  // 提前把目标分组纳入渲染窗口，避免跳转落点出现占位空白
-  if (props.virtual && virtualState.ready) {
-    updateRenderRange(rightState.realScrollTop)
+  const target = rightState.topArrList[index]
+  if (target === undefined) {
+    unlockScroll()
+    return
   }
+  // 目标已在当前位置：不会产生 scroll 事件，无需滚动
+  if (Math.abs(target - rightState.realScrollTop) < SCROLL_TOLERANCE) {
+    unlockScroll()
+    return
+  }
+  scrollLock.target = target
 
   // 先重置为当前实际位置，保证 scroll-top 赋相同值时也能触发滚动
   rightState.scrollTop = rightState.realScrollTop
@@ -383,31 +436,37 @@ const onScrollToLower = (e: any) => {
 // ==================== 布局测量 ====================
 
 /**
- * 测量左侧菜单项与右侧分组尺寸。
- * 以右侧滚动容器自身 top 为基准并叠加当前滚动偏移，
- * 保证组件不在页面顶部、或非零滚动位置重测时定位依然正确。
+ * 测量左侧菜单项与"当前渲染窗口内"的右侧分组尺寸。
+ * 分组顶部偏移不靠全量测量，而由 recomputeTops 前缀和得出；
+ * 这里只把已渲染分组的真实高度回填，避免大数据量下全量渲染/全量测量卡顿。
  */
 const measureLayout = (): Promise<void> => {
   return new Promise((resolve) => {
     const query = uni.createSelectorQuery().in(instance?.proxy)
     query.selectAll('.item').boundingClientRect()
-    query.select('.right-scroll').boundingClientRect()
     query.selectAll('.item-parent').boundingClientRect()
-    query.select('.right-scroll').scrollOffset()
     query.exec((res: any[]) => {
-      const [itemRects, containerRect, groupRects, scrollOffset] = res || []
+      const [itemRects, groupRects] = res || []
 
       if (itemRects?.length) {
         leftState.itemRects = itemRects
         leftState.itemHeight = itemRects[0].height || FALLBACK_ITEM_HEIGHT
       }
-      if (containerRect && groupRects?.length) {
-        const baseTop: number = containerRect.top
-        const scrollTop: number = scrollOffset?.scrollTop || 0
-        rightState.topArrList = groupRects.map((rect: RectInfo) => rect.top - baseTop + scrollTop)
-        virtualState.groupHeights = groupRects.map((rect: RectInfo) => rect.height)
-
-        const lastHeight: number = groupRects[groupRects.length - 1].height
+      if (groupRects?.length) {
+        let changed = false
+        for (const rect of groupRects) {
+          // 占位符无 id；仅回填真实渲染的分组
+          const id: string = (rect as RectInfo & { id?: string }).id || ''
+          if (!id.startsWith('right-')) continue
+          const index = Number(id.slice('right-'.length))
+          const height = rect.height
+          if (height > 0 && virtualState.groupHeights[index] !== height) {
+            virtualState.groupHeights[index] = height
+            changed = true
+          }
+        }
+        if (changed) recomputeTops()
+        const lastHeight = virtualState.groupHeights[props.list.length - 1] || props.estimatedGroupHeight
         state.fillHeight = Math.max(props.virtualMenuHeight - lastHeight, 0)
       }
       resolve()
@@ -430,14 +489,14 @@ const refresh = () => {
       setCurrent(0, 'method')
     }
 
-    virtualState.ready = false
+    // 不再退出虚拟渲染做全量渲染：估算高度撑起全列表，只渲染可视窗口
+    syncGroupHeights()
+    virtualState.ready = true
+    updateRenderRange(rightState.realScrollTop)
     await nextTick()
     await measureLayout()
-
-    if (props.virtual) {
-      updateRenderRange(rightState.realScrollTop)
-      virtualState.ready = true
-    }
+    // 回填真实高度后窗口可能变化，再校正一次
+    updateRenderRange(rightState.realScrollTop)
 
     // 首次测量完成后，若初始下标非 0 则定位到对应分组
     if (!firstMeasured) {

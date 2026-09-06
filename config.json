@@ -61,66 +61,61 @@
 							"name": "自定义角标",
 							"show": true,
 							"path": "/pages/tabBarDemo/corner"
+						},
+						{
+							"name": "形态对比·filter 融合内凹",
+							"show": true,
+							"path": "/pages/tabBarDemo/filter"
 						}
 					]
 				},
 				{
-					"enName": "sk-swipe-page",
-					"cName": "整页横滑容器",
-					"desc": "仿小黑盒频道页：整页横滑/tab联动/懒挂载",
+					"enName": "sk-swipe-feed",
+					"cName": "整页横滑信息流三件套",
+					"desc": "整页横滑/滚动标签栏/下拉刷新列表 + usePagedList，频道页完整方案",
 					"show": true,
-					"path": "/pages/skSwipePageDemo/basic",
+					"path": "/pages/skSwipeFeedDemo/index",
 					"pathList": "/pages/index/list",
 					"packages": [
 						{
-							"name": "基础用法",
+							"name": "频道页组合示例（三件套联动）",
 							"show": true,
-							"path": "/pages/skSwipePageDemo/basic"
+							"path": "/pages/skSwipeFeedDemo/index"
 						},
 						{
-							"name": "仿小黑盒频道页",
+							"name": "组合示例 + 自定义下拉图标",
 							"show": true,
-							"path": "/pages/skSwipePageDemo/tabs-linkage"
-						}
-					]
-				},
-				{
-					"enName": "sk-scroll-list",
-					"cName": "滚动列表容器",
-					"desc": "下拉刷新/上拉加载/状态footer，配合usePagedList",
-					"show": true,
-					"path": "/pages/skSwipePageDemo/scroll-list",
-					"pathList": "/pages/index/list",
-					"packages": [
-						{
-							"name": "综合示例",
-							"show": true,
-							"path": "/pages/skSwipePageDemo/scroll-list"
+							"path": "/pages/skSwipeFeedDemo/combo-custom-icon"
 						},
 						{
-							"name": "频道页内演示",
+							"name": "整页横滑·懒挂载与进度联动",
 							"show": true,
-							"path": "/pages/skSwipePageDemo/tabs-linkage"
-						}
-					]
-				},
-				{
-					"enName": "sk-scroll-tabs",
-					"cName": "滚动标签栏",
-					"desc": "顶部滚动标签栏：滑块动画，可与整页横滑联动",
-					"show": true,
-					"path": "/pages/skSwipePageDemo/tabs-style",
-					"pathList": "/pages/index/list",
-					"packages": [
-						{
-							"name": "自定义样式",
-							"show": true,
-							"path": "/pages/skSwipePageDemo/tabs-style"
+							"path": "/pages/skSwipeFeedDemo/swipe-page"
 						},
 						{
-							"name": "与整页横滑联动",
+							"name": "标签栏·样式与受控方法",
 							"show": true,
-							"path": "/pages/skSwipePageDemo/tabs-linkage"
+							"path": "/pages/skSwipeFeedDemo/scroll-tabs"
+						},
+						{
+							"name": "列表容器·数据状态与插槽",
+							"show": true,
+							"path": "/pages/skSwipeFeedDemo/scroll-list"
+						},
+						{
+							"name": "列表容器·下拉刷新头",
+							"show": true,
+							"path": "/pages/skSwipeFeedDemo/refresher"
+						},
+						{
+							"name": "列表容器·自定义刷新与加载图标",
+							"show": true,
+							"path": "/pages/skSwipeFeedDemo/custom-indicator"
+						},
+						{
+							"name": "usePagedList·分页状态机",
+							"show": true,
+							"path": "/pages/skSwipeFeedDemo/paged-list"
 						}
 					]
 				},
