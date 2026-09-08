@@ -5,7 +5,6 @@ import type { MenuDataItem } from '@/uni_modules/sk-linkage-menu/components/sk-l
 
 /** 本地测试图池：按下标伪随机分配，保证多次渲染结果稳定 */
 const GOODS_IMAGES = [
-  '/static/test/663.jpg',
   '/static/test/test1.jpg',
   '/static/test/test2.jpg',
   '/static/test/test3.jpg',

@@ -11,8 +11,10 @@
       <!-- menu 插槽：自定义菜单项，展示角标 -->
       <template #menu="{ item, index, active }">
         <view class="menu-cell">
-          <text :class="['menu-cell__name', { 'menu-cell__name--active': active }]">{{ item.name }}</text>
-          <view v-if="index % 4 === 0" class="menu-cell__badge">{{ item.data.length }}</view>
+          <view class="menu-cell__label">
+            <text :class="['menu-cell__name', { 'menu-cell__name--active': active }]">{{ item.name }}</text>
+            <view v-if="index % 4 === 0" class="menu-cell__badge">{{ item.data.length }}</view>
+          </view>
         </view>
       </template>
       <template #default="{ data }">
@@ -53,11 +55,16 @@ const leftBarUnStyle = {
 }
 
 .menu-cell {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   width: 100%;
+
+  &__label {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
 
   &__name {
     font-size: 26rpx;
@@ -69,8 +76,9 @@ const leftBarUnStyle = {
 
   &__badge {
     position: absolute;
-    top: -14rpx;
-    right: 10rpx;
+    top: -12rpx;
+    left: 100%;
+    margin-left: 2rpx;
     min-width: 28rpx;
     height: 28rpx;
     padding: 0 6rpx;

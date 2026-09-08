@@ -94,6 +94,12 @@
 				"navigationBarTitleText": "路由联动B"
 			}
 		},
+		{
+			"path": "pages/tabBarDemo/filter",
+			"style": {
+				"navigationBarTitleText": "形态对比·filter 融合内凹"
+			}
+		},
 		
 		{
 			"path": "pages/skCameraDemo/basic",
@@ -158,27 +164,51 @@
 		},
 
 		{
-			"path": "pages/skSwipePageDemo/basic",
+			"path": "pages/skSwipeFeedDemo/index",
 			"style": {
-				"navigationBarTitleText": "整页横滑·基础用法"
+				"navigationBarTitleText": "频道页套件·组合示例"
 			}
 		},
 		{
-			"path": "pages/skSwipePageDemo/tabs-linkage",
+			"path": "pages/skSwipeFeedDemo/combo-custom-icon",
 			"style": {
-				"navigationBarTitleText": "整页横滑·频道页"
+				"navigationBarTitleText": "组合示例·自定义下拉图标"
 			}
 		},
 		{
-			"path": "pages/skSwipePageDemo/tabs-style",
+			"path": "pages/skSwipeFeedDemo/swipe-page",
 			"style": {
-				"navigationBarTitleText": "标签栏·自定义样式"
+				"navigationBarTitleText": "整页横滑·懒挂载与进度联动"
 			}
 		},
 		{
-			"path": "pages/skSwipePageDemo/scroll-list",
+			"path": "pages/skSwipeFeedDemo/scroll-tabs",
 			"style": {
-				"navigationBarTitleText": "列表容器·综合示例"
+				"navigationBarTitleText": "标签栏·样式与受控方法"
+			}
+		},
+		{
+			"path": "pages/skSwipeFeedDemo/scroll-list",
+			"style": {
+				"navigationBarTitleText": "列表容器·数据状态与插槽"
+			}
+		},
+		{
+			"path": "pages/skSwipeFeedDemo/refresher",
+			"style": {
+				"navigationBarTitleText": "列表容器·下拉刷新头"
+			}
+		},
+		{
+			"path": "pages/skSwipeFeedDemo/custom-indicator",
+			"style": {
+				"navigationBarTitleText": "列表容器·自定义刷新与加载图标"
+			}
+		},
+		{
+			"path": "pages/skSwipeFeedDemo/paged-list",
+			"style": {
+				"navigationBarTitleText": "usePagedList·分页状态机"
 			}
 		}
 	],

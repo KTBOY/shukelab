@@ -1,0 +1,194 @@
+/**
+ * sk-scroll-list 组件样式
+ *
+ * 下拉头与 footer 的加载指示器全部用 CSS border 实现（chevron 箭头 + 圆环），
+ * 不使用 SVG 与字体字形——小程序端不支持内联 SVG，字形在各端字体下粗细与基线不一致。
+ * 不使用 gap 与 inset 简写，规避低版本 WebView / WXSS 兼容问题。
+ */
+
+.sk-scroll-list {
+  width: 100%;
+}
+
+/* ==================== 下拉头 ==================== */
+
+/**
+ * 下拉头容器：必须显式声明 width:100%。
+ * uni 原生 refresher 容器为 column-reverse + bottom:0，H5 下靠 align-items:stretch
+ * 把子节点撑满，小程序/App 端不保证，缺省宽度会导致内容左偏而非居中。
+ * 高度由组件按 refresherThreshold 内联绑定，与原生容器高度一致，避免内容被裁切。
+ */
+.sk-scroll-list__refresher {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.sk-refresh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.sk-refresh--idle {
+  opacity: 0;
+}
+
+/* 收合态：整体淡出并微缩，落在原生 refresher height 0.3s 收合窗口内 */
+.sk-refresh--settling {
+  opacity: 0;
+  transform: scale(0.92);
+}
+
+.sk-refresh__indicator {
+  position: relative;
+  width: 36rpx;
+  height: 36rpx;
+}
+
+/* chevron 箭头：右+下边框旋转 45deg 朝下，进度拉满时 225deg 朝上。
+   仅过渡 opacity——transform 由下拉进度内联驱动，加过渡会拖手 */
+.sk-refresh__arrow {
+  position: absolute;
+  top: 10rpx;
+  left: 10rpx;
+  box-sizing: border-box;
+  width: 16rpx;
+  height: 16rpx;
+  border-right: 3rpx solid #999;
+  border-bottom: 3rpx solid #999;
+  transition: opacity 0.15s;
+}
+
+.sk-refresh__ring {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  box-sizing: border-box;
+  border: 4rpx solid rgba(0, 0, 0, 0.1);
+  border-top-color: #999;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.sk-refresh--refreshing .sk-refresh__arrow {
+  opacity: 0;
+}
+
+/* 刷新中与收合中都保持旋转，只由父级 opacity 淡出，避免转一半骤停 */
+.sk-refresh--refreshing .sk-refresh__ring,
+.sk-refresh--settling .sk-refresh__ring {
+  opacity: 1;
+  animation: sk-refresh-spin 0.8s linear infinite;
+}
+
+.sk-refresh__text {
+  margin-left: 12rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+
+@keyframes sk-refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== footer ==================== */
+
+.sk-scroll-list__footer {
+  padding: 32rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sk-scroll-list__footer-loading {
+  display: flex;
+  align-items: center;
+}
+
+.sk-scroll-list__spinner {
+  box-sizing: border-box;
+  width: 28rpx;
+  height: 28rpx;
+  margin-right: 10rpx;
+  border: 3rpx solid rgba(0, 0, 0, 0.1);
+  border-top-color: #999;
+  border-radius: 50%;
+  animation: sk-refresh-spin 0.8s linear infinite;
+}
+
+.sk-scroll-list__footer-finished {
+  display: flex;
+  align-items: center;
+}
+
+.sk-scroll-list__footer-line {
+  width: 60rpx;
+  height: 2rpx;
+  margin: 0 16rpx;
+  background: #ebedf0;
+}
+
+.sk-scroll-list__footer-text {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 失败重试：加大点击热区 */
+.sk-scroll-list__footer-text--error {
+  padding: 8rpx 24rpx;
+  color: #fa5151;
+}
+
+/* ==================== 首屏加载 ==================== */
+
+/* 外层不预设布局：传入骨架屏时按块级从顶部排布；内置默认态由 __loading-inner 居中 */
+.sk-scroll-list__loading {
+  display: block;
+}
+
+.sk-scroll-list__loading-inner {
+  padding: 160rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==================== 空态与错误态 ==================== */
+
+.sk-scroll-list__empty {
+  padding: 160rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sk-scroll-list__empty-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 首屏失败且无数据：错误态（点击重试） */
+.sk-scroll-list__error {
+  padding: 160rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sk-scroll-list__error-text {
+  padding: 8rpx 24rpx;
+  font-size: 26rpx;
+  color: #fa5151;
+}

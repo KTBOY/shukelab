@@ -1,7 +1,7 @@
 <!-- 案例：基础用法（异步数据 + 默认开启虚拟渲染） -->
 <template>
   <view class="demo-page">
-    <sk-linkage-menu :list="menuList" :virtual-menu-height="menuHeight" @change="onChange">
+    <sk-linkage-menu :list="menuList" :loading="loading" :virtual-menu-height="menuHeight" @change="onChange">
       <template #default="{ data }">
         <goods-item :data="data"></goods-item>
       </template>
@@ -20,11 +20,14 @@ import { createMenuList, delay, getContentHeight } from './mock'
 
 const menuHeight = getContentHeight()
 const menuList = ref<MenuDataItem[]>([])
+const loading = ref(false)
 
 // 模拟接口异步返回：组件监听 list 变化后会自动重新测量并联动
 onMounted(async () => {
+  loading.value = true
   await delay(600)
   menuList.value = createMenuList(100, 3)
+  loading.value = false
 })
 
 const onChange = (payload: ChangePayload) => {

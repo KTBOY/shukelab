@@ -66,6 +66,12 @@
 	transition: color var(--duration);
 }
 
+/* uni-h5 的 uni-image 在图片命中缓存时，load 事件可能早于其 onload 绑定，
+   内部 img 的 opacity 停留 0 导致图标隐形；内部 img 属子组件，需 :deep 穿透强制可见 */
+.sk-tab-bar__icon :deep(img) {
+	opacity: 1 !important;
+}
+
 .sk-tab-bar__icon--font {
 	font-size: 60rpx;
 	color: var(--text-color, #222);
@@ -73,6 +79,8 @@
 
 .sk-tab-bar__text {
 	position: absolute;
+	/* 与上方图标/圆钮的间距 +5px（10rpx） */
+	margin-top: 10rpx;
 	font-size: var(--font-size, 26rpx);
 	font-weight: bold;
 	color: var(--text-color, #222);
@@ -93,7 +101,7 @@
 
 .sk-tab-bar__item--active .sk-tab-bar__text {
 	opacity: 1;
-	transform: translateY(22rpx);
+	transform: translateY(12rpx);
 	color: var(--active-text-color, #222);
 }
 
@@ -106,6 +114,7 @@
 	box-sizing: border-box;
 	min-width: 40rpx;
 	height: 40rpx;
+	line-height:40rpx;
 	padding: 0 8rpx;
 	background-color: #f53f3f;
 	border: 4rpx solid var(--bar-bg, #fff);
@@ -165,10 +174,14 @@
 	box-shadow: 0 -15rpx 0 0 var(--color, #f2f3f7);
 }
 
-/* 纯净/镂空模式：页面背景为图片/渐变等无法与外光圈同色时，
+/* 纯净模式：页面背景为图片/渐变等无法与外光圈同色时，
    去掉内凹伪类与外光圈描边，仅保留圆钮悬浮效果 */
 .sk-tab-bar--plain .sk-tab-bar__bump {
 	border-color: transparent;
+	/* 背景默认 border-box，会从透明边框下透出，令可视黑钮变成整个 --c（120rpx），
+	   比 concave（实色边框圈住，可视 100rpx）大一圈，还会吞掉 canvas 凹口的 10rpx 透明缝；
+	   收回 padding-box，保证四种形态可视圆钮直径一致 */
+	background-clip: padding-box;
 }
 
 .sk-tab-bar--plain .sk-tab-bar__bump::before,
@@ -176,50 +189,100 @@
 	display: none;
 }
 
-/* 镂空模式：根节点不再绘制底色，由 __fill 填充层负责，
-   缺口处真实透明，透出任意页面背景 */
-.sk-tab-bar--notch {
+/* 融合模式：blur+contrast 让同色的底栏矩形与凸起圆钮自然融合出内凹平滑圆角。
+   注意——纯 CSS 的 contrast() 只作用于颜色通道、不硬化 alpha，
+   融合层必须铺一层实底色（--color，需与页面背景一致）供其对比，
+   故本模式与 concave 一样依赖 outerApertureBorderColor 与页面背景同色；
+   真正的免底色内凹需 SVG gooey(feColorMatrix)，小程序端不支持。 */
+.sk-tab-bar--filter {
 	background: transparent;
 }
 
-/* 底色填充层：clip-path 以 24 段折线拟合半圆缺口，
-   顶点全部由 --w/--n/--c 表达，随选中项平移且可插值动画；
-   缺口半径取 var(--c)/2，与圆钮（border-box，含 10rpx 透明描边）间留出光圈缝 */
-.sk-tab-bar__fill {
+.sk-tab-bar__goo {
+	/* 融合层向上探出的高度，需容纳凸起圆钮半径，避免被 overflow 裁平 */
+	--goo-lift: calc(var(--c) * 0.7 + 16rpx);
+	--goo-blur: 12rpx;
+	--goo-contrast: 26;
+	--goo-ring: 14rpx;
+
 	position: absolute;
-	inset: 0;
+	z-index: 0;
+	top: calc(var(--goo-lift) * -1);
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background: var(--color, #f2f3f7);
+	border-radius: 10rpx 10rpx 0 0;
+	overflow: hidden;
+	filter: blur(var(--goo-blur)) contrast(var(--goo-contrast));
+}
+
+/* 底栏主体矩形，与凸起圆钮同色，融合后成为一条带内凹的连续轮廓 */
+.sk-tab-bar__goo-bar {
+	position: absolute;
+	top: var(--goo-lift);
+	left: 0;
+	right: 0;
+	bottom: 0;
 	background: var(--bar-bg, #fff);
 	border-radius: 10rpx 10rpx 0 0;
-	transition: clip-path var(--duration);
-	clip-path: polygon(
-		0 0,
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.5) 0,
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.49572) calc(var(--c) * 0.06526),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.48296) calc(var(--c) * 0.12941),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.46194) calc(var(--c) * 0.19134),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.43301) calc(var(--c) * 0.25),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.39668) calc(var(--c) * 0.30438),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.35355) calc(var(--c) * 0.35355),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.30438) calc(var(--c) * 0.39668),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.25) calc(var(--c) * 0.43301),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.19134) calc(var(--c) * 0.46194),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.12941) calc(var(--c) * 0.48296),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 - var(--c) * 0.06526) calc(var(--c) * 0.49572),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2) calc(var(--c) * 0.5),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.06526) calc(var(--c) * 0.49572),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.12941) calc(var(--c) * 0.48296),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.19134) calc(var(--c) * 0.46194),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.25) calc(var(--c) * 0.43301),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.30438) calc(var(--c) * 0.39668),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.35355) calc(var(--c) * 0.35355),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.39668) calc(var(--c) * 0.30438),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.43301) calc(var(--c) * 0.25),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.46194) calc(var(--c) * 0.19134),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.48296) calc(var(--c) * 0.12941),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.49572) calc(var(--c) * 0.06526),
-		calc(var(--w) * var(--n, 0) + var(--w) / 2 + var(--c) * 0.5) 0,
-		100% 0,
-		100% 100%,
-		0 100%
-	);
+}
+
+/* 凸起圆钮：与底栏同色，凸出顶边后被滤镜融合出内凹圆角；随 --n 平移 */
+.sk-tab-bar__goo-knob {
+	position: absolute;
+	top: calc(var(--goo-lift) + constant(safe-area-inset-bottom) / 2);
+	top: calc(var(--goo-lift) + env(safe-area-inset-bottom) / 2);
+	left: calc(var(--w) * var(--n, 0) + var(--w) / 2 - (var(--c) + var(--goo-ring)) / 2);
+	width: calc(var(--c) + var(--goo-ring));
+	height: calc(var(--c) + var(--goo-ring));
+	transform: translateY(-50%);
+	background: var(--bar-bg, #fff);
+	border-radius: 50%;
+	transition: left var(--duration);
+}
+
+/* 深色圆钮叠在融合凸起之上，直径小于 __goo-knob 以留出一圈 bar-bg 环 */
+.sk-tab-bar--filter .sk-tab-bar__bump {
+	z-index: 3;
+}
+
+/* 降级：基础库不支持 contrast() 时，隐藏融合层并回退为实心底栏，避免整条 tabBar 消失 */
+@supports not (filter: contrast(20)) {
+	.sk-tab-bar--filter {
+		background: var(--bar-bg, #fff);
+	}
+
+	.sk-tab-bar--filter .sk-tab-bar__goo {
+		display: none;
+	}
+}
+
+/* canvas 形态：根节点不铺底色，由画布绘制真透明的"栏顶凹口"轮廓，透出任意页面背景 */
+.sk-tab-bar--canvas {
+	background: transparent;
+}
+
+/* 画布层：覆盖栏体（凹口向下舀入栏内，栏顶以上无白色，无需向上探出）；
+   置于 item/bump 之下，pointer-events 关闭保证点击穿透 */
+.sk-tab-bar__canvas {
+	position: absolute;
+	z-index: 0;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	width: 100%;
+	/* canvas 为替换元素，top/bottom 不拉伸高度（会落回内禀 150px），必须显式 100% 对齐栏高 */
+	height: 100%;
+	pointer-events: none;
+}
+
+/* canvas 取节点/绘制失败降级：回退实心底栏并隐藏画布，bump 呈 plain 观感 */
+.sk-tab-bar--canvas.is-degraded {
+	background: var(--bar-bg, #fff);
+}
+
+.sk-tab-bar--canvas.is-degraded .sk-tab-bar__canvas {
+	display: none;
 }

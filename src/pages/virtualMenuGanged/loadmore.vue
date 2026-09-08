@@ -11,6 +11,7 @@
 			:list="menuList"
 			:virtual-menu-height="menuHeight"
 			:show-title="true"
+			:loading="loading && loadedCount === 0"
 			@scrolltolower="onLoadMore"
 			@change="onChange"
 		>
@@ -52,11 +53,11 @@
 	const loadedCount = ref(0)
 	const finished = computed(() => loadedCount.value >= TOTAL_ITEMS)
 
-	let loading = false
+	const loading = ref(false)
 
 	/** 模拟分页接口：按扁平下标返回 [start, start+count) 区间的条目及其归属分组 */
-	async function fetchPage(start : number, count : number) {
-		await delay(400)
+	async function fetchPage(start : number, count : number, ms = 400) {
+		await delay(ms)
 		const end = Math.min(start + count, TOTAL_ITEMS)
 		const result : Array<{ groupIndex : number; item : Record<string, any> }> = []
 		for (let flat = start; flat < end; flat++) {
@@ -67,20 +68,20 @@
 	}
 
 	/** 加载下一页并按归属分组追加，组件监听到 list 变化后自动重新测量 */
-	async function loadNext(count = PAGE_SIZE) {
-		if (loading || finished.value) return
-		loading = true
-		const page = await fetchPage(loadedCount.value, count)
+	async function loadNext(count = PAGE_SIZE, ms = 400) {
+		if (loading.value || finished.value) return
+		loading.value = true
+		const page = await fetchPage(loadedCount.value, count, ms)
 		page.forEach(({ groupIndex, item }) => {
 			menuList.value[groupIndex].data.push(item)
 		})
 		loadedCount.value += page.length
-		loading = false
+		loading.value = false
 	}
 
-	// 首屏仅右侧内容异步加载第一页，左侧菜单已全量渲染
+	// 首屏仅右侧内容异步加载第一页，左侧菜单已全量渲染；首屏延迟拉长以便观察首屏 loading
 	onMounted(() => {
-		loadNext()
+		loadNext(PAGE_SIZE, 1000)
 	})
 
 	/** 右侧触底：加载下一页 */
@@ -96,7 +97,7 @@
 	const onChange = async (payload : ChangePayload) => {
 		if (payload.source !== 'click') return
 		const needed = (payload.index + 1) * GROUP_ITEM_COUNT
-		if (loadedCount.value >= needed || loading) return
+		if (loadedCount.value >= needed || loading.value) return
 
 		uni.showLoading({ title: '加载中' })
 		await loadNext(needed - loadedCount.value)

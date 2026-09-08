@@ -71,9 +71,38 @@
 	border-top: 2rpx solid #e3e4e6;
 }
 
-/* 虚拟渲染占位符：仅撑起等高空间，无内容 */
+/* 虚拟渲染占位符：撑起等高空间，空白即可 */
 .item-placeholder {
 	overflow: hidden;
+}
+
+/* 加载态（loading 插槽默认内容）：容器与可视区等高，转圈 + 文字垂直水平居中 */
+.menu-loading {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+.menu-loading__spinner {
+	width: 44rpx;
+	height: 44rpx;
+	border: 4rpx solid #e3e4e6;
+	border-top-color: #999;
+	border-radius: 50%;
+	animation: sk-loading-spin 0.8s linear infinite;
+}
+
+.menu-loading__text {
+	margin-top: 16rpx;
+	font-size: 22rpx;
+	color: #999;
+}
+
+@keyframes sk-loading-spin {
+	to {
+		transform: rotate(360deg);
+	}
 }
 
 /* 分组吸顶标题 */

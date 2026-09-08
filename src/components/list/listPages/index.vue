@@ -7,19 +7,21 @@
  * @FilePath: \project-template\uni_template\components\list\listPages\index.vue
 -->
 <template>
-	<view class="list-pages">
-		<view class="nav-item">
-			<view class="nav-name">{{ nav.cName||nav.name }}</view>
-			<template v-for="packageItem in nav.packages" :key="packageItem">
-				<view v-if="packageItem.show">
-					<view class="nav-info" :url="packageItem.path" @click="handlerPageRouter(packageItem)">
-						<view class="child-name">{{ packageItem.name }} {{ packageItem.cName }}</view>
-						<view><uni-icons type="forward" size="20"></uni-icons></view>
+	<scroll-view class="list-pages-scroll" :scroll-y="true" :show-scrollbar="false">
+		<view class="list-pages">
+			<view class="nav-item">
+				<view class="nav-name">{{ nav.cName||nav.name }}</view>
+				<template v-for="packageItem in nav.packages" :key="packageItem">
+					<view v-if="packageItem.show">
+						<view class="nav-info" :url="packageItem.path" @click="handlerPageRouter(packageItem)">
+							<view class="child-name">{{ packageItem.name }} {{ packageItem.cName }}</view>
+							<view><uni-icons type="forward" size="20"></uni-icons></view>
+						</view>
 					</view>
-				</view>
-			</template>
+				</template>
+			</view>
 		</view>
-	</view>
+	</scroll-view>
 </template>
 <script>
 	import {
@@ -51,11 +53,18 @@
 </script>
 <style lang="scss" scoped>
 
+	/* App.vue 全局 page{height:100%;overflow:hidden} 关掉了原生滚动，滚动交给外层 scroll-view。
+	   高度必须自足：本组件在小程序端是自定义组件，外层包裹节点没有高度，height:100% 会塌成内容高，
+	   scroll-view 便不再是滚动容器；--window-top 在 H5 是导航栏 44px、小程序端是 0 */
+	.list-pages-scroll {
+		height: calc(100vh - var(--window-top) - var(--window-bottom));
+	}
+
 	.list-pages {
 		background: #f7f8fa;
-		overflow: hidden;
 		padding: 60rpx 50rpx;
-		height: 100vh;
+		min-height: 100%;
+		box-sizing: border-box;
 		.nav-item {
 			flex: 1;
 
