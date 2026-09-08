@@ -61,25 +61,103 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 
 ## 预览
 
-<img src="D:/my/git/shukelab/image/README/test2.png" alt="test2" style="zoom:55%;" />
+> 🔍 点击图片可在新窗口查看原图
 
-### sk-linkage-menu
+<table>
+  <tr>
+    <td align="center">
+      <a href="image/README/test2.png">
+        <img src="image/README/test2.png" width="180" alt="微信小程序码，扫码体验" />
+      </a>
+      <br /><sub><b>微信小程序 · 扫码体验</b></sub>
+    </td>
+  </tr>
+</table>
 
-<img src="https://github.com/user-attachments/assets/8fa94ecd-31c7-492e-8cc0-0a6b057f4611" alt="d4389960-103a-11f0-a627-2f63d4e8edd3_0" style="zoom: 33%;" />
+### sk-linkage-menu · 左右联动菜单
 
-### sk-tab-bar
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href="https://github.com/user-attachments/assets/8fa94ecd-31c7-492e-8cc0-0a6b057f4611">
+        <img src="https://github.com/user-attachments/assets/8fa94ecd-31c7-492e-8cc0-0a6b057f4611" width="100%" alt="左右联动菜单演示" />
+      </a>
+      <br /><sub>左右联动 · 吸顶 / 虚拟列表</sub>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href="image/README/sk-linkage-menu-with-tabbar.gif">
+        <img src="image/README/sk-linkage-menu-with-tabbar.gif" width="100%" alt="联动菜单与自定义 tabBar 组合演示" />
+      </a>
+      <br /><sub>联动菜单 × sk-tab-bar 组合</sub>
+    </td>
+  </tr>
+</table>
 
-<img src="https://github.com/user-attachments/assets/698e92dc-8edb-463c-8369-8a2c4227382f" alt="录屏_20250807_192802" style="zoom: 33%;" />
+### sk-tab-bar · 凹陷弧形 tabBar
 
-<img src="https://github.com/user-attachments/assets/29c96aa9-0df4-43dd-b190-9d6839546a5b" alt="录屏_20260107_192559" style="zoom: 33%;" />
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href="https://github.com/user-attachments/assets/698e92dc-8edb-463c-8369-8a2c4227382f">
+        <img src="https://github.com/user-attachments/assets/698e92dc-8edb-463c-8369-8a2c4227382f" width="100%" alt="凹陷弧形 tabBar 演示" />
+      </a>
+      <br /><sub>凹陷弧形 · 切换动效</sub>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href="https://github.com/user-attachments/assets/29c96aa9-0df4-43dd-b190-9d6839546a5b">
+        <img src="https://github.com/user-attachments/assets/29c96aa9-0df4-43dd-b190-9d6839546a5b" width="100%" alt="tabBar 角标与主题定制演示" />
+      </a>
+      <br /><sub>角标 / 主题定制</sub>
+    </td>
+  </tr>
+</table>
 
-### sk-flux-capsule
+### sk-flux-capsule · WebGL 流体胶囊
 
-<img src="image/README/1785820661385.gif" alt="1785820661385" style="zoom:33%;" />
+<table>
+  <tr>
+    <td width="100%" align="center" valign="top">
+      <a href="image/README/1785820661385.gif">
+        <img src="image/README/1785820661385.gif" width="100%" alt="WebGL 流体色彩胶囊效果" />
+      </a>
+      <br /><sub>FBM 流体扭曲着色器</sub>
+    </td>
+  </tr>
+</table>
 
-### sk-swipe-feed（整页横滑频道页三件套）
+### sk-swipe-feed · 整页横滑频道页三件套
 
-<img src="image/README/sk-swipe-page-demo.gif" alt="组合示例演示：自定义下拉图标刷新/收合/横滑切频道/点tab联动" style="zoom:33%;" />
+<table>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href="image/README/sk-swipe-page-demo.gif">
+        <img src="image/README/sk-swipe-page-demo.gif" width="100%" alt="组合示例演示：自定义下拉图标刷新/收合/横滑切频道/点tab联动" />
+      </a>
+      <br /><sub>组合演示 · 横滑切频道 / tab 联动 / 自定义刷新图标</sub>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href="image/README/sk-swipe-feed-paged-list.png">
+        <img src="image/README/sk-swipe-feed-paged-list.png" width="100%" alt="usePagedList 分页列表" />
+      </a>
+      <br /><sub>usePagedList 分页加载</sub>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" align="center" valign="top">
+      <a href="image/README/sk-swipe-page-basic.png">
+        <img src="image/README/sk-swipe-page-basic.png" width="100%" alt="整页横滑基础用法：懒挂载与进度联动" />
+      </a>
+      <br /><sub>sk-swipe-page · 懒挂载 / keepAlive / LRU</sub>
+    </td>
+    <td width="50%" align="center" valign="top">
+      <a href="image/README/sk-swipe-page-tabs-linkage.png">
+        <img src="image/README/sk-swipe-page-tabs-linkage.png" width="100%" alt="整页横滑与标签栏联动" />
+      </a>
+      <br /><sub>sk-swipe-page × sk-scroll-tabs 联动</sub>
+    </td>
+  </tr>
+</table>
+
 
 
 
