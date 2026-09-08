@@ -61,7 +61,7 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 
 ## 预览
 
-<img src="D:/my/git/shukelab/image/README/test2.png" alt="test2" style="zoom:55%;" />
+<img src="https://img2024.cnblogs.com/blog/1963715/202608/1963715-20260803232130187-1153254980.png" alt="test2" style="zoom:55%;" />
 
 ### sk-linkage-menu
 
