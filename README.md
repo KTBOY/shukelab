@@ -81,19 +81,7 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 
 <img src="image/README/sk-swipe-page-demo.gif" alt="组合示例演示：自定义下拉图标刷新/收合/横滑切频道/点tab联动" style="zoom:33%;" />
 
-<img src="image/README/sk-swipe-page-tabs-linkage.png" alt="频道页组合示例" style="zoom:33%;" />
 
-<img src="image/README/sk-scroll-tabs-style.png" alt="滚动标签栏自定义样式：胶囊/分段器/徽标红点禁用拦截" style="zoom:33%;" />
-
-<img src="image/README/sk-scroll-list-demo.png" alt="滚动列表容器综合示例：下拉刷新/失败重试/空态/自定义footer" style="zoom:33%;" />
-
-<img src="image/README/sk-swipe-page-basic.png" alt="整页横滑基础用法" style="zoom:33%;" />
-
-<img src="image/README/sk-swipe-feed-refresher.png" alt="下拉刷新头专项：内置头与读数探针对照" style="zoom:33%;" />
-
-<img src="image/README/sk-swipe-feed-custom-indicator.png" alt="自定义刷新与加载图标：三点/条形/深色进度条/品牌圆环" style="zoom:33%;" />
-
-<img src="image/README/sk-swipe-feed-paged-list.png" alt="usePagedList 分页状态机：完成判定/防重入/reset与reload/失败重试" style="zoom:33%;" />
 
 ---
 
