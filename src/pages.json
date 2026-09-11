@@ -137,6 +137,12 @@
 				"navigationBarTitleText": "css魔法"
 			}
 		},
+		{
+			"path": "pages/cssPage/resources",
+			"style": {
+				"navigationBarTitleText": "教程资源"
+			}
+		},
 
 		{
 			"path": "pages/skFluxCapsuleDemo/basic",

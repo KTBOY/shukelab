@@ -7,6 +7,9 @@
  * @FilePath: \project-template\uni_template\pages\index\components.vue
 -->
 <template>
+  <view v-if="unlocked" class="resource-entry">
+    <view class="resource-entry-btn" @click="goResources">进入教程资源</view>
+  </view>
   <view class="index">
     <view class="index-components">
       <view v-for="nav in nav" :key="nav" class="nav-item">
@@ -26,12 +29,21 @@
   </view>
 </template>
 <script lang="ts">
-import { defineComponent, reactive } from 'vue'
+import { defineComponent, reactive, ref } from 'vue'
+import { onShow } from '@dcloudio/uni-app'
 import { nav } from '../../../config.json'
 //defineComponent:对setup的option参数进行封装，在ts下并且正确的类型推断，
 export default {
   name: 'Doc',
   setup() {
+    // 永久解锁标记（曾在 css魔法页点击过第一个模块）
+    const unlocked = ref(false)
+    onShow(() => {
+      unlocked.value = !!uni.getStorageSync('cssResourcesUnlocked')
+    })
+    function goResources() {
+      uni.navigateTo({ url: '/pages/cssPage/resources' })
+    }
     function handleRouter(nav, packageItem) {
       uni.setStorageSync('moduleData', packageItem)
       console.log(packageItem.pathList)
@@ -58,6 +70,8 @@ export default {
       nav,
       handleRouter,
       navigateToMiniProgram,
+      unlocked,
+      goResources,
     })
   },
 }
@@ -147,6 +161,26 @@ page {
       }
     }
   }
+}
+
+.resource-entry {
+  padding: 0 50rpx 60rpx;
+}
+
+.resource-entry-btn {
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #ffffff;
+  background: #644dff;
+  border-radius: 44rpx;
+  box-shadow: 0 4rpx 12rpx #654dff63;
+}
+
+.resource-entry-btn:active {
+  opacity: 0.85;
 }
 
 .rest {
