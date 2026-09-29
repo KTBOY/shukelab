@@ -7,6 +7,8 @@
 
 shukelab 是一套基于 **uni-app + Vue3 + TypeScript** 的跨端组件库，以 `uni_modules` 形式分发，零外部依赖，导入即用。支持 H5 与微信小程序双端。
 
+> 📖 **在线文档与实时演示**：[sh-design 文档站 · shukelab 区](https://ktboy.github.io/sh-design/lab/) —— 已上站的 sk-linkage-menu、sk-tab-bar 提供手机壳内可交互的 H5 演示与完整 API 表。
+
 ---
 
 ## 特性
@@ -15,7 +17,7 @@ shukelab 是一套基于 **uni-app + Vue3 + TypeScript** 的跨端组件库，�
 - **跨端兼容** — H5 / 微信小程序双端适配，条件编译隔离平台差异
 - **零依赖** — 组件无第三方运行时依赖，仅依赖 uni-app 框架
 - **uni_modules 分发** — 拖入即用，无需 npm 配置
-- **CSS 变量驱动** — 主题定制只需覆盖变量，无需修改源码
+- **props + 插槽定制** — 外观由组件显式暴露的 props 与作用域插槽控制，无需修改源码
 
 ---
 
@@ -35,13 +37,18 @@ shukelab 是一套基于 **uni-app + Vue3 + TypeScript** 的跨端组件库，�
 
 ### 方式一：插件市场导入（推荐）
 
-1. 在 [DCloud 插件市场](https://ext.dcloud.net.cn/) 搜索组件名
+1. 在 [DCloud 插件市场](https://ext.dcloud.net.cn/) 搜索组件名（sk-linkage-menu `id=22894`、sk-tab-bar `id=24578`）
 2. 点击「导入插件」，选择目标项目
-3. 组件自动安装到 `src/uni_modules/` 目录
+3. HBuilderX 工程落到项目根 `uni_modules/`；CLI 工程请下载 zip 后解压到 `src/uni_modules/`
+
+> `sk-camera` / `sk-flux-capsule` / `sk-swipe-feed` 尚未上架市场，只能用方式二。
 
 ### 方式二：手动复制
 
-将 `src/uni_modules/sk-xxx` 目录整体复制到你的项目 `src/uni_modules/` 下即可。
+把 `src/uni_modules/sk-xxx` **整目录**（含 `package.json` / `readme.md` / `changelog.md`）复制到你的工程：
+
+- HBuilderX 工程 → 项目根 `uni_modules/sk-xxx`
+- CLI 工程 → `src/uni_modules/sk-xxx`
 
 ### 使用示例
 
@@ -55,7 +62,7 @@ shukelab 是一套基于 **uni-app + Vue3 + TypeScript** 的跨端组件库，�
 </template>
 ```
 
-uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `components/` 目录下的同名组件。
+uni_modules 组件无需手动注册：easycom 按 `uni_modules/<插件id>/components/<同名目录>/<同名>.vue` 三层同名规则自动识别。**复制时不要单独改目录名或文件名**，否则组件会静默不渲染。
 
 ---
 
@@ -175,6 +182,8 @@ uni_modules 组件无需手动注册，uni-app 编译器会自动识别 `compone
 
 > ✅ 已验证 &nbsp; — 未测试/不适用
 
+App 端未纳入验证范围。`sk-camera` 在小程序 / App 会降级为原生 `<camera>`（对外 props 与事件一致）；H5 端 `getUserMedia` 要求安全上下文（`https://` 或 `localhost` / `127.0.0.1`），不满足时自动走系统拍照兜底。
+
 ---
 
 ## 项目结构
@@ -186,8 +195,11 @@ src/
 │   ├── sk-linkage-menu/     # 左右联动菜单
 │   ├── sk-tab-bar/          # 自定义 tabBar
 │   ├── sk-camera/           # H5 拍照相机
-│   └── sh-loading/          # 加载动画
-├── pages/                   # 演示页面
+│   ├── sk-swipe-feed/       # 频道页三件套（swipe-page / scroll-tabs / scroll-list）
+│   ├── sh-loading/          # 加载动画
+│   ├── take-photos/         # 拍照（含 H5 相机）
+│   └── uni-icons/ uni-scss/ # 官方依赖，非本仓产出
+├── pages/                   # 演示页面（每个 demo 一个文件，须在 pages.json 注册）
 └── pages.json               # 路由配置
 ```
 
@@ -195,16 +207,20 @@ src/
 
 ## 开发
 
+仓库同时存在 `pnpm-lock.yaml` 与 `package-lock.json`，以 **pnpm** 为准。
+
 ```bash
 # 安装依赖
-npm install
+pnpm install
 
-# H5 开发
-npm run dev:h5
+# H5 开发（端口 5175，base /shukelab/）
+pnpm dev:h5
 
-# 微信小程序开发
-npm run dev:mp-weixin
+# 微信小程序开发（产物 dist/dev/mp-weixin，用微信开发者工具打开）
+pnpm dev:mp-weixin
 ```
+
+无单元测试脚本，验证方式为跑 H5 或在微信开发者工具中预览小程序。
 
 ---
 
