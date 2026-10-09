@@ -99,7 +99,7 @@
 | --- | --- | --- |
 | change | 选中分类变化时触发（点击、滚动、方法调用均会触发） | `{ ...item, index, currenIndex, source }`，source 为 `click` / `scroll` / `method` |
 | update:current | 选中下标变化，配合 `v-model:current` 使用 | `index: number` |
-| scrolltolower | 右侧内容区滚动触底，可用于分页加载 | 原生事件对象 |
+| scrolltolower | 右侧内容区滚动触底，可用于分页加载。分页场景建议各分组条数尽量均匀，并将 `estimatedGroupHeight` 调整为接近真实分组高度，以获得更稳定的滚动与锚定体验 | 原生事件对象 |
 
 ### Slots
 
@@ -116,7 +116,7 @@
 | 方法名 | 说明 | 参数 |
 | --- | --- | --- |
 | scrollToIndex | 程序化跳转到指定菜单 | `index: number` |
-| refresh | 重新测量布局。数据变更后组件会自动调用，插槽内容高度变化（如图片撑高）时可手动调用 | - |
+| refresh | 重新测量布局。数据变更后组件会自动调用，插槽内容高度变化（如图片撑高）时可手动调用；返回 Promise，在本轮测量完成后 resolve，可用于数据变更后的精确重定位 | - |
 
 **MenuDataItem 类型**
 

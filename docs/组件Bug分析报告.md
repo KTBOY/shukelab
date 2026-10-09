@@ -111,7 +111,7 @@ async function onItemClick(item: SkTabBarItem, index: number) {
 
 ## 二、sk-linkage-menu
 
-### 🔴 Bug 1：list 清空后残留脏状态，且可能对外 emit 非法下标
+### 🔴 Bug 1：list 清空后残留脏状态，且可能对外 emit 非法下标 ✅（1.0.7 已修复）
 
 **位置**：`sk-linkage-menu.vue` L409-L434（`refresh`）、L67（`.fill-last`）、L280-L291（`setCurrent`）
 

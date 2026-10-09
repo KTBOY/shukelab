@@ -34,7 +34,7 @@
 						},
 						{
 							"name": "异步与分页加载",
-							"show": true,
+							"show": false,
 							"path": "/pages/virtualMenuGanged/loadmore"
 						},
 						{

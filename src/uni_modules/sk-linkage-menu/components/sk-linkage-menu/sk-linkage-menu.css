@@ -38,6 +38,8 @@
 	width: 180rpx;
 	height: 100rpx;
 	position: absolute;
+	/* 滑块覆盖在选中项上方，不能拦截点击（否则"重复点击回位"到不了菜单项） */
+	pointer-events: none;
 	display: flex;
 	align-items: center;
 	justify-content: center;

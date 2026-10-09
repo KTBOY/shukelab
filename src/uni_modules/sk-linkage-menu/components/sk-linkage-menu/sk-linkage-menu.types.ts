@@ -41,8 +41,9 @@ export interface RectInfo {
 
 /** 组件对外暴露的实例方法（配合 ref 使用） */
 export interface SkLinkageMenuExpose {
-  /** 重新测量布局。数据异步更新后组件会自动调用，特殊场景（如字体加载、图片撑高）可手动触发 */
-  refresh: () => void
+  /** 重新测量布局。数据异步更新后组件会自动调用，特殊场景（如字体加载、图片撑高）可手动触发。
+   *  返回 Promise，在本轮测量完成后 resolve，可用于数据变更后的精确重定位 */
+  refresh: () => Promise<void>
   /** 程序化跳转到指定菜单下标 */
   scrollToIndex: (index: number) => void
 }

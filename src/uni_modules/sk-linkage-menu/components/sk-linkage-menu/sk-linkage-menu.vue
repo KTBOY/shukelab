@@ -9,6 +9,9 @@
  *    以等高占位符渲染，保证滚动条与锚点稳定的同时大幅减少节点数。
  * 3. 程序化滚动锁：点击左侧菜单触发的动画滚动过程中，屏蔽 scroll 事件
  *    对高亮的反向修改，避免滑块逐格抖动。
+ * 4. 精确落点：跳转前将当前位置到目标之间的分组整段渲染并测量，
+ *    以实测锚点换算目标位置（与估算高度无关）；着陆后再静默校正兜底，
+ *    长距离跳转也不会出现左右两侧错位。
 -->
 <template>
   <view class="sk-linkage-menu virtual-menu-ganged">
@@ -53,7 +56,7 @@
             :show-scrollbar="false"
             :style="{ height: `${virtualMenuHeight}px` }"
             :scroll-top="rightState.scrollTop"
-            :scroll-with-animation="scrollWithAnimation"
+            :scroll-with-animation="scrollWithAnimation && !state.silentFix"
             @scroll="onRightScroll"
             @scrolltolower="onScrollToLower"
           >
@@ -194,6 +197,8 @@ const state = reactive({
   fillHeight: 0,
   /** 首帧（首次测量+渲染）是否就绪 */
   booted: false,
+  /** 着陆静默补滚进行中：临时关闭右侧滚动动画 */
+  silentFix: false,
 })
 
 const leftState = reactive({
@@ -225,6 +230,31 @@ const virtualState = reactive({
   groupHeights: [] as number[],
 })
 
+/**
+ * 分组实测高度缓存：以 item.id 为键（无 id 时退化按下标），
+ * 分组动态插入 / 删除 / 排序后仍能正确对号入座。
+ * 注意：动态增删分组的场景必须为数据项提供唯一 id。
+ */
+const groupHeightCache = new Map<string, number>()
+
+/** 分组高度缓存键：id 与下标分属两个命名空间，避免数值 id 与下标碰撞 */
+const heightKeyOf = (index: number): string => {
+  const id = props.list[index]?.id
+  return id !== undefined ? `id:${id}` : `idx:${index}`
+}
+
+/**
+ * 最近一次布局测量结果（非响应式）：
+ * 滚动视口的视口相对 top + 各已渲染分组的视口相对位置，
+ * 供 computeExactGroupTop 换算内容区绝对坐标。
+ */
+const lastMeasure = {
+  /** 滚动视口（.right-scroll）的视口相对 top */
+  svTop: 0,
+  /** 已渲染分组下标 -> 视口相对位置与尺寸 */
+  rects: new Map<number, { top: number; height: number }>(),
+}
+
 /** 程序化滚动锁（非响应式即可） */
 const scrollLock = {
   locked: false,
@@ -235,6 +265,8 @@ const scrollLock = {
 }
 
 let refreshTimer: ReturnType<typeof setTimeout> | null = null
+/** 等待 refresh 完成的 resolver 队列：被防抖取代的调用顺延到下一轮完成时统一兑现 */
+let refreshResolvers: Array<() => void> = []
 let firstMeasured = false
 
 // ==================== 计算属性 ====================
@@ -290,13 +322,23 @@ const recomputeTops = () => {
   rightState.topArrList = tops
 }
 
-/** 将 groupHeights 对齐到 list 长度：新增分组用估算值，已有的保留实测值 */
+/**
+ * 将 groupHeights 对齐到 list：按当前顺序从 id 键缓存重建，
+ * 未测量的分组用估算值；已移除分组的缓存项同步淘汰，避免长期累积。
+ */
 const syncGroupHeights = () => {
-  const heights = virtualState.groupHeights
   const n = props.list.length
-  if (heights.length === n) return
-  if (heights.length > n) heights.length = n
-  while (heights.length < n) heights.push(props.estimatedGroupHeight)
+  const heights: number[] = new Array(n)
+  const alive = new Set<string>()
+  for (let i = 0; i < n; i++) {
+    const key = heightKeyOf(i)
+    alive.add(key)
+    heights[i] = groupHeightCache.get(key) ?? props.estimatedGroupHeight
+  }
+  for (const key of groupHeightCache.keys()) {
+    if (!alive.has(key)) groupHeightCache.delete(key)
+  }
+  virtualState.groupHeights = heights
   recomputeTops()
 }
 
@@ -332,10 +374,34 @@ const updateRenderRange = (scrollTop: number) => {
   }
 }
 
+/**
+ * 计算目标分组的精确锚点位置（px）：
+ * 以渲染窗口首组为参照，其内容区绝对位置由本次实测 rect 换算（与估算高度无关），
+ * 再累加参照组到目标之间各组的实测高度。长距离跳转也能精确落点。
+ * 数据不足时返回 undefined，调用方回退到估算 tops。
+ */
+const computeExactGroupTop = (index: number): number | undefined => {
+  const anchor = virtualState.start
+  const aRect = lastMeasure.rects.get(anchor)
+  if (!aRect || index < 0 || index >= virtualState.groupHeights.length) return undefined
+  const anchorAbsTop = aRect.top - lastMeasure.svTop + rightState.realScrollTop
+  let delta = 0
+  if (index >= anchor) {
+    for (let i = anchor; i < index; i++) delta += virtualState.groupHeights[i] || props.estimatedGroupHeight
+    return anchorAbsTop + delta
+  }
+  for (let i = index; i < anchor; i++) delta += virtualState.groupHeights[i] || props.estimatedGroupHeight
+  return Math.max(anchorAbsTop - delta, 0)
+}
+
 // ==================== 联动核心 ====================
 
 /** 更新选中项并对外派发事件 */
 const setCurrent = (index: number, source: ChangeSource, forceEmit = false) => {
+  // 越界下标直接丢弃：list 变短的防抖窗口内，旧 tops 反查可能得到非法下标，
+  // 必须先守卫再赋值，避免对外 emit 非法的 update:current
+  if (index < 0 || index >= props.list.length) return
+
   const changed = index !== leftState.currentIndex
   if (!changed && !forceEmit) return
 
@@ -358,16 +424,74 @@ const unlockScroll = () => {
   }
 }
 
+/**
+ * 跳动着陆收尾（修复长跳转落点偏移后左右长期错位）：
+ * 长距离跳转途径的分组可能仍是估算高度，导致落点偏离目标分组真实位置。
+ * 着陆后重测渲染窗口内的分组并重算 tops，偏差超容差则以无动画方式静默补滚，
+ * 并手动同步位置与高亮（无动画补滚在部分端不触发 scroll 事件）。
+ */
+const finalizeLanding = async (targetIndex: number) => {
+  if (scrollLock.locked) unlockScroll()
+  if (!props.virtual || !virtualState.ready) return
+  if (targetIndex < 0 || targetIndex >= props.list.length) return
+
+  const landedTop = rightState.realScrollTop
+  updateRenderRange(landedTop)
+  // 保证目标分组留在渲染窗口内，否则无法取得它的真实高度
+  if (targetIndex < virtualState.start) virtualState.start = targetIndex
+  if (targetIndex > virtualState.end) virtualState.end = targetIndex
+  await nextTick()
+  await measureLayout()
+
+  // 校正期间用户已手动滚动：放弃补滚，交给正常滚动联动
+  if (Math.abs(rightState.realScrollTop - landedTop) >= SCROLL_TOLERANCE) return
+
+  const target = computeExactGroupTop(targetIndex) ?? rightState.topArrList[targetIndex]
+  if (target === undefined || Math.abs(target - landedTop) < SCROLL_TOLERANCE) return
+
+  state.silentFix = true
+  rightState.scrollTop = landedTop
+  await nextTick()
+  rightState.scrollTop = target
+  await nextTick()
+  state.silentFix = false
+
+  rightState.realScrollTop = target
+  setCurrent(targetIndex, 'method')
+  // 无动画补滚在部分端不触发 scroll 事件，手动校正渲染窗口
+  updateRenderRange(target)
+}
+
+/**
+ * 滚动锚定补偿：当前滚动位置上方的分组回填真实高度后，
+ * 视口内容会被推/拉（估算值与实测值偏差越大跳动越明显），
+ * 按累计差值无动画调整滚动位置，保持视口稳定。
+ */
+const compensateAnchor = async (delta: number) => {
+  // 程序化滚动期间不补偿，落点由着陆收尾负责
+  if (scrollLock.locked) return
+  state.silentFix = true
+  rightState.scrollTop = rightState.realScrollTop
+  await nextTick()
+  rightState.scrollTop = Math.max(rightState.realScrollTop + delta, 0)
+  await nextTick()
+  state.silentFix = false
+  rightState.realScrollTop = rightState.scrollTop
+  if (props.virtual && virtualState.ready) updateRenderRange(rightState.realScrollTop)
+}
+
 /** 驱动右侧滚动到指定分组 */
 const scrollRightTo = async (index: number) => {
-  // 先把目标分组纳入渲染窗口并渲染、测量，避免落点是占位空白、目标偏移失准
+  // 先把当前位置到目标之间的分组整段纳入渲染窗口并渲染、测量：
+  // 长跳转途经的分组可能还是估算高度，实测后目标落点才精确
   scrollLock.locked = true
   scrollLock.targetIndex = index
   if (props.virtual && virtualState.ready) updateRenderRange(rightState.realScrollTop)
   await nextTick()
   await measureLayout()
 
-  const target = rightState.topArrList[index]
+  // 优先使用实测推算的精确落点；数据不足（如尚未测量）时回退估算 tops
+  const target = computeExactGroupTop(index) ?? rightState.topArrList[index]
   if (target === undefined) {
     unlockScroll()
     return
@@ -386,9 +510,8 @@ const scrollRightTo = async (index: number) => {
 
   if (scrollLock.timer) clearTimeout(scrollLock.timer)
   scrollLock.timer = setTimeout(() => {
-    unlockScroll()
-    // 兜底解锁后收回跳转期间多渲染的分组
-    if (props.virtual && virtualState.ready) updateRenderRange(rightState.realScrollTop)
+    // 兜底：动画未在预期内到达目标（或被中断），直接做着陆收尾校正
+    finalizeLanding(scrollLock.targetIndex)
   }, SCROLL_LOCK_TIMEOUT)
 }
 
@@ -403,15 +526,22 @@ const onRightScroll = (e: any) => {
   const scrollTop: number = e.detail.scrollTop
   rightState.realScrollTop = scrollTop
 
-  // 到达目标后先解锁，随后的窗口更新即可收回跳转期间多渲染的分组
+  // 到达目标：解锁并做着陆收尾；本次事件不再反向修改高亮，避免滑块闪动
   if (scrollLock.locked && Math.abs(scrollTop - scrollLock.target) < SCROLL_TOLERANCE) {
+    const targetIndex = scrollLock.targetIndex
     unlockScroll()
+    if (props.virtual && virtualState.ready) updateRenderRange(scrollTop)
+    finalizeLanding(targetIndex)
+    return
   }
 
   if (props.virtual && virtualState.ready) updateRenderRange(scrollTop)
 
   // 程序化滚动期间不反向修改高亮，避免滑块逐格抖动
   if (scrollLock.locked) return
+
+  // 占位符随滚动替换为真实内容：节流回填真实高度并锚定补偿，避免视口跳动
+  if (props.virtual && virtualState.ready) scheduleScrollMeasure()
 
   const tops = rightState.topArrList
   let index = 0
@@ -432,6 +562,26 @@ const onScrollToLower = (e: any) => {
 // ==================== 布局测量 ====================
 
 /**
+ * 滚动期间的测量调度：占位符随滚动替换为真实内容后其真实高度需要及时回填，
+ * 否则 tops 失准、视口随分组"塌缩"跳动。滚动中节流执行，停止后兜底补一次。
+ */
+let scrollMeasureTimer: ReturnType<typeof setTimeout> | null = null
+let lastScrollMeasure = 0
+const scheduleScrollMeasure = () => {
+  const now = Date.now()
+  if (now - lastScrollMeasure >= 150) {
+    lastScrollMeasure = now
+    measureLayout()
+  }
+  if (scrollMeasureTimer) clearTimeout(scrollMeasureTimer)
+  scrollMeasureTimer = setTimeout(() => {
+    scrollMeasureTimer = null
+    lastScrollMeasure = Date.now()
+    measureLayout()
+  }, 200)
+}
+
+/**
  * 测量左侧菜单项与"当前渲染窗口内"的右侧分组尺寸。
  * 分组顶部偏移不靠全量测量，而由 recomputeTops 前缀和得出；
  * 这里只把已渲染分组的真实高度回填，避免大数据量下全量渲染/全量测量卡顿。
@@ -441,8 +591,15 @@ const measureLayout = (): Promise<void> => {
     const query = uni.createSelectorQuery().in(instance?.proxy)
     query.selectAll('.item').boundingClientRect()
     query.selectAll('.item-parent').boundingClientRect()
+    query.select('.right-scroll').boundingClientRect()
     query.exec((res: any[]) => {
-      const [itemRects, groupRects] = res || []
+      const [itemRects, groupRects, svRect] = res || []
+
+      // 记录本次测量的视口基准与各分组视口相对位置，供精确落点推算
+      lastMeasure.rects.clear()
+      if (svRect && !Array.isArray(svRect) && svRect.top !== undefined) {
+        lastMeasure.svTop = svRect.top
+      }
 
       if (itemRects?.length) {
         leftState.itemRects = itemRects
@@ -450,18 +607,32 @@ const measureLayout = (): Promise<void> => {
       }
       if (groupRects?.length) {
         let changed = false
+        /** 当前滚动位置上方的分组高度差累计，用于锚定补偿 */
+        let anchorDelta = 0
+        const prevTops = rightState.topArrList
         for (const rect of groupRects) {
           // 占位符无 id；仅回填真实渲染的分组
           const id: string = (rect as RectInfo & { id?: string }).id || ''
           if (!id.startsWith('right-')) continue
           const index = Number(id.slice('right-'.length))
           const height = rect.height
-          if (height > 0 && virtualState.groupHeights[index] !== height) {
+          if (height <= 0 || index < 0 || index >= props.list.length) continue
+          if (index >= virtualState.groupHeights.length) continue
+          lastMeasure.rects.set(index, { top: rect.top, height })
+          // 同步写入 id 键缓存：分组顺序变化后 syncGroupHeights 仍能取回该值
+          groupHeightCache.set(heightKeyOf(index), height)
+          if (virtualState.groupHeights[index] !== height) {
+            const oldHeight = virtualState.groupHeights[index] || props.estimatedGroupHeight
+            // 完整处于当前滚动位置上方的分组高度变化会推/拉视口内容，记录差值
+            if (prevTops[index] !== undefined && prevTops[index] + oldHeight <= rightState.realScrollTop) {
+              anchorDelta += height - oldHeight
+            }
             virtualState.groupHeights[index] = height
             changed = true
           }
         }
         if (changed) recomputeTops()
+        if (anchorDelta !== 0) compensateAnchor(anchorDelta)
         const lastHeight = virtualState.groupHeights[props.list.length - 1] || props.estimatedGroupHeight
         state.fillHeight = Math.max(props.virtualMenuHeight - lastHeight, 0)
       }
@@ -470,37 +641,67 @@ const measureLayout = (): Promise<void> => {
   })
 }
 
+/** 兑现所有等待中的 refresh Promise */
+const flushRefreshResolvers = () => {
+  const list = refreshResolvers
+  refreshResolvers = []
+  list.forEach((resolve) => resolve())
+}
+
 /**
  * 重新测量布局（防抖）。
- * 流程：退出虚拟渲染以渲染全部分组 -> 等待渲染 -> 测量 -> 恢复虚拟渲染。
+ * 流程：对齐高度缓存 -> 渲染可视窗口 -> 测量 -> 校正渲染窗口。
  * 数据异步更新后组件自动调用；插槽内容高度变化等场景可通过 ref 手动调用。
+ * 返回 Promise，在本轮重新测量完成后 resolve，便于数据变更后精确重定位。
  */
-const refresh = () => {
-  if (refreshTimer) clearTimeout(refreshTimer)
-  refreshTimer = setTimeout(async () => {
-    if (!props.list.length) return
+const refresh = (): Promise<void> => {
+  return new Promise((resolve) => {
+    refreshResolvers.push(resolve)
+    if (refreshTimer) clearTimeout(refreshTimer)
+    refreshTimer = setTimeout(async () => {
+      // list 清空：重置全部派生状态，避免残留脏数据
+      //（旧 tops 反查出非法下标并误发 update:current、empty 插槽旁挂着可滚动空白等）
+      if (!props.list.length) {
+        unlockScroll()
+        state.fillHeight = 0
+        rightState.scrollTop = 0
+        rightState.realScrollTop = 0
+        rightState.topArrList = []
+        groupHeightCache.clear()
+        lastMeasure.svTop = 0
+        lastMeasure.rects.clear()
+        virtualState.groupHeights = []
+        virtualState.ready = false
+        virtualState.start = 0
+        virtualState.end = 0
+        leftState.currentIndex = 0
+        flushRefreshResolvers()
+        return
+      }
 
-    // list 变短后的下标越界保护
-    if (leftState.currentIndex >= props.list.length) {
-      setCurrent(0, 'method')
-    }
+      // list 变短后的下标越界保护
+      if (leftState.currentIndex >= props.list.length) {
+        setCurrent(0, 'method')
+      }
 
-    // 不再退出虚拟渲染做全量渲染：估算高度撑起全列表，只渲染可视窗口
-    syncGroupHeights()
-    virtualState.ready = true
-    updateRenderRange(rightState.realScrollTop)
-    await nextTick()
-    await measureLayout()
-    // 回填真实高度后窗口可能变化，再校正一次
-    updateRenderRange(rightState.realScrollTop)
-    state.booted = true
+      // 不再退出虚拟渲染做全量渲染：估算高度撑起全列表，只渲染可视窗口
+      syncGroupHeights()
+      virtualState.ready = true
+      updateRenderRange(rightState.realScrollTop)
+      await nextTick()
+      await measureLayout()
+      // 回填真实高度后窗口可能变化，再校正一次
+      updateRenderRange(rightState.realScrollTop)
+      state.booted = true
 
-    // 首次测量完成后，若初始下标非 0 则定位到对应分组
-    if (!firstMeasured) {
-      firstMeasured = true
-      if (leftState.currentIndex > 0) scrollRightTo(leftState.currentIndex)
-    }
-  }, REFRESH_DEBOUNCE)
+      // 首次测量完成后，若初始下标非 0 则定位到对应分组
+      if (!firstMeasured) {
+        firstMeasured = true
+        if (leftState.currentIndex > 0) scrollRightTo(leftState.currentIndex)
+      }
+      flushRefreshResolvers()
+    }, REFRESH_DEBOUNCE)
+  })
 }
 
 // ==================== 对外方法 ====================
@@ -550,6 +751,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (refreshTimer) clearTimeout(refreshTimer)
   if (scrollLock.timer) clearTimeout(scrollLock.timer)
+  if (scrollMeasureTimer) clearTimeout(scrollMeasureTimer)
+  flushRefreshResolvers()
 })
 </script>
 

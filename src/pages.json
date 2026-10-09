@@ -41,15 +41,15 @@
 			}
 		},
 		{
-			"path": "pages/virtualMenuGanged/loadmore",
-			"style": {
-				"navigationBarTitleText": "异步与分页加载"
-			}
-		},
-		{
 			"path": "pages/virtualMenuGanged/with-tabbar",
 			"style": {
 				"navigationBarTitleText": "搭配底部 tabBar"
+			}
+		},
+		{
+			"path": "pages/virtualMenuGanged/batch1-verify",
+			"style": {
+				"navigationBarTitleText": "P0修复验证"
 			}
 		},
 		// {
