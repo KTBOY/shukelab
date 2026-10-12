@@ -74,7 +74,7 @@
  * @tutorial https://ext.dcloud.net.cn/plugin?name=sk-tab-bar
  *
 	 * @property {SkTabBarItem[]} data tab 数据源
-	 * @property {String} mode 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）/ canvas 画布绘制融合内凹（真实透明轮廓，任意背景可用；小程序需基础库 2.9.0+，background 仅纯色，失败自动回退 plain 观感；开发者工具模拟器不支持 canvas 同层渲染，自动回退 plain 观感，真机不受影响）/ plain 纯净模式。注：filter 融合为内部保留形态，暂不开放
+	 * @property {String} mode 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）/ canvas 画布绘制融合内凹（真实透明轮廓，任意背景可用；小程序需基础库 2.9.0+，background 仅纯色，失败自动回退 plain 观感；开发者工具模拟器不支持 canvas 同层渲染，图片图标时由画布自绘圆钮与 tab 项以预览真实观感，字体图标/角标/自定义 item 插槽无法自绘则回退 plain；真机不受影响）/ plain 纯净模式。注：filter 融合为内部保留形态，暂不开放
  * @property {Number} current 当前选中下标，支持 v-model:current
  * @property {String} outerApertureBorderColor 弧形外光圈颜色，需与页面背景一致（默认 #f2f3f7）
  * @property {String} iconBackgroundColor 选中圆形按钮背景色（默认 rgb(3, 3, 3)）
@@ -101,10 +101,17 @@ import type { SkTabBarBeforeChange, SkTabBarChangeEvent, SkTabBarItem, SkTabBarM
 import {
 	CANVAS_CONST,
 	createFrameDriver,
+	drawKnob,
 	drawSilhouette,
+	drawTabItems,
 	knobCxFor,
 	makeCssEase,
+	trackDuration,
+	trackPos,
 	type FrameDriver,
+	type ItemPaint,
+	type KnobPaint,
+	type KnobTrack,
 	type SilhouetteGeometry
 } from './sk-tab-bar-canvas'
 
@@ -124,7 +131,7 @@ const props = defineProps({
 		type: Number,
 		default: 0
 	},
-	/** 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）；canvas 画布绘制融合内凹，真实透明轮廓、任意背景可用（小程序需基础库 2.9.0+，background 仅纯色，取节点失败自动回退 plain 观感；开发者工具模拟器 canvas 非同层会遮挡 tab 项，自动回退 plain 观感）；plain 纯净模式，实心栏 + 圆钮悬浮，不依赖背景色。filter 融合为内部保留形态，暂不开放 */
+	/** 形态：concave 伪类凹陷弧形（默认，光圈需与页面背景同色）；canvas 画布绘制融合内凹，真实透明轮廓、任意背景可用（小程序需基础库 2.9.0+，background 仅纯色，取节点失败自动回退 plain 观感；开发者工具模拟器 canvas 非同层会遮挡 tab 项，图片图标时由画布自绘圆钮与 tab 项，字体图标/角标/自定义插槽则回退 plain 观感）；plain 纯净模式，实心栏 + 圆钮悬浮，不依赖背景色。filter 融合为内部保留形态，暂不开放 */
 	mode: {
 		type: String as PropType<SkTabBarMode>,
 		default: 'concave'
@@ -233,6 +240,12 @@ watch(
 	}
 )
 
+/**
+ * 本次切换的动画时长（ms）。连点时按剩余距离缩短，与 canvas 补间共用同一值，
+ * 保证 view 层圆钮（CSS transition）和画布凹口（rAF）始终同步落位。
+ */
+const switchDur = ref(props.duration)
+
 /** 根节点样式：通过 CSS 变量向下传递主题配置；--n 为选中下标，bump 平移与 filter 融合凸起平移共用 */
 const rootStyle = computed<CSSProperties>(() => ({
 	'--length': list.value.length || 1,
@@ -244,7 +257,7 @@ const rootStyle = computed<CSSProperties>(() => ({
 	'--active-text-color': props.activeTextColor,
 	'--font-size': props.fontSize,
 	'--c': props.height,
-	'--duration': `${props.duration}ms`,
+	'--duration': `${switchDur.value}ms`,
 	zIndex: props.zIndex
 }))
 
@@ -259,19 +272,45 @@ let canvasNode: any = null
 let canvasCtx: any = null
 let frameDriver: FrameDriver | null = null
 let silhouette: SilhouetteGeometry | null = null
-let currentCx = 0
+/** 圆钮轨迹（下标空间）：canvas 与 view 层共用，切换只改它，绘制按它取值 */
+let track: KnobTrack = { from: 0, to: 0, t0: 0, dur: Math.max(props.duration, 1) }
 let animId: number | null = null
 let canvasDpr = 1
 let resizeTimer: any = null
 let degradeWarned = false
 const cssEase = makeCssEase()
 
+/* ---------- 开发者工具自绘 tab 项 ---------- */
+/** 自绘参数；为空即不画（真机画布在 DOM 之下不需要，或模拟器已降级为 plain 观感） */
+let itemPaint: ItemPaint[] = []
+let knobPaint: KnobPaint | null = null
+/** 图标位图缓存：src → Image；值为 null 表示加载失败，不再重试 */
+const imgCache = new Map<string, any>()
+
+/** 取已就绪的图标位图；首次调用发起加载，onload 后补画一帧 */
+function getImage(src: string): any {
+	if (!src || !canvasNode || typeof canvasNode.createImage !== 'function') return null
+	let img = imgCache.get(src)
+	if (img === undefined) {
+		img = canvasNode.createImage()
+		img.__loaded = false
+		img.onload = () => {
+			img.__loaded = true
+			drawTracked()
+		}
+		img.onerror = () => imgCache.set(src, null)
+		imgCache.set(src, img)
+		img.src = src
+	}
+	return img && img.__loaded ? img : null
+}
+
 function degrade(reason: 'init' | 'devtools' = 'init') {
 	if (!degradeWarned) {
 		degradeWarned = true
 		console.warn(
 			reason === 'devtools'
-				? '[sk-tab-bar] 开发者工具模拟器不支持 canvas 2d 同层渲染，画布会盖住 tab 项，已降级为 plain 观感；真机不受影响。'
+				? '[sk-tab-bar] 开发者工具模拟器不支持 canvas 2d 同层渲染，且当前 tab 项无法由画布自绘（字体图标 / 角标 / 自定义 item 插槽），已降级为 plain 观感；真机不受影响。'
 				: '[sk-tab-bar] canvas 形态初始化失败，已降级为 plain 观感（实心栏）。小程序需基础库 2.9.0+。'
 		)
 	}
@@ -303,27 +342,87 @@ function drawAt(cx: number) {
 	// #endif
 	canvasCtx.clearRect(0, 0, silhouette.width, silhouette.height)
 	drawSilhouette(canvasCtx, silhouette, cx, props.background)
-	currentCx = cx
 }
 
-/** 切 tab 时平移凸包；缓动对齐 __bump 的 CSS ease，避免中途错位露缝 */
-function animateKnobTo(target: number) {
-	if (!frameDriver || !silhouette) {
-		drawAt(target)
-		return
-	}
+/** 按当前轨迹画一帧；缓动与 __bump 的 CSS transition 同拍，两层不会中途错位 */
+function drawTracked() {
+	if (!silhouette || !canvasCtx) return
+	const pos = trackPos(track, cssEase, Date.now())
+	const cx = knobCxFor(pos, list.value.length, silhouette.width)
+	drawAt(cx)
+	/* 模拟器里画布遮住 DOM 圆钮与图标，按 DOM 实测几何再画一份 */
+	if (knobPaint) drawKnob(canvasCtx, knobPaint, cx)
+	if (itemPaint.length) drawTabItems(canvasCtx, itemPaint, pos, getImage)
+}
+
+/** '26rpx' / '13px' → CSS px */
+function toPx(size: string): number {
+	const num = parseFloat(size)
+	return /rpx$/.test(size) ? uni.upx2px(num) : num
+}
+
+/**
+ * 由 DOM 实测几何拼出画布自绘参数；返回空数组表示当前形态无法忠实还原，应降级
+ * 画不出来的东西：字体图标（组件只拿到 class 名，码点在接入方 CSS 里）、角标、item 插槽内容
+ */
+function buildItemPaint(wrapRects: any[], iconRects: any[], textRects: any[], canvasLeft: number, canvasTop: number): ItemPaint[] {
+	const n = list.value.length
+	if (!n || wrapRects.length !== n || iconRects.length !== n || textRects.length !== n) return []
+	if (list.value.some((it) => it.iconType === 'font' || it.dot || getBadgeText(it))) return []
+	const ai = activeIndex.value
+	const idleIdx = ai === 0 ? Math.min(1, n - 1) : 0
+	const center = (r: any) => ({ x: r.left + r.width / 2 - canvasLeft, y: r.top + r.height / 2 - canvasTop })
+	const idleWrap = n > 1 ? center(wrapRects[idleIdx]) : center(wrapRects[ai])
+	const actWrap = center(wrapRects[ai])
+	const idleText = n > 1 ? center(textRects[idleIdx]) : center(textRects[ai])
+	const actText = center(textRects[ai])
+	const fontSize = toPx(props.fontSize)
+	return list.value.map((it, i) => {
+		const icon = center(iconRects[i])
+		return {
+			index: i,
+			cx: icon.x,
+			iconIdleY: idleWrap.y,
+			iconActiveY: actWrap.y,
+			iconW: iconRects[i].width,
+			iconH: iconRects[i].height,
+			textIdleY: idleText.y,
+			textActiveY: actText.y,
+			text: it.text || '',
+			fontSize,
+			textColor: props.textColor,
+			activeTextColor: props.activeTextColor,
+			idleSrc: String(it.icon || ''),
+			activeSrc: String(it.active || it.icon || ''),
+			active: i === ai,
+			alpha: it.disabled ? 0.5 : 1
+		}
+	})
+}
+
+/** 沿轨迹补间：只在动画期间占用 rAF，落位即停（避免持续绘制空转） */
+function startTween() {
+	if (!frameDriver) return
 	if (animId !== null) frameDriver.cancel(animId)
-	const from = currentCx
-	const t0 = Date.now()
-	const dur = Math.max(props.duration, 1)
 	const step = () => {
-		const t = Math.min((Date.now() - t0) / dur, 1)
-		const cx = t < 1 ? from + (target - from) * cssEase(t) : target
-		drawAt(cx)
-		if (t < 1) animId = frameDriver ? frameDriver.request(step) : null
-		else animId = null
+		animId = null
+		drawTracked()
+		if (Date.now() - track.t0 < track.dur) animId = frameDriver?.request(step) ?? null
 	}
 	animId = frameDriver.request(step)
+}
+
+/**
+ * 发起一次切换：起点取当前轨迹位置（打断处续跑），时长按剩余距离等比取时，
+ * 同一个值同时下发给 CSS（--duration）与画布补间，两层同步落位
+ */
+function moveTo(index: number) {
+	const now = Date.now()
+	const from = trackPos(track, cssEase, now)
+	const dur = trackDuration(Math.abs(index - from), props.duration)
+	track = { from, to: index, t0: now, dur }
+	switchDur.value = dur
+	startTween()
 }
 
 function teardownCanvas() {
@@ -333,21 +432,23 @@ function teardownCanvas() {
 	canvasCtx = null
 	frameDriver = null
 	silhouette = null
+	itemPaint = []
+	knobPaint = null
+	imgCache.clear()
 }
 
 /** 查询节点与几何并画首帧；尺寸未就绪时重试，仍失败则降级 */
 function initCanvas(retry = 0) {
-	/* 模拟器里 canvas 恒盖在 view 之上（非同层），tab 项会被白色栏体挡住，直接走 plain 观感 */
-	if (isDevtoolsSimulator()) {
-		degrade('devtools')
-		return
-	}
 	teardownCanvas()
 	const query = uni.createSelectorQuery().in(instance?.proxy ?? null)
 	query.select(`#${canvasId}`).fields({ node: true, size: true }, () => undefined)
 	query.select('.sk-tab-bar__canvas').boundingClientRect()
 	query.select('.sk-tab-bar').boundingClientRect()
 	query.select('.sk-tab-bar__bump').boundingClientRect()
+	/* 模拟器自绘要用 DOM 实测几何：图标上浮容器、图标本身、文字 */
+	query.selectAll('.sk-tab-bar__icon-wrap').boundingClientRects()
+	query.selectAll('.sk-tab-bar__icon').boundingClientRects()
+	query.selectAll('.sk-tab-bar__text').boundingClientRects()
 	query.exec((res: any[]) => {
 		const retryOrDegrade = () => {
 			if (retry < 3) setTimeout(() => initCanvas(retry + 1), 100)
@@ -358,6 +459,23 @@ function initCanvas(retry = 0) {
 			const canvasRect = res?.[1]
 			const rootRect = res?.[2]
 			const bumpRect = res?.[3]
+			const asRects = (v: any) => (Array.isArray(v) ? v : v ? [v] : [])
+			const devtools = isDevtoolsSimulator()
+			const paint = devtools
+				? buildItemPaint(
+						asRects(res[4]),
+						asRects(res[5]),
+						asRects(res[6]),
+						canvasRect?.left || 0,
+						canvasRect?.top || 0
+					)
+				: []
+			/* 模拟器里画布恒盖在 view 之上：能量到几何并画得出来就保留 canvas 真镂空观感，
+			   否则（字体图标 / 角标 / 用了 item 插槽）退回 plain 观感，至少 tab 项可见 */
+			if (devtools && !paint.length) {
+				degrade('devtools')
+				return
+			}
 			const node = nodeField?.node
 			const cssW = canvasRect?.width || nodeField?.width || 0
 			const cssH = canvasRect?.height || nodeField?.height || 0
@@ -378,7 +496,7 @@ function initCanvas(retry = 0) {
 			node.width = Math.round(cssW * canvasDpr)
 			node.height = Math.round(cssH * canvasDpr)
 			// #endif
-			silhouette = {
+			const geo: SilhouetteGeometry = {
 				width: cssW,
 				height: cssH,
 				barTop: rootRect.top - canvasRect.top,
@@ -389,13 +507,28 @@ function initCanvas(retry = 0) {
 				filletR: uni.upx2px(CANVAS_CONST.filletRpx),
 				cornerR: uni.upx2px(CANVAS_CONST.cornerRpx)
 			}
+			silhouette = geo
 			frameDriver = createFrameDriver(
 				typeof node.requestAnimationFrame === 'function' ? node.requestAnimationFrame.bind(node) : undefined,
 				typeof node.cancelAnimationFrame === 'function' ? node.cancelAnimationFrame.bind(node) : undefined
 			)
+			/* 模拟器里圆钮与 tab 项都被画布盖住，按实测几何由画布补画；真机留空交给 DOM */
+			itemPaint = paint
+			knobPaint = paint.length
+				? {
+						cy: geo.knobCy,
+						r: bumpRect.width / 2 - 0.5,
+						ring: uni.upx2px(10),
+						fill: props.iconBackgroundColor,
+						ringColor: props.outerApertureBorderColor
+					}
+				: null
 			canvasDegraded.value = false
-			currentCx = knobCxFor(activeIndex.value, list.value.length, cssW)
-			drawAt(currentCx)
+			const now = Date.now()
+			/* 补间中就沿轨迹继续画（resize/重建不该把圆钮瞬移到终点），静止时对齐到当前选中项 */
+			if (now - track.t0 < track.dur) startTween()
+			else track = { from: activeIndex.value, to: activeIndex.value, t0: now, dur: 1 }
+			drawTracked()
 		} catch (e) {
 			retryOrDegrade()
 		}
@@ -408,15 +541,13 @@ function handleWindowResize() {
 	resizeTimer = setTimeout(() => initCanvas(), 150)
 }
 
-// 选中变化：仅平移凸包（不重建几何）
-watch(activeIndex, (index) => {
-	if (props.mode === 'canvas' && silhouette) animateKnobTo(knobCxFor(index, list.value.length, silhouette.width))
-})
+// 选中变化：只改轨迹（非 canvas 形态同样要走，CSS 靠 --duration 与画布同拍）
+watch(activeIndex, (index) => moveTo(index))
 // 栏色变化：仅重绘
 watch(
 	() => props.background,
 	() => {
-		if (props.mode === 'canvas') drawAt(currentCx)
+		if (props.mode === 'canvas') drawTracked()
 	}
 )
 // 尺寸/数量/形态变化：全量重建或卸载

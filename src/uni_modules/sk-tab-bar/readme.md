@@ -148,10 +148,10 @@ GitHub 上「凹陷弧形 tabBar」主要有三种实现流派：①伪类 + box
 
 - 微信小程序需 **canvas 2d（基础库 ≥2.9.0）**；H5 / App-vue 通过 `createSelectorQuery().fields({node:true})` 取节点。
 - **nvue 页面不支持**（无 DOM canvas / SelectorQuery node）。
-- **开发者工具模拟器不支持 canvas 同层渲染**（画布恒盖在 view 之上，会遮住 tab 项，只剩选中图标从凹口透出），组件检测到 `platform === 'devtools'` 会自动降级为 plain 观感并 `console.warn` 提示，**真机不受影响**；canvas 形态的实际观感请以真机为准。
+- **开发者工具模拟器不支持 canvas 同层渲染**（画布恒盖在 view 之上，会遮住 tab 项）。检测到 `platform === 'devtools'` 时：tab 项为**图片图标**则由画布按 DOM 实测几何自绘圆钮、图标与文字，模拟器里可直接预览 canvas 真镂空观感；用了**字体图标、角标或自定义 `item` 插槽**（组件拿不到码点与内容，画不出来）则自动降级为 plain 观感并 `console.warn` 提示。**真机不受影响**——画布在 DOM 之下，圆钮与图标一律由 DOM 渲染。
 - `background` 在 canvas 模式下**仅支持纯色**（hex/rgb/rgba），传渐变字符串在小程序端会静默失败。
 - 取节点失败 / 尺寸未就绪 / 绘制异常时**自动降级为 plain 观感**（实心栏），并 `console.warn` 提示，任何端都不会出现整条 tabBar 消失。
-- 切换动画的缓动已对齐 `__bump` 的 CSS `ease`，避免深色钮与画布轮廓中途错位；窗口 resize / 旋转 / `height`、`data` 变化会自动重建重绘。
+- 切换动画由一条**下标空间轨迹**统一驱动：画布 rAF 与 `__bump` 的 CSS `transition` 共用同一时长与 `ease` 缓动，不会中途错位；连点时按剩余距离等比取时（下限为 `duration` 的 35%），圆钮不再来回折返、能即时落位。窗口 resize / 旋转 / `height`、`data` 变化会自动重建重绘且不瞬移。
 - 小程序真机需抽测：低端 Android 同层渲染是否盖层或吞点击、iOS 橡皮筋滚动、从二级页返回画布是否空白。**开发者工具模拟器不代表真机**。
 
 **页面背景为图片/渐变等复杂背景、又想要内凹观感时，推荐 `mode="canvas"`**（真透明 + 内凹）；只想要极简则用 `plain`。三种形态在纯色 / 深色 / 渐变 / 图片背景下的直观对比见 demo 页 `pages/tabBarDemo/filter`。
@@ -173,7 +173,7 @@ GitHub 上「凹陷弧形 tabBar」主要有三种实现流派：①伪类 + box
 | fontSize | `String` | `26rpx` | 文字字号 |
 | height | `String` | `120rpx` | tabBar 高度，同时决定圆形按钮直径 |
 | zIndex | `Number` | `10` | 层级 |
-| duration | `Number` | `500` | 切换动画时长（ms） |
+| duration | `Number` | `500` | 切换动画时长（ms）；补间中途改选时按剩余距离等比缩短（不低于 35%），避免圆钮来回折返 |
 | fixed | `Boolean` | `true` | 是否固定在页面底部 |
 | placeholder | `Boolean` | `false` | fixed 时是否生成同高占位，防止遮挡页面内容 |
 | badgeMax | `Number` | `99` | 数字角标上限，超出显示 `badgeMax+` |

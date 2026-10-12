@@ -42,6 +42,128 @@ export function knobCxFor(index: number, count: number, width: number): number {
 }
 
 /**
+ * 补间轨迹（下标空间）。canvas 凸包与 view 层圆钮（CSS transition）共用这一条时间线，
+ * 两层才不会在连续切换时中途错位；下标空间还让栏宽变化（resize / 折叠屏）自动等比适配。
+ */
+export interface KnobTrack {
+	/** 起点下标（可为小数，即被打断时的位置） */
+	from: number
+	/** 终点下标 */
+	to: number
+	/** 起始时间戳（ms） */
+	t0: number
+	/** 本次时长（ms） */
+	dur: number
+}
+
+/** 打断后时长按剩余距离等比取时，下限为 duration 的该比例 */
+export const MIN_DURATION_RATIO = 0.35
+
+/**
+ * 本次切换应用的时长：走满一个位距仍是完整 duration（观感不变），
+ * 打断时按剩余距离缩短。若每次都重跑整条 duration 的 ease，
+ * 起步段几乎不动，连点会让圆钮在两 tab 间来回折返、迟迟落不到目标。
+ */
+export function trackDuration(dist: number, duration: number): number {
+	const base = Math.max(duration, 1)
+	return Math.max(base * MIN_DURATION_RATIO, Math.min(base, dist * base))
+}
+
+/** 轨迹在 now 时刻的下标（ease 取 CSS 默认 ease 的贝塞尔，与 view 层 transition 同拍） */
+export function trackPos(track: KnobTrack, ease: (x: number) => number, now: number): number {
+	const p = Math.min(Math.max((now - track.t0) / track.dur, 0), 1)
+	return p >= 1 ? track.to : track.from + (track.to - track.from) * ease(p)
+}
+
+/* ---------- 开发者工具自绘 tab 项 ----------
+   模拟器里 canvas 非同层、恒盖在 view 之上，DOM 圆钮/图标/文字会被栏体遮没，
+   故由画布按 DOM 实测几何再画一份。几何取自 boundingClientRect，避免与 CSS 两处对齐。 */
+
+/** 单个 tab 项的绘制参数（CSS px，画布坐标系） */
+export interface ItemPaint {
+	/** 对应下标（算激活度用） */
+	index: number
+	/** 图标与文字中心 x */
+	cx: number
+	/** 图标中心 y：未选中 / 选中（选中时上浮进圆钮） */
+	iconIdleY: number
+	iconActiveY: number
+	/** 图标绘制尺寸 */
+	iconW: number
+	iconH: number
+	/** 文字中心 y：未选中 / 选中 */
+	textIdleY: number
+	textActiveY: number
+	/** 文字内容、字号与两态颜色 */
+	text: string
+	fontSize: number
+	textColor: string
+	activeTextColor: string
+	/** 两态图标源（active 缺省时同 icon） */
+	idleSrc: string
+	activeSrc: string
+	/** 当前是否为选中项（决定取哪一态图，与 view 层三元表达式同语义） */
+	active: boolean
+	/** 禁用项整体半透明 */
+	alpha: number
+}
+
+/** 深色圆钮绘制参数 */
+export interface KnobPaint {
+	/** 圆心 y */
+	cy: number
+	/** 元素外半径（含描边环） */
+	r: number
+	/** 描边环宽 */
+	ring: number
+	/** 钮心色（--bg）与环色（--color） */
+	fill: string
+	ringColor: string
+}
+
+/** 画深色圆钮：先铺环再铺心，等价于 view 的 border + background */
+export function drawKnob(ctx: any, k: KnobPaint, cx: number): void {
+	ctx.fillStyle = k.ringColor
+	ctx.beginPath()
+	ctx.arc(cx, k.cy, k.r, 0, Math.PI * 2)
+	ctx.fill()
+	ctx.fillStyle = k.fill
+	ctx.beginPath()
+	ctx.arc(cx, k.cy, Math.max(k.r - k.ring, 0), 0, Math.PI * 2)
+	ctx.fill()
+}
+
+/**
+ * 画一组 tab 项的图标与文字。
+ * pos 为补间中的浮点下标，激活度取 1 - |pos - i|，与 view 层 CSS transition 同步落位
+ */
+export function drawTabItems(
+	ctx: any,
+	items: ItemPaint[],
+	pos: number,
+	getImage: (src: string) => any
+): void {
+	ctx.textAlign = 'center'
+	ctx.textBaseline = 'middle'
+	items.forEach((it) => {
+		const k = Math.max(0, Math.min(1, 1 - Math.abs(pos - it.index)))
+		ctx.globalAlpha = it.alpha
+		const img = getImage(it.active ? it.activeSrc : it.idleSrc)
+		if (img) {
+			const cy = it.iconIdleY + (it.iconActiveY - it.iconIdleY) * k
+			ctx.drawImage(img, it.cx - it.iconW / 2, cy - it.iconH / 2, it.iconW, it.iconH)
+		}
+		if (k > 0.01 && it.text) {
+			ctx.globalAlpha = it.alpha * k
+			ctx.fillStyle = it.active ? it.activeTextColor : it.textColor
+			ctx.font = `bold ${it.fontSize}px sans-serif`
+			ctx.fillText(it.text, it.cx, it.textIdleY + (it.textActiveY - it.textIdleY) * k)
+		}
+		ctx.globalAlpha = 1
+	})
+}
+
+/**
  * 绘制单条闭合并填充：模仿 concave 的"栏顶凹口"观感，但轮廓外为真实透明。
  * 白色栏顶在圆钮处向下凹出一个半圆口（filletR > 0 时带相切圆唇，默认 0 = 纯半圆），
  * 深色圆钮（view 层）坐进口中，圆钮与凹口之间的缝隙透出任意页面背景。
