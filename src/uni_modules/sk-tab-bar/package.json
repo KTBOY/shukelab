@@ -1,7 +1,7 @@
 {
   "id": "sk-tab-bar",
   "displayName": "小程序自定义tabBar",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "组件形式的凹陷弧形tabBar，支持v-model受控、角标/红点、切换拦截、路由联动、字体图标与插槽自定义",
   "keywords": [
     "sk-tab-bar",

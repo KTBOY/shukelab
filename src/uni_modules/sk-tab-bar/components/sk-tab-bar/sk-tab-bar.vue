@@ -305,14 +305,15 @@ function getImage(src: string): any {
 	return img && img.__loaded ? img : null
 }
 
-function degrade(reason: 'init' | 'devtools' = 'init') {
+function degrade(reason: 'init' | 'devtools' = 'init', error?: unknown) {
 	if (!degradeWarned) {
 		degradeWarned = true
-		console.warn(
+		const message =
 			reason === 'devtools'
 				? '[sk-tab-bar] 开发者工具模拟器不支持 canvas 2d 同层渲染，且当前 tab 项无法由画布自绘（字体图标 / 角标 / 自定义 item 插槽），已降级为 plain 观感；真机不受影响。'
 				: '[sk-tab-bar] canvas 形态初始化失败，已降级为 plain 观感（实心栏）。小程序需基础库 2.9.0+。'
-		)
+		if (error === undefined) console.warn(message)
+		else console.warn(message, error)
 	}
 	canvasDegraded.value = true
 }
@@ -437,102 +438,113 @@ function teardownCanvas() {
 	imgCache.clear()
 }
 
-/** 查询节点与几何并画首帧；尺寸未就绪时重试，仍失败则降级 */
-function initCanvas(retry = 0) {
+/** 查询节点与几何并画首帧；尺寸未就绪或查询异常时重试，仍失败则降级 */
+function initCanvas(retry = 0, failure?: unknown) {
 	teardownCanvas()
-	const query = uni.createSelectorQuery().in(instance?.proxy ?? null)
-	query.select(`#${canvasId}`).fields({ node: true, size: true }, () => undefined)
-	query.select('.sk-tab-bar__canvas').boundingClientRect()
-	query.select('.sk-tab-bar').boundingClientRect()
-	query.select('.sk-tab-bar__bump').boundingClientRect()
-	/* 模拟器自绘要用 DOM 实测几何：图标上浮容器、图标本身、文字 */
-	query.selectAll('.sk-tab-bar__icon-wrap').boundingClientRects()
-	query.selectAll('.sk-tab-bar__icon').boundingClientRects()
-	query.selectAll('.sk-tab-bar__text').boundingClientRects()
-	query.exec((res: any[]) => {
-		const retryOrDegrade = () => {
-			if (retry < 3) setTimeout(() => initCanvas(retry + 1), 100)
-			else degrade()
+	/** 失败重试：节点未就绪与查询/绘制异常共用同一预算，耗尽后清理并回退 plain 观感 */
+	const retryOrDegrade = (reason?: unknown) => {
+		const error = reason ?? failure
+		if (retry < 3) {
+			setTimeout(() => initCanvas(retry + 1, error), 100)
+			return
 		}
-		try {
-			const nodeField = res?.[0]
-			const canvasRect = res?.[1]
-			const rootRect = res?.[2]
-			const bumpRect = res?.[3]
-			const asRects = (v: any) => (Array.isArray(v) ? v : v ? [v] : [])
-			const devtools = isDevtoolsSimulator()
-			const paint = devtools
-				? buildItemPaint(
-						asRects(res[4]),
-						asRects(res[5]),
-						asRects(res[6]),
-						canvasRect?.left || 0,
-						canvasRect?.top || 0
-					)
-				: []
-			/* 模拟器里画布恒盖在 view 之上：能量到几何并画得出来就保留 canvas 真镂空观感，
-			   否则（字体图标 / 角标 / 用了 item 插槽）退回 plain 观感，至少 tab 项可见 */
-			if (devtools && !paint.length) {
-				degrade('devtools')
-				return
+		teardownCanvas()
+		degrade('init', error)
+	}
+	try {
+		const query = uni.createSelectorQuery().in(instance?.proxy ?? null)
+		query.select(`#${canvasId}`).fields({ node: true, size: true }, () => undefined)
+		query.select('.sk-tab-bar__canvas').boundingClientRect()
+		query.select('.sk-tab-bar').boundingClientRect()
+		query.select('.sk-tab-bar__bump').boundingClientRect()
+		/* 模拟器自绘要用 DOM 实测几何：图标上浮容器、图标本身、文字。
+		   selectAll 只表示多节点，方法名仍是单数 boundingClientRect */
+		query.selectAll('.sk-tab-bar__icon-wrap').boundingClientRect()
+		query.selectAll('.sk-tab-bar__icon').boundingClientRect()
+		query.selectAll('.sk-tab-bar__text').boundingClientRect()
+		query.exec((res: any[]) => {
+			try {
+				const nodeField = res?.[0]
+				const canvasRect = res?.[1]
+				const rootRect = res?.[2]
+				const bumpRect = res?.[3]
+				const asRects = (v: any) => (Array.isArray(v) ? v : v ? [v] : [])
+				const devtools = isDevtoolsSimulator()
+				const paint = devtools
+					? buildItemPaint(
+							asRects(res[4]),
+							asRects(res[5]),
+							asRects(res[6]),
+							canvasRect?.left || 0,
+							canvasRect?.top || 0
+						)
+					: []
+				/* 模拟器里画布恒盖在 view 之上：能量到几何并画得出来就保留 canvas 真镂空观感，
+				   否则（字体图标 / 角标 / 用了 item 插槽）退回 plain 观感，至少 tab 项可见 */
+				if (devtools && !paint.length) {
+					degrade('devtools')
+					return
+				}
+				const node = nodeField?.node
+				const cssW = canvasRect?.width || nodeField?.width || 0
+				const cssH = canvasRect?.height || nodeField?.height || 0
+				if (!node || typeof node.getContext !== 'function' || !cssW || !cssH || !rootRect || !bumpRect) {
+					retryOrDegrade()
+					return
+				}
+				const ctx = node.getContext('2d')
+				if (!ctx) {
+					retryOrDegrade()
+					return
+				}
+				canvasNode = node
+				canvasCtx = ctx
+				// #ifdef MP-WEIXIN
+				const sys: any = (uni as any).getWindowInfo ? (uni as any).getWindowInfo() : (uni as any).getSystemInfoSync()
+				canvasDpr = Math.min(sys?.pixelRatio || 1, CANVAS_CONST.maxDpr)
+				node.width = Math.round(cssW * canvasDpr)
+				node.height = Math.round(cssH * canvasDpr)
+				// #endif
+				const geo: SilhouetteGeometry = {
+					width: cssW,
+					height: cssH,
+					barTop: rootRect.top - canvasRect.top,
+					knobCy: bumpRect.top + bumpRect.height / 2 - canvasRect.top,
+					/* 凹口半径贴住圆钮元素边缘（内收 0.5px 防抗锯齿发丝线），
+					   缝隙 = 圆钮 10rpx 透明边框，透出页面背景呈均匀半圆环 */
+					knobR: bumpRect.width / 2 - 0.5,
+					filletR: uni.upx2px(CANVAS_CONST.filletRpx),
+					cornerR: uni.upx2px(CANVAS_CONST.cornerRpx)
+				}
+				silhouette = geo
+				frameDriver = createFrameDriver(
+					typeof node.requestAnimationFrame === 'function' ? node.requestAnimationFrame.bind(node) : undefined,
+					typeof node.cancelAnimationFrame === 'function' ? node.cancelAnimationFrame.bind(node) : undefined
+				)
+				/* 模拟器里圆钮与 tab 项都被画布盖住，按实测几何由画布补画；真机留空交给 DOM */
+				itemPaint = paint
+				knobPaint = paint.length
+					? {
+							cy: geo.knobCy,
+							r: bumpRect.width / 2 - 0.5,
+							ring: uni.upx2px(10),
+							fill: props.iconBackgroundColor,
+							ringColor: props.outerApertureBorderColor
+						}
+					: null
+				canvasDegraded.value = false
+				const now = Date.now()
+				/* 补间中就沿轨迹继续画（resize/重建不该把圆钮瞬移到终点），静止时对齐到当前选中项 */
+				if (now - track.t0 < track.dur) startTween()
+				else track = { from: activeIndex.value, to: activeIndex.value, t0: now, dur: 1 }
+				drawTracked()
+			} catch (e) {
+				retryOrDegrade(e)
 			}
-			const node = nodeField?.node
-			const cssW = canvasRect?.width || nodeField?.width || 0
-			const cssH = canvasRect?.height || nodeField?.height || 0
-			if (!node || typeof node.getContext !== 'function' || !cssW || !cssH || !rootRect || !bumpRect) {
-				retryOrDegrade()
-				return
-			}
-			const ctx = node.getContext('2d')
-			if (!ctx) {
-				retryOrDegrade()
-				return
-			}
-			canvasNode = node
-			canvasCtx = ctx
-			// #ifdef MP-WEIXIN
-			const sys: any = (uni as any).getWindowInfo ? (uni as any).getWindowInfo() : (uni as any).getSystemInfoSync()
-			canvasDpr = Math.min(sys?.pixelRatio || 1, CANVAS_CONST.maxDpr)
-			node.width = Math.round(cssW * canvasDpr)
-			node.height = Math.round(cssH * canvasDpr)
-			// #endif
-			const geo: SilhouetteGeometry = {
-				width: cssW,
-				height: cssH,
-				barTop: rootRect.top - canvasRect.top,
-				knobCy: bumpRect.top + bumpRect.height / 2 - canvasRect.top,
-				/* 凹口半径贴住圆钮元素边缘（内收 0.5px 防抗锯齿发丝线），
-				   缝隙 = 圆钮 10rpx 透明边框，透出页面背景呈均匀半圆环 */
-				knobR: bumpRect.width / 2 - 0.5,
-				filletR: uni.upx2px(CANVAS_CONST.filletRpx),
-				cornerR: uni.upx2px(CANVAS_CONST.cornerRpx)
-			}
-			silhouette = geo
-			frameDriver = createFrameDriver(
-				typeof node.requestAnimationFrame === 'function' ? node.requestAnimationFrame.bind(node) : undefined,
-				typeof node.cancelAnimationFrame === 'function' ? node.cancelAnimationFrame.bind(node) : undefined
-			)
-			/* 模拟器里圆钮与 tab 项都被画布盖住，按实测几何由画布补画；真机留空交给 DOM */
-			itemPaint = paint
-			knobPaint = paint.length
-				? {
-						cy: geo.knobCy,
-						r: bumpRect.width / 2 - 0.5,
-						ring: uni.upx2px(10),
-						fill: props.iconBackgroundColor,
-						ringColor: props.outerApertureBorderColor
-					}
-				: null
-			canvasDegraded.value = false
-			const now = Date.now()
-			/* 补间中就沿轨迹继续画（resize/重建不该把圆钮瞬移到终点），静止时对齐到当前选中项 */
-			if (now - track.t0 < track.dur) startTween()
-			else track = { from: activeIndex.value, to: activeIndex.value, t0: now, dur: 1 }
-			drawTracked()
-		} catch (e) {
-			retryOrDegrade()
-		}
-	})
+		})
+	} catch (e) {
+		retryOrDegrade(e)
+	}
 }
 
 function handleWindowResize() {
